@@ -172,3 +172,26 @@ form .contraseña{
     width: 100%;
 }
 
+.icons {
+    margin: 15px 0;
+    display: flex;
+    justify-content: center;  /* centra horizontalmente */
+    align-items: center;   
+  }
+  
+  .icons i {
+    border-radius: 50%;
+    padding: 15px;
+    cursor: pointer;
+    margin: 0 10px;
+    color: #82a87e;
+    border: solid thin #82a87e;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .1);
+  }
+  
+  .icons i:hover {
+    background-color: #90b48c;
+    color: #fff;
+  }
+  
