@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta charset="utf-8"> 
+        <meta charset="utf-8">  <!-- me permite usar tilde y caracteres especiales -->
         <meta name="keywords" content="fútbol,torneos,partidos,deporte"> <!-- palabras clave de la página para q se recomiente en busquedas -->
         <title>Gestor de Torneos</title>
         <link rel="icon" href="C:\Tomas\UTN\3er año\Desarrollo\Frontend\assets\pelotita.ico">
         <link rel="stylesheet" href="C:\Tomas\UTN\3er año\Desarrollo\Frontend\styles\IndexStyle.css">
+        <script src="scripts/Equipos.js" defer></script>
     </head>     
     <body>
         <header>
@@ -22,36 +23,17 @@
                 </div>
             </nav>
         </header>
-        <p>ESTA ES LA PARTE DE FIXTURE</p>
-        <img src="imagenes/tablaperiodica.png" alt="ImagenTabla" title="Una tabla periodica">
-        <h3>Ingresar nombre del equipo</h3>
-        <form>
-            <input type="" name="Nombre de equipo" required="">
-            <input type="submit">
-        </form> 
-        <h2>Fixture</h2>
-        <table class="tabla-fixture">
-            <tr>
-                <td>Fecha</td>
-                <td>Horario</td>
-                <td>Partido</td>
-                <td>Cancha</td>
-            </tr>
-            <tr>
-                <td>19/5</td>
-                <td>17:00hs</td>
-                <td>Sacachispas vs Los Robles</td>
-                <td>Club Temperley</td>
-            </tr>
-            <tr>
-                <td>25/5</td>
-                <td>19:00hs</td>
-                <td>Serbando Bayo vs Los Robles</td>
-                <td>Club Temperley</td>
-            </tr>
-        </table>            
+        <p>ESTA ES LA PARTE DE EQUIPOS </p>
+        <h3>Ingresar nombre del Jugador que desea agregar a su Equipo</h3>
+        <form id="form-jugador">
+            <input type="text" id="nombre" placeholder="Nombre" required>
+            <input type="text" id="apellido" placeholder="Apellido" required>
+            <button type="submit">Agregar</button>
+        </form>
+        <h2>Jugadores del Equipo</h2>
+        <ul id="lista-jugadores"></ul>
     </body>
     <footer>
         <h5>Para mas información o problemas con la página contactate a: 341 6173297 o a nuestra cuenta de instagram @todotorneos </h5>
     </footer>
-</html>        
+</html>

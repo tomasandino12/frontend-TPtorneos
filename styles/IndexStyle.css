@@ -1,12 +1,12 @@
-body html{
+*{
+    text-decoration: none;
+}
+
+body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: sans-serif;
-}
-
-*{
-    text-decoration: none;
 }
 
 .navbar{
@@ -41,4 +41,18 @@ li a{
 
 li:hover{
     background: rgb(93, 191, 105);
+}
+
+.tabla-fixture, .tabla-fixture td{
+    border: 1px solid black;
+    border-collapse: collapse;
+    padding: 8px;
+}
+
+td {
+    text-align: center;
+}
+
+#lista-jugadores, #lista-jugadores li {
+    border: 1px solid black
 }
