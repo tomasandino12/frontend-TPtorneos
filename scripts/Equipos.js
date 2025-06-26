@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (nombre.trim() === '' || apellido.trim() === '') return;          //el .trim() saca espacios en blanco en inicio y final, la linea verifica que no haya campos en blanco
 
     const nuevoJugador = document.createElement('li');                 
-    nuevoJugador.textContent = `${nombre} ${apellido}`;
+    nuevoJugador.textContent = `${nombre} ${apellido} `;
     lista.appendChild(nuevoJugador);
 
     form.reset(); // Limpia el formulario

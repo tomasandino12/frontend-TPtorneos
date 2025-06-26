@@ -9,39 +9,64 @@ body {
     font-family: sans-serif;
 }
 
-.navbar{
-    background: rgb(51, 148, 7);
-    padding-right: 15px;
-    padding-left: 15px;
+.navbar {
+  background-color: white;
+  border-bottom: 1px solid #d2d1d1; 
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-.navdiv{
+.navdiv {
+    max-width: 1900px;
+    margin: 0 auto;
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    width: 100%;
 }
 
 .logo a{
-    font-size: 35px;
-    font-weight: 600;
-    color: white;
-}
-
-li{
-    list-style: none;
-    display: inline-block;
-}
-
-li a{
-    color: white;
-    font-size: 18px;
+    font-size: 30px;
     font-weight: bold;
-    margin: 40px;    
+    color: #2e7d32; /* verde oscuro */
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-li:hover{
-    background: rgb(93, 191, 105);
+.navlinks{
+    list-style: none;
+    display: flex;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
 }
+
+.navlinks a{
+  text-decoration: none;
+  color: #444;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.navdiv ul a:hover {
+  background-color: #dcf7e3; 
+  color: #338637;            
+}
+
+.navdiv ul a.active {
+  background-color: #d4f4dc; 
+  color: #2e7d32;            
+  font-weight: 600;
+}
+
 
 .tabla-fixture, .tabla-fixture td{
     border: 1px solid black;
@@ -53,6 +78,31 @@ td {
     text-align: center;
 }
 
-#lista-jugadores, #lista-jugadores li {
-    border: 1px solid black
+#lista-jugadores {
+  list-style: none; /* opcional, si no querés los puntitos */
+  padding-left: 0;
+}
+
+#lista-jugadores li {
+  display: block;
+  margin-bottom: 8px; /* separa cada jugador */
+  font-size: 16px;     /* opcional, mejora la legibilidad */
+}
+
+html, body{
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+  flex: 1; /* hace que el contenido principal ocupe todo el espacio disponible */
+}
+
+footer {
+  background-color: #222;
+  color: white;
+  text-align: center;
+  padding: 12px;
 }

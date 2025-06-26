@@ -6,52 +6,57 @@
         <title>Gestor de Torneos</title>
         <link rel="icon" href="C:\Tomas\UTN\3er año\Desarrollo\Frontend\assets\pelotita.ico">
         <link rel="stylesheet" href="C:\Tomas\UTN\3er año\Desarrollo\Frontend\styles\IndexStyle.css">
+        <link href='https://cdn.boxicons.com/fonts/basic/boxicons.min.css' rel='stylesheet'>
     </head>     
-    <body>
+    <body>      
         <header>
             <nav class="navbar">
                 <div class="navdiv">
-                    <div class="logo"><a href="#">Gestor de Torneos</a></div>
-                    <ul>
-                        <li><a href="C:\Tomas\UTN\3er año\Desarrollo\Frontend\GestorTorneosIndex.html" >Tabla de Posiciones</a></li> 
-                        <li><a href="C:\Tomas\UTN\3er año\Desarrollo\Frontend\Estadisticas.html">Estadísticas</a></li>
-                        <li><a href="C:\Tomas\UTN\3er año\Desarrollo\Frontend\FixtureTorneo.html">Fixture</a></li>
-                        <li><a href="C:\Tomas\UTN\3er año\Desarrollo\Frontend\Equipos.html">Equipos</a></li>
-                        <li><a href="C:\Tomas\UTN\3er año\Desarrollo\Frontend\MiPerfil.html">Mi Perfil</a></li>
+                    <div class="logo">
+                        <a href="#">Gestor de Torneos</a>
+                    </div>
+                    <ul class="navlinks">
+                        <li><a href="GestorTorneosIndex.html" ><i class='bx  bx-trophy-star'></i> Tabla de Posiciones</a></li> 
+                        <li><a href="Estadisticas.html"><i class='bx  bx-chart-bar-big-columns'></i> Estadísticas</a></li>
+                        <li><a href="FixtureTorneo.html" class="active"><i class='bx  bx-calendar' ></i> Fixture</a></li>
+                        <li><a href="Equipos.html"> <i class='bx  bx-group'></i> Equipos</a></li>
+                        <li><a href="MiPerfil.html"><i class='bx  bx-user'></i> Mi Perfil</a></li>
                     </ul>
                 </div>
             </nav>
         </header>
-        <p>ESTA ES LA PARTE DE FIXTURE</p>
-        <img src="imagenes/tablaperiodica.png" alt="ImagenTabla" title="Una tabla periodica">
-        <h3>Ingresar nombre del equipo</h3>
-        <form>
-            <input type="" name="Nombre de equipo" required="">
-            <input type="submit">
-        </form> 
-        <h2>Fixture</h2>
-        <table class="tabla-fixture">
-            <tr>
-                <td>Fecha</td>
-                <td>Horario</td>
-                <td>Partido</td>
-                <td>Cancha</td>
-            </tr>
-            <tr>
-                <td>19/5</td>
-                <td>17:00hs</td>
-                <td>Sacachispas vs Los Robles</td>
-                <td>Club Temperley</td>
-            </tr>
-            <tr>
-                <td>25/5</td>
-                <td>19:00hs</td>
-                <td>Serbando Bayo vs Los Robles</td>
-                <td>Club Temperley</td>
-            </tr>
-        </table>            
+        <main>
+            <p>ESTA ES LA PARTE DE FIXTURE</p>
+            <img src="imagenes/tablaperiodica.png" alt="ImagenTabla" title="Una tabla periodica">
+            <h3>Ingresar nombre del equipo</h3>
+            <form>
+                <input type="" name="Nombre de equipo" required="">
+                <input type="submit">
+            </form> 
+            <h2>Fixture</h2>
+            <table class="tabla-fixture">
+                <tr>
+                    <td>Fecha</td>
+                    <td>Horario</td>
+                    <td>Partido</td>
+                    <td>Cancha</td>
+                </tr>
+                <tr>
+                    <td>19/5</td>
+                    <td>17:00hs</td>
+                    <td>Sacachispas vs Los Robles</td>
+                    <td>Club Temperley</td>
+                </tr>
+                <tr>
+                    <td>25/5</td>
+                    <td>19:00hs</td>
+                    <td>Serbando Bayo vs Los Robles</td>
+                    <td>Club Temperley</td>
+                </tr>
+            </table>
+        </main>
+        <footer>
+            <h5> © 2025 - Gestor de Torneos -Para mas información o problemas con la página contactate a: 341 6173297 o a nuestra cuenta de instagram @todotorneos </h5>
+        </footer>
     </body>
-    <footer>
-        <h5>Para mas información o problemas con la página contactate a: 341 6173297 o a nuestra cuenta de instagram @todotorneos </h5>
-    </footer>
 </html>        
