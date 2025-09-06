@@ -28,3 +28,5 @@ function MiPerfil() {
     </div>
   );
 }
+
+export default MiPerfil;
