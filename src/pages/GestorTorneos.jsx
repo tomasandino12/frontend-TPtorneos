@@ -1,20 +1,57 @@
-import "../styles/IndexStyle.css";
-import { Link, NavLink } from "react-router-dom";
+import { Outlet, NavLink } from "react-router-dom";
+import "../styles/IndexStyle.css"; // si querés, después podés mover esto a GestorTorneos.css
+import { FaTrophy, FaChartBar, FaCalendarAlt, FaUsers, FaUser } from "react-icons/fa";
 
 function GestorTorneos() {
   return (
     <div className="IndexPage">
-        <main>
-            <p>Este es un párrafo para probar cosas como la <b>negrita</b> o la <i>inclinada</i> y la <small>chiquita</small> </p>
-            <h3>Ingresar nombre del equipo</h3>
-            <form>
-                <input type="" name="Nombre de equipo" required="" />
-                <input type="submit" />
-            </form>
-        </main>
-        <footer>
-            <h5> © 2025 - Gestor de Torneos -Para mas información o problemas con la página contactate a: 341 6173297 o a nuestra cuenta de instagram @todotorneos </h5>
-        </footer>
+      <nav className="navbar">
+        <div className="navdiv">
+          <div className="logo">
+            <NavLink to="/gestorTorneos" end>Gestor de Torneos</NavLink>
+          </div>
+          <ul className="navlinks">
+            <li>
+              <NavLink to="/gestorTorneos" end>
+                <FaTrophy />
+                Tabla de Posiciones
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/gestorTorneos/estadisticas">
+                <FaChartBar />
+                Estadísticas
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/gestorTorneos/fixture">
+                <FaCalendarAlt />
+                Fixture
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/gestorTorneos/equipos">
+                <FaUsers />
+                Equipos
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/gestorTorneos/miPerfil">
+                <FaUser />
+                Mi Perfil
+              </NavLink>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <main>
+        <Outlet />
+      </main>
+
+      <footer>
+        <h5>© 2025 - Gestor de Torneos...</h5>
+      </footer>
     </div>
   );
 }

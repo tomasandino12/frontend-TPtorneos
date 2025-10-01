@@ -1,0 +1,80 @@
+.tabla-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fefefe;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+  color: #222;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.tabla-titulo {
+  font-size: 2rem;
+  color: #2e7d32;
+  margin-bottom: 0.25rem;
+  text-align: center;
+}
+
+.tabla-subtitulo {
+  text-align: center;
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+.tabla-posiciones {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.tabla-posiciones th {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 12px 8px;
+  font-weight: 600;
+}
+
+.tabla-posiciones td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #ccc;
+}
+
+.tabla-posiciones tbody tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.tabla-posiciones tbody tr:hover {
+  background-color: #eef4f0;
+}
+
+.positivo {
+  color: #388e3c;
+  font-weight: bold;
+}
+
+.negativo {
+  color: #c62828;
+  font-weight: bold;
+}
+
+.puntos {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+
+
+/* Aplica a NavLink activo */
+.navlinks a.active {
+  background-color: #d4f4dc;  /* verde claro */
+  color: #2e7d32;             /* verde oscuro */
+  font-weight: 600;
+  border-radius: 6px;
+}
+
+/* Animación suave */
+.navlinks a {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
