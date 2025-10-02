@@ -1,4 +1,4 @@
-import "../styles/InicioSesion.css"; // o el CSS que estés usando
+import "../styles/InicioSesion.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -11,17 +11,23 @@ function Registro() {
   }, []);
 
   const [form, setForm] = useState({
-    nombreUsuario: "",
+    nombre: "",
+    apellido: "",
+    dni: "",
     email: "",
-    password: "",
-    confirmar: "",
+    fecha_nacimiento: "",
+    posicion: "",
+    contraseña: "",
   });
 
   const valido =
-    form.nombreUsuario.trim().length >= 3 &&
+    form.nombre.trim().length >= 2 &&
+    form.apellido.trim().length >= 2 &&
+    /^\d{9}$/.test(form.dni) &&
     /\S+@\S+\.\S+/.test(form.email) &&
-    form.password.length >= 6 &&
-    form.password === form.confirmar;
+    form.fecha_nacimiento !== "" &&
+    form.posicion.trim().length >= 2 &&
+    form.contraseña.length >= 6;
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -29,77 +35,127 @@ function Registro() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!valido) return;
-    // TODO: enviar al backend
+
+    // TODO: enviar form al backend
+    console.log("Datos del jugador:", form);
     navigate("/gestorTorneos");
   };
 
   return (
-    <div className="pagina-fondo-verde">
-      <div className="formulario">
-        <h1>Registrarse</h1>
-        <form onSubmit={handleSubmit}>
-          <div className="username">
-            <input
-              type="text"
-              name="nombreUsuario"
-              value={form.nombreUsuario}
-              onChange={handleChange}
-              required
-            />
-            <label>Nombre de usuario</label>
-            <span></span>
+  <div className="pagina-fondo-verde">
+    <div className="formulario">
+      <h1>Registrarse</h1>
+      <form onSubmit={handleSubmit}>
+        <div className="form-columns">
+          <div className="columna">
+            <div className="campo">
+              <input
+                type="text"
+                name="nombre"
+                value={form.nombre}
+                onChange={handleChange}
+                required
+              />
+              <label>Nombre</label>
+              <span></span>
+            </div>
+
+            <div className="campo">
+              <input
+                type="text"
+                name="apellido"
+                value={form.apellido}
+                onChange={handleChange}
+                required
+              />
+              <label>Apellido</label>
+              <span></span>
+            </div>
+
+            <div className="campo">
+              <input
+                type="text"
+                name="dni"
+                value={form.dni}
+                onChange={handleChange}
+                required
+              />
+              <label>DNI</label>
+              <span></span>
+            </div>
+
+            <div className="campo">
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                required
+              />
+              <label>Email</label>
+              <span></span>
+            </div>
           </div>
 
-          <div className="username">
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
-            <label>Email</label>
-            <span></span>
-          </div>
+          <div className="columna">
+            <div className="campo">
+              <input
+                type="date"
+                name="fecha_nacimiento"
+                value={form.fecha_nacimiento}
+                onChange={handleChange}
+                required
+              />
+              <label>Fecha de nacimiento</label>
+              <span></span>
+            </div>
 
-          <div className="contraseña">
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              required
-            />
-            <label>Contraseña</label>
-            <span></span>
-          </div>
+            <div className="campo">
+              <input
+                type="text"
+                name="posicion"
+                value={form.posicion}
+                onChange={handleChange}
+                required
+              />
+              <label>Posición</label>
+              <span></span>
+            </div>
 
-          <div className="contraseña">
-            <input
-              type="password"
-              name="confirmar"
-              value={form.confirmar}
-              onChange={handleChange}
-              required
-            />
-            <label>Confirmar contraseña</label>
-            <span></span>
+            <div className="campo">
+              <input
+                type="password"
+                name="contraseña"
+                value={form.contraseña}
+                onChange={handleChange}
+                required
+              />
+              <label>Contraseña</label>
+              <span></span>
+            </div>
           </div>
+        </div>
 
-          <input
-            type="submit"
-            value="Registrarse"
-            disabled={!valido}
-            style={{ opacity: valido ? 1 : 0.5, cursor: valido ? "pointer" : "not-allowed" }}
-          />
+        <input
+          type="submit"
+          value="Registrarse"
+          disabled={!valido}
+          style={{
+            opacity: valido ? 1 : 0.5,
+            cursor: valido ? "pointer" : "not-allowed",
+            marginTop: "20px"
+          }}
+        />
 
-          <div className="registrarse">
-            <Link to="/">Volver al inicio</Link>
-          </div>
-        </form>
-      </div>
+        <div className="registrarse">
+          <Link to="/">Volver al inicio</Link>
+        </div>
+      </form>
     </div>
-  );
+  </div>
+);
+
 }
 
 export default Registro;
+

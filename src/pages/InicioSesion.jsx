@@ -6,7 +6,6 @@ function InicioSesion() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // aplica fondo al body solo en esta vista
     document.body.classList.add("bg-login");
     return () => document.body.classList.remove("bg-login");
   }, []);
@@ -29,7 +28,7 @@ function InicioSesion() {
 
           <div className="username">
             <input type="text" name="usuario" required />
-            <label>Nombre de usuario</label>
+            <label>Nombre de jugador</label>
             <span></span>
           </div>
 

@@ -212,3 +212,63 @@ input[type="submit"]:hover {
   box-shadow: 0 2px 5px rgba(0, 0, 0, .1);
 }
 .icons i:hover { background-color: #90b48c; color: #fff; }
+
+
+.form-columns {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.columna {
+  flex: 1;
+  min-width: 200px;
+}
+
+.campo {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.campo input {
+  width: 100%;
+  padding: 10px 5px;
+  border: none;
+  border-bottom: 2px solid purple;
+  background: transparent;
+  color: #333;
+  font-size: 16px;
+}
+
+.campo label {
+  position: absolute;
+  top: 10px;
+  left: 5px;
+  color: #999;
+  font-size: 14px;
+  pointer-events: none;
+  transition: 0.2s ease all;
+}
+
+.campo input:focus ~ label,
+.campo input:not(:placeholder-shown) ~ label {
+  top: -10px;
+  left: 0px;
+  font-size: 12px;
+  color: purple;
+}
+
+.campo span {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: purple;
+  transition: 0.4s;
+}
+
+.campo input:focus ~ span {
+  width: 100%;
+}
