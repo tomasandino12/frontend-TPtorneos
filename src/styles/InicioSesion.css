@@ -272,3 +272,23 @@ input[type="submit"]:hover {
 .campo input:focus ~ span {
   width: 100%;
 }
+
+
+
+.links-abajo {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+}
+
+.links-abajo a {
+  color: #1a237e; 
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.links-abajo a:hover {
+  text-decoration: underline;
+}

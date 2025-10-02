@@ -42,8 +42,10 @@ function InicioSesion() {
 
           <input type="submit" value="Iniciar Sesión" />
 
-          <div className="registrarse">
+          {/* 🔽 NUEVO CONTENEDOR FLEXIBLE PARA AMBOS ENLACES */}
+          <div className="links-abajo">
             <Link to="/registro">Registrarse</Link>
+            <Link to="/admin/login">Administrar Torneos</Link>
           </div>
         </form>
       </div>
