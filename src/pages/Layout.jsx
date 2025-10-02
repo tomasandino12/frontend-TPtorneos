@@ -2,7 +2,7 @@ import { Outlet, NavLink } from "react-router-dom";
 
 export default function Layout() {
   return (
-    <>
+    <div id="root">
       <nav className="navbar">
         <div className="navdiv">
           <div className="logo">
@@ -58,9 +58,9 @@ export default function Layout() {
       </main>
 
       <footer>
-        <p>© 2025 MiApp - Todos los derechos reservados</p>
+        © 2025 - Gestor de Torneos -Para mas información o problemas con la página contactate a: 341 6173297 o a nuestra cuenta de instagram @todotorneos
       </footer>
-    </>
+    </div>
   );
 }
 
