@@ -1,0 +1,105 @@
+/* Fondo general */
+.mi-perfil-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #f3fdf6;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Título principal */
+.mi-perfil-titulo {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2e7d32;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* Subtítulo */
+.mi-perfil-subtitulo {
+  text-align: center;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+/* Tarjeta de sección */
+.perfil-seccion {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+/* Título de sección */
+.perfil-seccion h2 {
+  color: #2e7d32;
+  margin-bottom: 0.25rem;
+}
+
+.perfil-seccion p {
+  color: #999;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+/* Campos */
+.perfil-campo {
+  display: flex;
+  gap: 1.5rem; /* ✅ espaciado entre campos */
+  margin-bottom: 1rem;
+}
+
+.input-grupo {
+  flex: 1;
+}
+
+.input-grupo label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.input-grupo input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background-color: #fefefe;
+}
+
+.input-espaciado {
+  flex: 1; /* ocupa el lugar de la izquierda */
+}
+
+
+
+/* Botón editar */
+.boton-editar {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #2e7d32; 
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.boton-editar:hover {
+  background-color: #e9f8ed; 
+}
