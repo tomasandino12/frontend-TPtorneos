@@ -4,7 +4,7 @@ import { FaTrophy, FaChartBar, FaCalendarAlt, FaUsers, FaUser } from "react-icon
 
 function GestorTorneos() {
   return (
-    <div className="IndexPage">
+    <div className="layout">
       <nav className="navbar">
         <div className="navdiv">
           <div className="logo">
@@ -45,11 +45,11 @@ function GestorTorneos() {
         </div>
       </nav>
 
-      <main className="main-content">
+      <main className="content">
         <Outlet />
       </main>
 
-      <footer>
+      <footer className="footer">
         <h5>© 2025 - Gestor de Torneos -Para mas información o problemas con la página contactate a: 341 6173297 o a nuestra cuenta de instagram @todotorneos</h5>
       </footer>
     </div>
