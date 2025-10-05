@@ -1,0 +1,150 @@
+.estadisticas-container {
+  padding: 2rem;
+  background-color: #f5fdf7;
+}
+
+.estadisticas-header {
+  background-color: #e5f8eb;
+  text-align: center;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.estadisticas-header h1 {
+  font-size: 2.2rem;
+  color: #2e7d32;
+  margin-bottom: 0.5rem;
+}
+
+.estadisticas-header p {
+  color: #555;
+}
+
+.resumen-boxes {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.resumen-box {
+  background: white;
+  border-radius: 12px;
+  padding: 1.2rem 2rem;
+  text-align: center;
+  width: 150px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.resumen-box span {
+  font-size: 2rem;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.resumen-box p {
+  margin: 0;
+  color: #555;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.verde span { color: #2e7d32; }
+.gris span { color: #757575; }
+.rojo span { color: #d32f2f; }
+.azul span { color: #1e88e5; }
+
+.estadisticas-contenido {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.partidos-jugados, .plantilla-jugadores {
+  flex: 1;
+  min-width: 320px;
+}
+
+.partidos-jugados h2,
+.plantilla-jugadores h2 {
+  color: #2e7d32;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.partidos-jugados p,
+.plantilla-jugadores p {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.partido-card {
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #222;
+  font-weight: 500;
+}
+
+.partido-card.verde {
+  background-color: #c8e6c9;
+}
+
+.partido-card.amarillo {
+  background-color: #ffecb3;
+}
+
+.partido-card.rojo {
+  background-color: #ef9a9a;
+}
+
+.partido-vs {
+  font-weight: bold;
+}
+
+.partido-resultado {
+  background: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.plantilla-jugadores h3 {
+  margin-top: 1.2rem;
+  font-size: 1rem;
+  color: #444;
+}
+
+.jugador-card {
+  background: white;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.6rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.jugador-pos {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #777;
+}
+
+.jugador-edad {
+  background-color: #f1f1f1;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #333;
+}
