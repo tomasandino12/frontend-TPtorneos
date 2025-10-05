@@ -1,17 +1,60 @@
-import "../styles/IndexStyle.css";
-import { Link } from "react-router-dom";
+import "../styles/FixtureTorneo.css";
 
 function FixtureTorneo() {
-    return (
-    <div className="FixtureTorneo">
-        <main>
-            <p>ESTA ES LA PARTE DE ESTADISTICAS </p>
-            <h3>Ingresar nombre del equipo</h3>
-            <form>
-                <input type="" name="Nombre de equipo" required="" />
-                <input type="submit" />
-            </form>
-        </main>
+  // Simulación de datos (mock) hasta conectar con backend
+  const partidos = [
+    {
+      id: 1,
+      jornada: 9,
+      estado: "programado",
+      fecha: "2024-03-14",
+      hora: "16:00",
+      equipoLocal: "Los Tigres FC",
+      equipoVisitante: "Águilas United",
+      golesLocal: null,
+      golesVisitante: null,
+      cancha: "Estadio Municipal",
+    },
+    {
+      id: 2,
+      jornada: 9,
+      estado: "programado",
+      fecha: "2024-03-14",
+      hora: "18:00",
+      equipoLocal: "Leones Dorados",
+      equipoVisitante: "Halcones FC",
+      golesLocal: null,
+      golesVisitante: null,
+      cancha: "Campo Deportivo Norte",
+    },
+  ];
+
+  return (
+    <div className="fixture-container">
+      <section className="fixture-header">
+        <h1><i className="bx bx-calendar"></i> Fixture del Torneo</h1>
+        <p>Próximos partidos y resultados recientes</p>
+      </section>
+
+      <section className="fixture-lista">
+        <h2>Próximos Partidos</h2>
+        <p className="fixture-sub">Calendario de encuentros programados</p>
+
+        {partidos.map((partido) => (
+          <div className="fixture-card" key={partido.id}>
+            <div className="fixture-card-estado">
+              <span className="jornada">Jornada {partido.jornada}</span>
+              <span className={`estado ${partido.estado}`}>{partido.estado}</span>
+            </div>
+            <h3>{partido.equipoLocal} vs {partido.equipoVisitante}</h3>
+            <div className="fixture-detalles">
+              <p><i className="bx bx-calendar"></i> {partido.fecha}</p>
+              <p><i className="bx bx-time"></i> {partido.hora}</p>
+              <p><i className="bx bx-map"></i> {partido.cancha}</p>
+            </div>
+          </div>
+        ))}
+      </section>
     </div>
   );
 }

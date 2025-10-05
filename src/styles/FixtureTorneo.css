@@ -1,0 +1,97 @@
+.fixture-container {
+  padding: 2rem;
+  background-color: #f5fdf7;
+  min-height: 100vh;
+}
+
+.fixture-header {
+  background-color: #e5f8eb;
+  text-align: center;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.fixture-header h1 {
+  color: #2e7d32;
+  font-size: 2rem;
+}
+
+.fixture-header p {
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+.fixture-lista h2 {
+  color: #2e7d32;
+}
+
+.fixture-sub {
+  color: #888;
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.fixture-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+}
+
+.fixture-card h3 {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.fixture-card-estado {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 0.5rem;
+}
+
+.jornada {
+  background-color: #e1ecf4;
+  color: #0366d6;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+.estado {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.estado.programado {
+  background-color: #eee;
+  color: #444;
+}
+
+.estado.finalizado {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.estado.en_juego {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.estado.suspendido {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.fixture-detalles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: #555;
+  font-size: 0.95rem;
+}
