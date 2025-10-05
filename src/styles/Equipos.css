@@ -1,0 +1,106 @@
+.equipos-page {
+  padding: 2rem;
+  background-color: #f5fdf7;
+  min-height: 100vh;
+}
+
+.equipos-header {
+  text-align: center;
+  background-color: #e5f8eb;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.equipos-header h1 {
+  color: #2e7d32;
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.equipos-header p {
+  color: #555;
+  font-size: 1rem;
+}
+
+.crear-equipo-card {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.crear-equipo-card h2 {
+  color: #2e7d32;
+  margin-bottom: 0.5rem;
+}
+
+.crear-equipo-card p {
+  color: #444;
+  margin-bottom: 1.5rem;
+}
+
+.btn-crear-equipo {
+  background-color: #2e7d32;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-crear-equipo:hover {
+  background-color: #1b5e20;
+}
+
+.agregar-jugadores {
+  margin-top: 2rem;
+}
+
+.agregar-jugadores h3 {
+  color: white;
+  margin-bottom: 1rem;
+}
+
+#form-jugador {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+#form-jugador input {
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+#form-jugador button {
+  padding: 10px 16px;
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#form-jugador button:hover {
+  background-color: #1b5e20;
+}
+
+#lista-jugadores li {
+  color: white;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.subtexto-busqueda {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
