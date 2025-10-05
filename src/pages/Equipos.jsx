@@ -8,7 +8,6 @@ function Equipos() {
   const [apellido, setApellido] = useState("");
   const [equipo, setEquipo] = useState(""); // ← simulamos que no tiene equipo
 
-  // Nueva lógica para crear equipo
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [nombreEquipo, setNombreEquipo] = useState("");
   const [colorCamiseta, setColorCamiseta] = useState("");
@@ -33,18 +32,16 @@ function Equipos() {
   const handleSubmitEquipo = (e) => {
     e.preventDefault();
     if (nombreEquipo && colorCamiseta) {
-      // Simulamos creación
       alert("✅ Equipo creado con éxito");
-      setEquipo(nombreEquipo); // seteamos el nombre como si se hubiera creado
+      setEquipo(nombreEquipo);
       setMostrarFormulario(false);
-      // limpiar campos
       setNombreEquipo("");
       setColorCamiseta("");
     }
   };
 
   return (
-    <div className="equipos-page">
+    <main className="subpagina-container">
       <section className="equipos-header">
         <h1><i className="bx bx-group"></i> Gestión de Equipos</h1>
         <p>Crea tu equipo o únete a uno existente</p>
@@ -57,7 +54,6 @@ function Equipos() {
           <i className="bx bx-plus"></i> Crear Equipo
         </button>
 
-        {/* MINI FORMULARIO FLOTANTE */}
         {mostrarFormulario && (
           <div className="modal-crear-equipo">
             <form className="formulario-crear-equipo" onSubmit={handleSubmitEquipo}>
@@ -117,7 +113,7 @@ function Equipos() {
           </>
         )}
       </section>
-    </div>
+    </main>
   );
 }
 

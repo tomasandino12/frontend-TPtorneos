@@ -1,7 +1,7 @@
 import "../styles/FixtureTorneo.css";
+import "../styles/IndexStyle.css"; // Importa estilos globales por si no lo tenías
 
 function FixtureTorneo() {
-  // Simulación de datos (mock) hasta conectar con backend
   const partidos = [
     {
       id: 1,
@@ -30,7 +30,7 @@ function FixtureTorneo() {
   ];
 
   return (
-    <div className="fixture-container">
+    <main className="subpagina-container">
       <section className="fixture-header">
         <h1><i className="bx bx-calendar"></i> Fixture del Torneo</h1>
         <p>Próximos partidos y resultados recientes</p>
@@ -55,7 +55,7 @@ function FixtureTorneo() {
           </div>
         ))}
       </section>
-    </div>
+    </main>
   );
 }
 

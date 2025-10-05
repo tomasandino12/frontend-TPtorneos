@@ -1,3 +1,4 @@
+import "../styles/IndexStyle.css";
 import "../styles/Estadisticas.css";
 
 function Estadisticas() {
@@ -52,7 +53,7 @@ function Estadisticas() {
   };
 
   return (
-    <div className="estadisticas-container">
+    <main className="subpagina-container">
       <header className="estadisticas-header">
         <h1>{equipo.nombre}</h1>
         <p>Estadísticas del equipo y plantilla de jugadores</p>
@@ -111,7 +112,7 @@ function Estadisticas() {
           ))}
         </section>
       </div>
-    </div>
+    </main>
   );
 }
 
