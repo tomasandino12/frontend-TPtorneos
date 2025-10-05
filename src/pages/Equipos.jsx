@@ -1,15 +1,17 @@
 import "../styles/IndexStyle.css";
 import "../styles/Equipos.css";
-import { useState} from "react";
+import { useState } from "react";
 
 function Equipos() {
   const [jugadores, setJugadores] = useState([]);
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
+  const [equipo, setEquipo] = useState(""); // ← simulamos que no tiene equipo
 
-  // ⚠️ Simulación por ahora (después se reemplaza con fetch al backend)
-  const [tieneEquipo] = useState(true);
- // ← cambiá a false para testear
+  // Nueva lógica para crear equipo
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [nombreEquipo, setNombreEquipo] = useState("");
+  const [colorCamiseta, setColorCamiseta] = useState("");
 
   const handleAgregar = (e) => {
     e.preventDefault();
@@ -20,12 +22,24 @@ function Equipos() {
     }
   };
 
-  const handleCrearEquipo = () => {
-    if (tieneEquipo) {
+  const handleCrearEquipoClick = () => {
+    if (equipo) {
       alert("Ya perteneces a un equipo.");
     } else {
-      console.log("Abrir formulario de creación de equipo...");
-      // Acá podrías abrir un modal, redirigir, etc.
+      setMostrarFormulario(true);
+    }
+  };
+
+  const handleSubmitEquipo = (e) => {
+    e.preventDefault();
+    if (nombreEquipo && colorCamiseta) {
+      // Simulamos creación
+      alert("✅ Equipo creado con éxito");
+      setEquipo(nombreEquipo); // seteamos el nombre como si se hubiera creado
+      setMostrarFormulario(false);
+      // limpiar campos
+      setNombreEquipo("");
+      setColorCamiseta("");
     }
   };
 
@@ -39,9 +53,36 @@ function Equipos() {
       <section className="crear-equipo-card">
         <h2>Crear Nuevo Equipo</h2>
         <p>Forma tu propio equipo e invita jugadores</p>
-        <button className="btn-crear-equipo" onClick={handleCrearEquipo}>
+        <button className="btn-crear-equipo" onClick={handleCrearEquipoClick}>
           <i className="bx bx-plus"></i> Crear Equipo
         </button>
+
+        {/* MINI FORMULARIO FLOTANTE */}
+        {mostrarFormulario && (
+          <div className="modal-crear-equipo">
+            <form className="formulario-crear-equipo" onSubmit={handleSubmitEquipo}>
+              <h3>Nuevo Equipo</h3>
+              <label>Nombre del Equipo</label>
+              <input
+                type="text"
+                value={nombreEquipo}
+                onChange={(e) => setNombreEquipo(e.target.value)}
+                required
+              />
+              <label>Color de Camiseta</label>
+              <input
+                type="text"
+                value={colorCamiseta}
+                onChange={(e) => setColorCamiseta(e.target.value)}
+                required
+              />
+              <div className="formulario-botones">
+                <button type="submit">Crear</button>
+                <button type="button" onClick={() => setMostrarFormulario(false)}>Cancelar</button>
+              </div>
+            </form>
+          </div>
+        )}
       </section>
 
       <section className="agregar-jugadores">

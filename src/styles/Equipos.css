@@ -104,3 +104,71 @@
   color: #555;
   margin-bottom: 0.5rem;
 }
+
+.modal-crear-equipo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
+}
+
+.formulario-crear-equipo {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formulario-crear-equipo h3 {
+  margin-top: 0;
+  color: #2e7d32;
+  text-align: center;
+}
+
+.formulario-crear-equipo input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.formulario-botones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.formulario-botones button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.formulario-botones button[type="submit"] {
+  background-color: #2e7d32;
+  color: white;
+}
+
+.formulario-botones button[type="button"] {
+  background-color: #ccc;
+  color: black;
+}
+
+.formulario-crear-equipo label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
