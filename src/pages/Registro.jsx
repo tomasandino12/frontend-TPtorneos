@@ -181,7 +181,7 @@ function Registro() {
           {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
 
           <div className="registrarse">
-            <Link to="/InicioSesion">Volver al inicio</Link>
+            <Link to="/">Volver al inicio</Link>
           </div>
         </form>
       </div>
