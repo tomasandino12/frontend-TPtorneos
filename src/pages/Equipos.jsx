@@ -12,6 +12,11 @@ function Equipos() {
   const [nombreEquipo, setNombreEquipo] = useState("");
   const [colorCamiseta, setColorCamiseta] = useState("");
 
+  // 👇 nuevos estados para la búsqueda de jugadores sin equipo
+  const [jugadoresSinEquipo, setJugadoresSinEquipo] = useState([]);
+  const [busqueda, setBusqueda] = useState("");
+  const [filtrados, setFiltrados] = useState([]);
+
   // Cargar el jugador logueado desde localStorage
   useEffect(() => {
     const jugadorGuardado = JSON.parse(localStorage.getItem("jugador"));
@@ -77,15 +82,58 @@ function Equipos() {
   }
 };
 
-  // === Agregar jugadores (solo si es capitán) ===
-  const handleAgregar = (e) => {
-    e.preventDefault();
-    if (nombre && apellido) {
-      setJugadores([...jugadores, { nombre, apellido }]);
-      setNombre("");
-      setApellido("");
+
+   // === Cargar jugadores sin equipo (solo si es capitán) ===
+  useEffect(() => {
+    if (jugador?.esCapitan) {
+      fetch("http://localhost:3000/api/jugadores/sin-equipo")
+        .then((res) => res.json())
+        .then((data) => {
+          setJugadoresSinEquipo(data);
+          setFiltrados(data);
+        })
+        .catch((err) =>
+          console.error("Error cargando jugadores sin equipo:", err)
+        );
     }
-  };
+  }, [jugador]);
+
+  // === Filtrar jugadores sin equipo ===
+  useEffect(() => {
+    const resultado = jugadoresSinEquipo.filter((j) => {
+      const nombreCompleto = `${j.nombre} ${j.apellido}`.toLowerCase();
+      return nombreCompleto.includes(busqueda.toLowerCase());
+    });
+    setFiltrados(resultado);
+  }, [busqueda, jugadoresSinEquipo]);
+
+  // === Agregar jugador al equipo ===
+  const handleAgregar = async (idJugador) => {
+  try {
+    const response = await fetch(`http://localhost:3000/api/jugadores/${idJugador}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        equipo: jugador.equipo.id,
+        esCapitan: false,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Error al agregar jugador");
+    }
+
+    alert("✅ Jugador agregado con éxito");
+
+    // actualizar las listas locales
+    setJugadores([...jugadores, filtrados.find((j) => j.id === idJugador)]);
+    setJugadoresSinEquipo(jugadoresSinEquipo.filter((j) => j.id !== idJugador));
+  } catch (error) {
+    console.error("Error agregando jugador:", error);
+    alert("❌ Error al agregar jugador: " + error.message);
+  }
+};
 
   return (
     <main className="subpagina-container">
@@ -131,43 +179,40 @@ function Equipos() {
         </section>
       )}
 
-      {/* === Agregar jugadores === */}
+      {/* === Agregar jugadores (solo si es capitán) === */}
       {jugador?.esCapitan && (
         <section className="agregar-jugadores">
           <p className="subtexto-busqueda">¿Necesitás encontrar jugadores para tu equipo?</p>
-          <h3>Ingresar nombre del Jugador que desea agregar a su Equipo</h3>
-          <form id="form-jugador" onSubmit={handleAgregar}>
-            <input
-              type="text"
-              placeholder="Nombre"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Apellido"
-              value={apellido}
-              onChange={(e) => setApellido(e.target.value)}
-              required
-            />
-            <button type="submit">Agregar</button>
-          </form>
+          <h3>Buscar jugadores sin equipo</h3>
 
-          {jugadores.length > 0 && (
-            <>
-              <h2>Jugadores del Equipo</h2>
-              <ul id="lista-jugadores">
-                {jugadores.map((j, index) => (
-                  <li key={index}>{j.nombre} {j.apellido}</li>
-                ))}
-              </ul>
-            </>
+          <input
+            type="text"
+            placeholder="Buscar por nombre o apellido"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+          />
+
+          {filtrados.length > 0 ? (
+            <ul className="lista-jugadores">
+              {filtrados.map((j) => (
+                <li key={j.id}>
+                  {j.nombre} {j.apellido}
+                  <button
+                    className="btn-agregar"
+                    onClick={() => handleAgregar(j.id)}
+                  >
+                    ➕ Agregar
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No se encontraron jugadores sin equipo.</p>
           )}
         </section>
       )}
 
-      {/* Mensaje para quienes no son capitanes */}
+      {/* === Mensaje para jugadores no capitanes === */}
       {jugador?.equipo && !jugador?.esCapitan && (
         <section className="agregar-jugadores">
           <p>⚽ Ya perteneces a un equipo. Solo el capitán puede agregar jugadores.</p>
