@@ -16,6 +16,7 @@ function InicioSesion() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     try {
       const response = await fetch("http://localhost:3000/api/jugadores/login", {
@@ -35,15 +36,34 @@ function InicioSesion() {
       }
 
       const data = await response.json();
-      const token = data.token;
 
-      // Guardamos el token en localStorage
-      localStorage.setItem("token", token);
+      // Guardamos el token JWT
+      localStorage.setItem("token", data.token);
 
-      // Redirigimos al panel principal
-      navigate("/gestorTorneos");
+      // Pedimos el jugador por email (endpoint dedicado)
+      const jugadorResp = await fetch(
+        `http://localhost:3000/api/jugadores/by-email?email=${encodeURIComponent(usuario)}`
+        );
+
+
+      if (!jugadorResp.ok) {
+     const err = await jugadorResp.json();
+      throw new Error(err.message || "No se pudo obtener el jugador");
+        }
+
+          const jugadorJson = await jugadorResp.json();
+          const jugador = jugadorJson.data;
+
+          // Limpiamos cualquier sesión previa y guardamos el jugador actual
+          localStorage.removeItem("jugador");
+          localStorage.setItem("jugador", JSON.stringify(jugador));
+
+          alert(`✅ Bienvenido ${jugador.nombre}!`);
+          navigate("/gestorTorneos");
+
 
     } catch (err) {
+      console.error("Error en inicio de sesión:", err);
       setError(err.message);
     }
   };

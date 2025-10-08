@@ -61,9 +61,26 @@
 }
 
 .agregar-jugadores h3 {
-  color: white;
+  color: #2c3e50; 
+  font-weight: 600;
   margin-bottom: 1rem;
+  text-align: center;
 }
+
+
+
+.agregar-jugadores p {
+  color: #d32f2f;
+  background-color: #ffeaea;
+  border: 1px solid #d32f2f;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  font-weight: 500;
+  width: fit-content;
+  margin: 20px auto;
+}
+
 
 #form-jugador {
   display: flex;
@@ -172,3 +189,5 @@
   color: #333;
   font-size: 0.95rem;
 }
+
+

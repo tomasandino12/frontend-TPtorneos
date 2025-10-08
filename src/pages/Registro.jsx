@@ -61,10 +61,24 @@ function Registro() {
       }
 
       const data = await response.json();
-      const token = data.token;
 
-      localStorage.setItem("token", token);
+      // Guarda el token JWT
+      localStorage.setItem("token", data.token);
 
+      // Guarda el jugador completo con valores iniciales
+      const nuevoJugador = {
+        id: data.id || null, // si el backend lo devuelve
+        nombre: form.nombre,
+        apellido: form.apellido,
+        email: form.email,
+        posicion: form.posicion,
+        equipo: null,
+        esCapitan: false,
+      };
+
+      localStorage.setItem("jugador", JSON.stringify(nuevoJugador));
+
+      alert("✅ Registro exitoso. ¡Bienvenido!");
       navigate("/gestorTorneos");
 
     } catch (err) {
