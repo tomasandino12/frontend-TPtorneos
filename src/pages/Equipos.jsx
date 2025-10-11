@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 
 function Equipos() {
   const [jugadores, setJugadores] = useState([]);
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
+  //const [nombre, setNombre] = useState("");
+  //const [apellido, setApellido] = useState("");
 
   const [jugador, setJugador] = useState(null);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
