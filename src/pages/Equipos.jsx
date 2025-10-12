@@ -4,9 +4,6 @@ import { useState, useEffect } from "react";
 
 function Equipos() {
   const [jugadores, setJugadores] = useState([]);
-  //const [nombre, setNombre] = useState("");
-  //const [apellido, setApellido] = useState("");
-
   const [jugador, setJugador] = useState(null);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [nombreEquipo, setNombreEquipo] = useState("");
@@ -17,10 +14,17 @@ function Equipos() {
   const [busqueda, setBusqueda] = useState("");
   const [filtrados, setFiltrados] = useState([]);
 
-  // Cargar el jugador logueado desde localStorage
+  // === Cargar jugador logueado ===
   useEffect(() => {
-    const jugadorGuardado = JSON.parse(localStorage.getItem("jugador"));
-    if (jugadorGuardado) setJugador(jugadorGuardado);
+    try {
+      const jugadorGuardado = JSON.parse(localStorage.getItem("jugador"));
+      if (jugadorGuardado) {
+        setJugador(jugadorGuardado);
+      }
+    } catch (error) {
+      console.error("Error al cargar jugador desde localStorage:", error);
+      setJugador(null);
+    }
   }, []);
 
   // === Crear equipo ===
@@ -33,64 +37,62 @@ function Equipos() {
   };
 
   const handleSubmitEquipo = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!nombreEquipo || !colorCamiseta) {
-    alert("Completá todos los campos.");
-    return;
-  }
-
-  if (!jugador || !jugador.id) {
-    alert("⚠️ No hay jugador logueado. Iniciá sesión nuevamente.");
-    return;
-  }
-
-  try {
-      const response = await fetch("http://localhost:3000/api/equipos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nombreEquipo,
-        colorCamiseta,
-        idJugador: jugador.id,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Error al crear equipo");
+    if (!nombreEquipo || !colorCamiseta) {
+      alert("Completá todos los campos.");
+      return;
     }
 
-    const data = await response.json();
-    alert("✅ Equipo creado con éxito");
+    if (!jugador || !jugador.id) {
+      alert("⚠️ No hay jugador logueado. Iniciá sesión nuevamente.");
+      return;
+    }
 
-    const jugadorActualizado = {
-      ...jugador,
-      equipo: data.data,
-      esCapitan: true,
-    };
+    try {
+      const response = await fetch("http://localhost:3000/api/equipos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombreEquipo,
+          colorCamiseta,
+          idJugador: jugador.id,
+        }),
+      });
 
-    localStorage.setItem("jugador", JSON.stringify(jugadorActualizado));
-    setJugador(jugadorActualizado);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Error al crear equipo");
 
-    setNombreEquipo("");
-    setColorCamiseta("");
-    setMostrarFormulario(false);
-  } catch (error) {
-    console.error("Error:", error);
-    alert("❌ Error al crear equipo: " + error.message);
-  }
-};
+      alert("✅ Equipo creado con éxito");
 
+      const jugadorActualizado = {
+        ...jugador,
+        equipo: data.data,
+        esCapitan: true,
+      };
 
-   // === Cargar jugadores sin equipo (solo si es capitán) ===
+      localStorage.setItem("jugador", JSON.stringify(jugadorActualizado));
+      setJugador(jugadorActualizado);
+      setNombreEquipo("");
+      setColorCamiseta("");
+      setMostrarFormulario(false);
+    } catch (error) {
+      console.error("Error:", error);
+      alert("❌ Error al crear equipo: " + error.message);
+    }
+  };
+
+  // === Cargar jugadores sin equipo (solo si es capitán) ===
   useEffect(() => {
     if (jugador?.esCapitan) {
       fetch("http://localhost:3000/api/jugadores/sin-equipo")
         .then((res) => res.json())
         .then((data) => {
-          setJugadoresSinEquipo(data);
-          setFiltrados(data);
+          // 🔒 validamos que sea un array
+          if (Array.isArray(data.data)) {
+            setJugadoresSinEquipo(data.data);
+            setFiltrados(data.data);
+          }
         })
         .catch((err) =>
           console.error("Error cargando jugadores sin equipo:", err)
@@ -109,31 +111,45 @@ function Equipos() {
 
   // === Agregar jugador al equipo ===
   const handleAgregar = async (idJugador) => {
-  try {
-    const response = await fetch(`http://localhost:3000/api/jugadores/${idJugador}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        equipo: jugador.equipo.id,
-        esCapitan: false,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Error al agregar jugador");
+    if (!jugador?.equipo?.id) {
+      alert("⚠️ No se puede agregar jugadores: no hay equipo activo.");
+      return;
     }
 
-    alert("✅ Jugador agregado con éxito");
+    try {
+      const response = await fetch(`http://localhost:3000/api/jugadores/${idJugador}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          equipo: jugador.equipo.id,
+          esCapitan: false,
+        }),
+      });
 
-    // actualizar las listas locales
-    setJugadores([...jugadores, filtrados.find((j) => j.id === idJugador)]);
-    setJugadoresSinEquipo(jugadoresSinEquipo.filter((j) => j.id !== idJugador));
-  } catch (error) {
-    console.error("Error agregando jugador:", error);
-    alert("❌ Error al agregar jugador: " + error.message);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Error al agregar jugador");
+
+      alert("✅ Jugador agregado con éxito");
+
+      // actualizar listas locales
+      setJugadores([...jugadores, filtrados.find((j) => j.id === idJugador)]);
+      setJugadoresSinEquipo(jugadoresSinEquipo.filter((j) => j.id !== idJugador));
+    } catch (error) {
+      console.error("Error agregando jugador:", error);
+      alert("❌ Error al agregar jugador: " + error.message);
+    }
+  };
+
+  // === Seguridad adicional: render condicional si no hay jugador cargado ===
+  if (!jugador) {
+    return (
+      <main className="subpagina-container">
+        <p style={{ textAlign: "center", marginTop: "2rem" }}>
+          ⚠️ No se encontró información del jugador. Iniciá sesión nuevamente.
+        </p>
+      </main>
+    );
   }
-};
 
   return (
     <main className="subpagina-container">
@@ -180,7 +196,7 @@ function Equipos() {
       )}
 
       {/* === Agregar jugadores (solo si es capitán) === */}
-      {jugador?.esCapitan && (
+      {jugador?.equipo?.id && jugador?.esCapitan && (
         <section className="agregar-jugadores">
           <p className="subtexto-busqueda">¿Necesitás encontrar jugadores para tu equipo?</p>
           <h3>Buscar jugadores sin equipo</h3>
@@ -213,7 +229,7 @@ function Equipos() {
       )}
 
       {/* === Mensaje para jugadores no capitanes === */}
-      {jugador?.equipo && !jugador?.esCapitan && (
+      {jugador?.equipo?.id && !jugador?.esCapitan && (
         <section className="agregar-jugadores">
           <p>⚽ Ya perteneces a un equipo. Solo el capitán puede agregar jugadores.</p>
         </section>
