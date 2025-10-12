@@ -90,8 +90,6 @@ function MiPerfil() {
         <p className="mi-perfil-subtitulo">Gestiona tu información y estadísticas</p>
 
         <div className="perfil-seccion">
-          <button className="boton-editar">✏️ Editar</button>
-
           <h2>Información Personal</h2>
           <p>Datos básicos del jugador</p>
 

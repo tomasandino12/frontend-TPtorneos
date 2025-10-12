@@ -102,30 +102,6 @@
   font-style: italic;
 }
 
-/* === Botón Editar === */
-.boton-editar {
-  position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background-color: #ffffff;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #2e7d32;
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.boton-editar:hover {
-  background-color: #eaf7ee;
-  border-color: #2e7d32;
-}
-
 /* === Botón Salir del equipo === */
 .boton-salir-container {
   text-align: right;
