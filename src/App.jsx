@@ -9,6 +9,7 @@ import Estadisticas from "./pages/Estadisticas.jsx"
 import FixtureTorneo from "./pages/FixtureTorneo.jsx"
 import Equipos from "./pages/Equipos.jsx"
 import MiPerfil from "./pages/MiPerfil.jsx"
+import EquipoDetalle from "./pages/EquipoDetalle.jsx"
 
 function App() {
   return (
@@ -25,6 +26,9 @@ function App() {
           <Route path="equipos" element={<Equipos />} />
           <Route path="miPerfil" element={<MiPerfil />} />
         </Route>
+
+        {/* Ruta para detalle de equipo */}
+        <Route path="/equipo/:id" element={<EquipoDetalle />} />
       </Routes>
     </BrowserRouter>
   )
