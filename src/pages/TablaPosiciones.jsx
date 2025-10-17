@@ -9,34 +9,64 @@ function TablaPosiciones() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchEstadisticas = async () => {
-      try {
-        // Obtener torneo del usuario (asumiendo que está en localStorage)
-        const jugador = JSON.parse(localStorage.getItem("jugador"));
-        if (!jugador?.equipo?.participaciones?.length) {
-          setError("No se encontró torneo activo para el usuario.");
-          setLoading(false);
-          return;
-        }
-
-        // Tomar el primer torneo de las participaciones
-        const torneoId = jugador.equipo.participaciones[0].torneo.id;
-
-        const response = await fetch(`http://localhost:3000/api/equipos/estadisticas/${torneoId}`);
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Error al cargar estadísticas");
-
-        setEstadisticas(data.data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
+useEffect(() => {
+  const fetchEstadisticas = async () => {
+    try {
+      const jugador = JSON.parse(localStorage.getItem("jugador"));
+      if (!jugador?.equipo?.id) {
+        setError("El jugador no pertenece a ningún equipo.");
         setLoading(false);
+        return;
       }
-    };
 
-    fetchEstadisticas();
-  }, []);
+      // Traemos el equipo completo desde el backend (con participaciones)
+      const resEquipo = await fetch(`http://localhost:3000/api/equipos/${jugador.equipo.id}`);
+      const equipoJson = await resEquipo.json();
+      if (!resEquipo.ok) throw new Error(equipoJson.message || "Error al obtener el equipo.");
+
+      const participaciones = equipoJson.data.participaciones || [];
+      if (participaciones.length === 0) {
+        setError("El equipo no está participando en ningún torneo.");
+        setLoading(false);
+        return;
+      }
+
+      // Buscamos el torneo activo
+      const participacionActiva = participaciones.find((p) => {
+        const torneo = p.torneo;
+        // torneo puede ser id o un objeto { id, estado }
+        return typeof torneo === "object" ? torneo.estado === "activo" : false;
+      });
+
+      if (!participacionActiva) {
+        setError("No se encontró un torneo activo para el equipo.");
+        setLoading(false);
+        return;
+      }
+
+      const torneo = participacionActiva.torneo;
+      const torneoId = typeof torneo === "object" ? torneo.id : Number(torneo);
+      if (!torneoId || Number.isNaN(torneoId)) {
+        setError("torneoId inválido en la participación del equipo.");
+        setLoading(false);
+        return;
+      }
+
+      // Pedimos estadísticas solo del torneo activo
+      const response = await fetch(`http://localhost:3000/api/equipos/estadisticas/${torneoId}`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Error al cargar estadísticas");
+
+      setEstadisticas(data.data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchEstadisticas();
+}, []);
 
   const handleEquipoClick = (equipoId) => {
     navigate(`/equipo/${equipoId}`);
