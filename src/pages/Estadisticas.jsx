@@ -1,37 +1,140 @@
+import { useEffect, useState } from "react";
 import "../styles/IndexStyle.css";
 import "../styles/Estadisticas.css";
 
 function Estadisticas() {
-  const equipo = {
-    nombre: "Los Tigres FC",
-    victorias: 3,
-    empates: 1,
-    derrotas: 1,
+  const [equipo, setEquipo] = useState(null);
+  const [partidos, setPartidos] = useState([]);
+  const [jugadores, setJugadores] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [jugador, setJugador] = useState(null);
+
+  useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const jugadorLogueado = JSON.parse(localStorage.getItem("jugador"));
+      if (!jugadorLogueado || !jugadorLogueado.equipo) {
+        setError("No se encontró equipo asociado al jugador.");
+        setLoading(false);
+        return;
+      }
+
+      setJugador(jugadorLogueado);
+
+      // 1) findOne del equipo
+      const equipoRes = await fetch(
+        `http://localhost:3000/api/equipos/${jugadorLogueado.equipo.id}`
+      );
+      const equipoJson = await equipoRes.json();
+      const equipoData = equipoJson?.data ?? equipoJson;
+      console.log("Datos del equipo obtenidos:", equipoData);
+      console.log("Participaciones completas del equipo:", equipoData.participaciones);
+      if (equipoData.participaciones?.length > 0) {
+        console.log("Primer partido local ejemplo:", equipoData.participaciones[0].partidosLocal[0]);
+        console.log("Primer partido visitante ejemplo:", equipoData.participaciones[0].partidosVisitante[0]);
+      }
+
+      // 2) estadísticas
+      const estadisticasRes = await fetch(
+        `http://localhost:3000/api/equipos/${jugadorLogueado.equipo.id}/estadisticas`
+      );
+      const estadisticasJson = await estadisticasRes.json();
+      const estad =
+        estadisticasJson?.estadisticas ??
+        estadisticasJson?.data ??
+        estadisticasJson;
+
+      // Validaciones
+      if (!equipoRes.ok) {
+        setError("Error al cargar los datos del equipo (findOne).");
+        setLoading(false);
+        return;
+      }
+
+      // --- Setear equipo (con estadísticas) ---
+      setEquipo({
+        nombreEquipo:
+          equipoData?.nombreEquipo ??
+          jugadorLogueado.equipo?.nombreEquipo ??
+          "",
+        colorCamiseta: equipoData?.colorCamiseta ?? "",
+        victorias: estad?.victorias ?? 0,
+        empates: estad?.empates ?? 0,
+        derrotas: estad?.derrotas ?? 0,
+      });
+
+      // --- Jugadores ---
+      setJugadores(equipoData?.jugadores ?? []);
+
+      // --- Partidos ---
+      const participaciones = equipoData?.participaciones ?? [];
+
+      const todos = participaciones.flatMap((p) => {
+        const idParticipacionActual = p.id;
+
+        // Locales
+        const locales = (p.partidosLocal ?? []).map((partido) => ({
+          rival: partido.visitante?.equipo?.nombreEquipo ?? "Rival desconocido",
+          local: true,
+          fecha: partido.fecha_partido,
+          hora: partido.hora_partido,
+          estado_partido: partido.estado_partido,
+          goles_local: partido.goles_local,
+          goles_visitante: partido.goles_visitante,
+          resultado:
+            partido.estado_partido === "Finalizado"
+              ? `${partido.goles_local}-${partido.goles_visitante}`
+              : "–",
+        }));
+
+          // Visitantes
+        const visitantes = (p.partidosVisitante ?? []).map((partido) => ({
+          rival: partido.local?.equipo?.nombreEquipo ?? "Rival desconocido",
+          local: false,
+          fecha: partido.fecha_partido,
+          hora: partido.hora_partido,
+          estado_partido: partido.estado_partido,
+          goles_local: partido.goles_local,
+          goles_visitante: partido.goles_visitante,
+          resultado:
+            partido.estado_partido === "Finalizado"
+              ? `${partido.goles_local}-${partido.goles_visitante}`
+              : "–",
+        }));
+
+        return [...locales, ...visitantes];
+      });
+
+    // opcional: ordenar por fecha
+      const ordenados = todos.slice().sort((a, b) => {
+        const fa = a.fecha ? new Date(a.fecha).getTime() : 0;
+        const fb = b.fecha ? new Date(b.fecha).getTime() : 0;
+        return fb - fa;
+      });
+
+      setPartidos(ordenados);
+    } catch (err) {
+      console.error("Error al obtener datos:", err);
+      setError("No se pudieron cargar los datos.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const partidos = [
-    { rival: "Águilas United", local: true, fecha: "15/03/2024", resultado: "3-2" },
-    { rival: "Leones Dorados", local: false, fecha: "22/03/2024", resultado: "1-1" },
-    { rival: "Halcones FC", local: true, fecha: "29/03/2024", resultado: "2-0" },
-    { rival: "Lobos Grises", local: true, fecha: "12/04/2024", resultado: "4-1" },
-  ];
+  fetchData();
+}, []);
 
-  const jugadores = [
-    { nombre: "Juan Pérez", posicion: "Arquero", edad: 28 },
-    { nombre: "Carlos Mendoza", posicion: "Arquero", edad: 25 },
-    { nombre: "Roberto Fernández", posicion: "Defensor", edad: 29 },
-    { nombre: "Diego Martínez", posicion: "Defensor", edad: 27 },
-    { nombre: "Andrés López", posicion: "Mediocampista", edad: 23 },
-    { nombre: "Fernando Sánchez", posicion: "Mediocampista", edad: 25 },
-    { nombre: "Pablo Ramírez", posicion: "Mediocampista", edad: 26 },
-    { nombre: "Javier Torres", posicion: "Mediocampista", edad: 24 },
-    { nombre: "Carlos Rodríguez", posicion: "Delantero", edad: 27 },
-    { nombre: "Alejandro Vargas", posicion: "Delantero", edad: 22 },
-  ];
+  // --- UI States ---
+  if (loading) return <p>Cargando estadísticas...</p>;
+  if (error) return <p>{error}</p>;
+  if (!equipo) return <p>No se encontraron datos del equipo.</p>;
 
-  const jugadoresPorPosicion = jugadores.reduce((acc, jugador) => {
-    if (!acc[jugador.posicion]) acc[jugador.posicion] = [];
-    acc[jugador.posicion].push(jugador);
+  // --- Lógica de render ---
+  const jugadoresPorPosicion = (jugadores || []).reduce((acc, jugador) => {
+    const pos = jugador.posicion ?? "Sin posición";
+    if (!acc[pos]) acc[pos] = [];
+    acc[pos].push(jugador);
     return acc;
   }, {});
 
@@ -42,38 +145,37 @@ function Estadisticas() {
     Delantero: "DELANTEROS",
   };
 
-  const getResultadoColor = (resultado, local) => {
-    const [golesEquipo, golesRival] = resultado.split("-").map(Number);
-    const victoria = (local && golesEquipo > golesRival) || (!local && golesEquipo < golesRival);
-    const empate = golesEquipo === golesRival;
-
-    if (empate) return "amarillo";
-    if (victoria) return "verde";
-    return "rojo";
-  };
+  const getResultadoColor = (resultado, estado) => {
+  if (estado === "Programado") return "gris";
+  if (resultado === "-") return "gris";
+  const [g1, g2] = resultado.split("-").map(Number);
+  if (g1 === g2) return "amarillo";
+  return g1 > g2 ? "verde" : "rojo";
+};
 
   return (
     <main className="subpagina-container">
       <header className="estadisticas-header">
-        <h1>{equipo.nombre}</h1>
+        {/* header usa el jugador almacenado para mostrar el nombre tal como lo tenías */}
+        <h1>{jugador?.equipo?.nombreEquipo ?? equipo.nombreEquipo}</h1>
         <p>Estadísticas del equipo y plantilla de jugadores</p>
       </header>
 
       <section className="resumen-boxes">
         <div className="resumen-box verde">
-          <span>{equipo.victorias}</span>
+          <span>{equipo.victorias ?? 0}</span>
           <p>Victorias</p>
         </div>
         <div className="resumen-box gris">
-          <span>{equipo.empates}</span>
+          <span>{equipo.empates ?? 0}</span>
           <p>Empates</p>
         </div>
         <div className="resumen-box rojo">
-          <span>{equipo.derrotas}</span>
+          <span>{equipo.derrotas ?? 0}</span>
           <p>Derrotas</p>
         </div>
         <div className="resumen-box azul">
-          <span>{equipo.victorias + equipo.empates + equipo.derrotas}</span>
+          <span>{(equipo.victorias ?? 0) + (equipo.empates ?? 0) + (equipo.derrotas ?? 0)}</span>
           <p>Partidos Jugados</p>
         </div>
       </section>
@@ -83,33 +185,80 @@ function Estadisticas() {
           <h2><i className="bx bx-calendar"></i> Partidos Jugados</h2>
           <p>Historial de encuentros del equipo</p>
 
-          {partidos.map((p, idx) => (
-            <div className={`partido-card ${getResultadoColor(p.resultado, p.local)}`} key={idx}>
-              <div className="partido-vs">{p.local ? "vs" : "@"} {p.rival}</div>
-              <div className="partido-fecha">{p.fecha}</div>
-              <div className="partido-resultado">{p.resultado}</div>
-            </div>
-          ))}
+          {equipo.participaciones?.length > 0 ? (
+            equipo.participaciones.map((p) => (
+              <div key={p.id}>
+                {[...(p.partidosLocal || []), ...(p.partidosVisitante || [])].map((partido) => {
+                  const esLocal = partido.equipoLocal === p.id;
+                  const idRival = esLocal ? partido.equipoVisitante : partido.equipoLocal;
+
+                  // Buscar el nombre del rival a partir de las participaciones cargadas
+                  const participacionRival = equipo.participaciones.find(
+                    (par) => par.id === idRival
+                  );
+                  const nombreRival = participacionRival
+                    ? participacionRival.equipo?.nombreEquipo || "Rival"
+                    : "Sin rival";
+
+                  const esProgramado = partido.estado_partido === "Programado";
+
+                  // Colores según el estado del partido
+                  const colorClass = esProgramado
+                    ? "gris"
+                    : partido.goles_local === partido.goles_visitante
+                    ? "amarillo"
+                    : (esLocal && partido.goles_local > partido.goles_visitante) ||
+                      (!esLocal && partido.goles_local < partido.goles_visitante)
+                    ? "verde"
+                    : "rojo";
+
+                  // Formateo de fecha (opcional)
+                  const fechaFormateada = new Date(partido.fecha_partido).toLocaleDateString("es-AR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  });
+
+                  return (
+                    <div className={`partido-card ${getResultadoColor(p.resultado, p.estado_partido)}`} key={idx}>
+                      <div className="partido-vs">vs {p.rival}</div>
+                      <div className="partido-fecha">{p.fecha}</div>
+                      <div className="partido-resultado">{p.resultado}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            ))
+          ) : (
+            <p>No se encontraron partidos.</p>
+          )}
         </section>
 
         <section className="plantilla-jugadores">
           <h2><i className="bx bx-group"></i> Plantel del equipo</h2>
           <p>Jugadores</p>
 
-          {Object.keys(jugadoresPorPosicion).map((pos) => (
-            <div className="bloque-posicion" key={pos}>
-              <h3>{traducciones[pos] || pos.toUpperCase() + "S"}</h3>
-              {jugadoresPorPosicion[pos].map((j, i) => (
-                <div className="jugador-card" key={i}>
-                  <div>
-                    <strong>{j.nombre}</strong>
-                    <p className="jugador-pos">{j.posicion}</p>
+          {Object.keys(jugadoresPorPosicion).length === 0 ? (
+            <p>No hay jugadores cargados.</p>
+          ) : (
+            Object.keys(jugadoresPorPosicion).map((pos) => (
+              <div className="bloque-posicion" key={pos}>
+                <h3>{traducciones[pos] || pos.toUpperCase() + "S"}</h3>
+                {jugadoresPorPosicion[pos].map((j, i) => (
+                  <div className="jugador-card" key={i}>
+                    <div>
+                      <strong>{j.nombre} {j.apellido ?? ""}</strong>
+                      <p className="jugador-pos">{j.posicion}</p>
+                    </div>
+                    <div className="jugador-edad">
+                      {/* si tenés fechaNacimiento, podés calcular edad; si no, muestro '-' */}
+                      {j.fechaNacimiento ? (new Date().getFullYear() - new Date(j.fechaNacimiento).getFullYear()) : (j.edad ?? "-")} años
+                    </div>
                   </div>
-                  <div className="jugador-edad">{j.edad} años</div>
-                </div>
-              ))}
-            </div>
-          ))}
+                ))}
+              </div>
+            ))
+          )}
         </section>
       </div>
     </main>
