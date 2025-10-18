@@ -31,7 +31,7 @@ function Registro() {
     /^\d{7,9}$/.test(form.dni) &&
     /\S+@\S+\.\S+/.test(form.email) &&
     form.fecha_nacimiento !== "" &&
-    form.posicion.trim().length >= 2 &&
+    form.posicion !== "" &&
     form.contraseña.length >= 6;
 
   const handleSubmit = async (e) => {
@@ -41,9 +41,7 @@ function Registro() {
     try {
       const response = await fetch("http://localhost:3000/api/jugadores/registro", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombre: form.nombre,
           apellido: form.apellido,
@@ -62,12 +60,9 @@ function Registro() {
 
       const data = await response.json();
 
-      // Guarda el token JWT
       localStorage.setItem("token", data.token);
-
-      // Guarda el jugador completo con valores iniciales
       const nuevoJugador = {
-        id: data.id || null, // si el backend lo devuelve
+        id: data.id || null,
         nombre: form.nombre,
         apellido: form.apellido,
         email: form.email,
@@ -75,12 +70,10 @@ function Registro() {
         equipo: null,
         esCapitan: false,
       };
-
       localStorage.setItem("jugador", JSON.stringify(nuevoJugador));
 
       alert("✅ Registro exitoso. ¡Bienvenido!");
       navigate("/gestorTorneos");
-
     } catch (err) {
       setError(err.message);
     }
@@ -94,56 +87,29 @@ function Registro() {
           <div className="form-columns">
             <div className="columna">
               <div className="campo">
-                <input
-                  type="text"
-                  name="nombre"
-                  value={form.nombre}
-                  onChange={handleChange}
-                  required
-                />
                 <label>Nombre</label>
-                <span></span>
+                <input type="text" name="nombre" value={form.nombre} onChange={handleChange} required />
               </div>
 
               <div className="campo">
-                <input
-                  type="text"
-                  name="apellido"
-                  value={form.apellido}
-                  onChange={handleChange}
-                  required
-                />
                 <label>Apellido</label>
-                <span></span>
+                <input type="text" name="apellido" value={form.apellido} onChange={handleChange} required />
               </div>
 
               <div className="campo">
-                <input
-                  type="text"
-                  name="dni"
-                  value={form.dni}
-                  onChange={handleChange}
-                  required
-                />
                 <label>DNI</label>
-                <span></span>
+                <input type="text" name="dni" value={form.dni} onChange={handleChange} required />
               </div>
 
               <div className="campo">
-                <input
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                />
                 <label>Email</label>
-                <span></span>
+                <input type="email" name="email" value={form.email} onChange={handleChange} required />
               </div>
             </div>
 
             <div className="columna">
               <div className="campo">
+                <label>Fecha de nacimiento</label>
                 <input
                   type="date"
                   name="fecha_nacimiento"
@@ -151,23 +117,26 @@ function Registro() {
                   onChange={handleChange}
                   required
                 />
-                <label>Fecha de nacimiento</label>
-                <span></span>
               </div>
 
               <div className="campo">
-                <input
-                  type="text"
+                <label>Posición</label>
+                <select
                   name="posicion"
                   value={form.posicion}
                   onChange={handleChange}
                   required
-                />
-                <label>Posición</label>
-                <span></span>
+                >
+                  <option value="">— Seleccionar posición —</option>
+                  <option value="Arquero">Arquero</option>
+                  <option value="Defensor">Defensor</option>
+                  <option value="Mediocampista">Mediocampista</option>
+                  <option value="Delantero">Delantero</option>
+                </select>
               </div>
 
               <div className="campo">
+                <label>Contraseña</label>
                 <input
                   type="password"
                   name="contraseña"
@@ -175,8 +144,6 @@ function Registro() {
                   onChange={handleChange}
                   required
                 />
-                <label>Contraseña</label>
-                <span></span>
               </div>
             </div>
           </div>
@@ -188,11 +155,11 @@ function Registro() {
             style={{
               opacity: valido ? 1 : 0.5,
               cursor: valido ? "pointer" : "not-allowed",
-              marginTop: "20px"
+              marginTop: "25px",
             }}
           />
 
-          {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
+          {error && <p className="error-msg">{error}</p>}
 
           <div className="registrarse">
             <Link to="/">Volver al inicio</Link>
