@@ -1,33 +1,30 @@
+import { useState, useEffect } from "react";
 import "../styles/FixtureTorneo.css";
 import "../styles/IndexStyle.css"; // Importa estilos globales por si no lo tenías
 
 function FixtureTorneo() {
-  const partidos = [
-    {
-      id: 1,
-      jornada: 9,
-      estado: "programado",
-      fecha: "2024-03-14",
-      hora: "16:00",
-      equipoLocal: "Los Tigres FC",
-      equipoVisitante: "Águilas United",
-      golesLocal: null,
-      golesVisitante: null,
-      cancha: "Estadio Municipal",
-    },
-    {
-      id: 2,
-      jornada: 9,
-      estado: "programado",
-      fecha: "2024-03-14",
-      hora: "18:00",
-      equipoLocal: "Leones Dorados",
-      equipoVisitante: "Halcones FC",
-      golesLocal: null,
-      golesVisitante: null,
-      cancha: "Campo Deportivo Norte",
-    },
-  ];
+  const [partidos, setPartidos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPartidos = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/partidos/programados');
+        if (!response.ok) {
+          throw new Error('Error al cargar los partidos');
+        }
+        const data = await response.json();
+        setPartidos(data.data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPartidos();
+  }, []);
 
   return (
     <main className="subpagina-container">
@@ -40,17 +37,21 @@ function FixtureTorneo() {
         <h2>Próximos Partidos</h2>
         <p className="fixture-sub">Calendario de encuentros programados</p>
 
+        {loading && <p>Cargando partidos...</p>}
+        {error && <p>Error: {error}</p>}
+        {!loading && !error && partidos.length === 0 && <p>No hay partidos programados.</p>}
+
         {partidos.map((partido) => (
           <div className="fixture-card" key={partido.id}>
             <div className="fixture-card-estado">
               <span className="jornada">Jornada {partido.jornada}</span>
-              <span className={`estado ${partido.estado}`}>{partido.estado}</span>
+              <span className={`estado ${partido.estado_partido}`}>{partido.estado_partido}</span>
             </div>
-            <h3>{partido.equipoLocal} vs {partido.equipoVisitante}</h3>
+            <h3>{partido.local?.equipo?.nombreEquipo || 'Equipo Local'} vs {partido.visitante?.equipo?.nombreEquipo || 'Equipo Visitante'}</h3>
             <div className="fixture-detalles">
-              <p><i className="bx bx-calendar"></i> {partido.fecha}</p>
-              <p><i className="bx bx-time"></i> {partido.hora}</p>
-              <p><i className="bx bx-map"></i> {partido.cancha}</p>
+              <p><i className="bx bx-calendar"></i> {new Date(partido.fecha_partido).toLocaleDateString()}</p>
+              <p><i className="bx bx-time"></i> {partido.hora_partido}</p>
+              <p><i className="bx bx-map"></i> {partido.cancha?.nombre || 'Cancha'}</p>
             </div>
           </div>
         ))}
