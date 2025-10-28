@@ -30,7 +30,7 @@ function FixtureTorneo() {
     <main className="subpagina-container">
       <section className="fixture-header">
         <h1><i className="bx bx-calendar"></i> Fixture del Torneo</h1>
-        <p>Próximos partidos y resultados recientes</p>
+        <p>Próximos partidos a disputarse en el torneo</p>
       </section>
 
       <section className="fixture-lista">
