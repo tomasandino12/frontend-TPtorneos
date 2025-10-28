@@ -19,17 +19,14 @@ function Estadisticas() {
           return;
         }
 
-        // === 1️⃣ Traer datos del equipo completo (jugadores + participaciones)
+        // Obtener equipo
         const equipoRes = await fetch(
           `http://localhost:3000/api/equipos/${jugadorLogueado.equipo.id}`
         );
         const equipoJson = await equipoRes.json();
         const equipoData = equipoJson?.data ?? equipoJson;
 
-        // 👇 Agregá esta línea para ver cómo llegan los jugadores
-console.log("📦 Jugadores desde el backend:", equipoData?.jugadores);
-
-        // === 2️⃣ Traer estadísticas del equipo
+        // Obtener estadísticas
         const estadisticasRes = await fetch(
           `http://localhost:3000/api/equipos/${jugadorLogueado.equipo.id}/estadisticas`
         );
@@ -39,7 +36,6 @@ console.log("📦 Jugadores desde el backend:", equipoData?.jugadores);
           estadisticasJson?.data ??
           estadisticasJson;
 
-        // === Datos generales del equipo
         setEquipo({
           nombreEquipo:
             equipoData?.nombreEquipo ??
@@ -51,30 +47,28 @@ console.log("📦 Jugadores desde el backend:", equipoData?.jugadores);
           derrotas: estad?.derrotas ?? 0,
         });
 
-        // === Normalizar jugadores ===
-          const jugadoresData = (equipoData?.jugadores || []).map((j) => ({
-            id: j.id,
-            nombre: j.nombre ?? j.nombreJugador ?? j.Nombre ?? "",
-            apellido: j.apellido ?? j.apellidoJugador ?? j.Apellido ?? "",
-            posicion: j.posicion ?? j.Posicion ?? "Sin posición",
-            fechaNacimiento:
-              j.fechaNacimiento ??
-              j.fecha_nacimiento ??
-              j.fechaNac ??
-              j.FechaNacimiento ??
-              "",
-            esCapitan: j.esCapitan ?? j.EsCapitan ?? false,
-          }));
+        // Procesar jugadores
+        const jugadoresData = (equipoData?.jugadores || []).map((j) => ({
+          id: j.id,
+          nombre: j.nombre ?? j.nombreJugador ?? j.Nombre ?? "",
+          apellido: j.apellido ?? j.apellidoJugador ?? j.Apellido ?? "",
+          posicion: j.posicion ?? j.Posicion ?? "Sin posición",
+          fechaNacimiento:
+            j.fechaNacimiento ??
+            j.fecha_nacimiento ??
+            j.fechaNac ??
+            j.FechaNacimiento ??
+            "",
+          esCapitan: j.esCapitan ?? j.EsCapitan ?? false,
+        }));
 
-
-        // Ordenar por posición: Arquero → Defensor → Mediocampista → Delantero
         const jugadoresOrdenados = jugadoresData.sort((a, b) => {
           const orden = ["Arquero", "Defensor", "Mediocampista", "Delantero"];
           return orden.indexOf(a.posicion) - orden.indexOf(b.posicion);
         });
         setJugadores(jugadoresOrdenados);
 
-        // === Partidos ===
+        // Procesar partidos (local y visitante)
         const participaciones = equipoData?.participaciones ?? [];
         const todos = participaciones.flatMap((p) => {
           const locales = (p.partidosLocal ?? []).map((partido) => ({
@@ -108,12 +102,13 @@ console.log("📦 Jugadores desde el backend:", equipoData?.jugadores);
           return [...locales, ...visitantes];
         });
 
-        // Ordenar partidos (últimos primero)
+        // Ordenar por fecha (más recientes primero)
         const ordenados = todos.slice().sort((a, b) => {
           const fa = new Date(a.fecha).getTime();
           const fb = new Date(b.fecha).getTime();
           return fb - fa;
         });
+
         setPartidos(ordenados);
       } catch (err) {
         console.error("Error al obtener datos:", err);
@@ -126,12 +121,11 @@ console.log("📦 Jugadores desde el backend:", equipoData?.jugadores);
     fetchData();
   }, []);
 
-  // === Estados de UI ===
   if (loading) return <p>Cargando estadísticas...</p>;
   if (error) return <p>{error}</p>;
   if (!equipo) return <p>No se encontraron datos del equipo.</p>;
 
-  // === Agrupar jugadores por posición ===
+  // Agrupar jugadores por posición
   const jugadoresPorPosicion = jugadores.reduce((acc, jugador) => {
     const pos = jugador.posicion ?? "Sin posición";
     if (!acc[pos]) acc[pos] = [];
@@ -146,7 +140,7 @@ console.log("📦 Jugadores desde el backend:", equipoData?.jugadores);
     Delantero: "DELANTEROS",
   };
 
-  // === Colores de resultado ===
+  // Colores de resultados
   const getResultadoColor = (resultado, estado, local) => {
     if (estado?.toLowerCase() !== "finalizado") return "gris";
     const [g1, g2] = resultado.split("-").map(Number);
@@ -154,6 +148,15 @@ console.log("📦 Jugadores desde el backend:", equipoData?.jugadores);
     const gano = local ? g1 > g2 : g2 > g1;
     return gano ? "verde" : "rojo";
   };
+
+  // Filtrar partidos jugados y próximos
+  const partidosJugados = partidos.filter(
+    (p) => p.estado_partido?.toLowerCase() === "finalizado"
+  );
+
+  const proximosPartidos = partidos
+    .filter((p) => p.estado_partido?.toLowerCase() === "programado")
+    .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
   return (
     <main className="subpagina-container">
@@ -192,10 +195,10 @@ console.log("📦 Jugadores desde el backend:", equipoData?.jugadores);
           <h2><i className="bx bx-calendar"></i> Partidos Jugados</h2>
           <p>Últimos encuentros del equipo</p>
 
-          {partidos.length === 0 ? (
-            <p>No se encontraron partidos.</p>
+          {partidosJugados.length === 0 ? (
+            <p>No se encontraron partidos finalizados.</p>
           ) : (
-            partidos.map((p, idx) => (
+            partidosJugados.map((p, idx) => (
               <div
                 key={idx}
                 className={`partido-card ${getResultadoColor(
@@ -211,6 +214,29 @@ console.log("📦 Jugadores desde el backend:", equipoData?.jugadores);
                   {new Date(p.fecha).toLocaleDateString("es-AR")}
                 </div>
                 <div className="partido-resultado">{p.resultado}</div>
+              </div>
+            ))
+          )}
+        </section>
+
+        {/* === PRÓXIMOS PARTIDOS === */}
+        <section className="partidos-jugados">
+          <h2><i className="bx bx-time-five"></i> Próximos encuentros del equipo</h2>
+          <p>Partidos programados del equipo</p>
+
+          {proximosPartidos.length === 0 ? (
+            <p>No hay próximos encuentros programados.</p>
+          ) : (
+            proximosPartidos.map((p, idx) => (
+              <div key={idx} className="partido-card gris">
+                <div className="partido-vs">
+                  {p.local ? "vs " + p.rival : "vs " + p.rival + " (Visitante)"}
+                </div>
+                <div className="partido-fecha">
+                  {new Date(p.fecha).toLocaleDateString("es-AR")}{" "}
+                  {p.hora && `- ${p.hora.slice(0, 5)}`}
+                </div>
+                <div className="partido-resultado">Programado</div>
               </div>
             ))
           )}
