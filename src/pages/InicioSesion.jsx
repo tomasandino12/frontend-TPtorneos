@@ -37,10 +37,10 @@ function InicioSesion() {
 
       const data = await response.json();
 
-      // Guardamos el token JWT
+      
       localStorage.setItem("token", data.token);
 
-      // Pedimos el jugador por email (endpoint dedicado)
+      
       const jugadorResp = await fetch(
         `http://localhost:3000/api/jugadores/by-email?email=${encodeURIComponent(usuario)}`
         );
@@ -54,7 +54,7 @@ function InicioSesion() {
           const jugadorJson = await jugadorResp.json();
           const jugador = jugadorJson.data;
 
-          // Limpiamos cualquier sesión previa y guardamos el jugador actual
+          
           localStorage.removeItem("jugador");
           localStorage.setItem("jugador", JSON.stringify(jugador));
 
