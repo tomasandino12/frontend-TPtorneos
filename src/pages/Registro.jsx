@@ -16,14 +16,23 @@ function Registro() {
   });
 
   const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     document.body.classList.add("bg-login");
     return () => document.body.classList.remove("bg-login");
   }, []);
 
-  const handleChange = (e) =>
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    if (e.target.name === "email") {
+      if (!/\S+@\S+\.\S+/.test(e.target.value)) {
+        setEmailError("El email no es válido");
+      } else {
+        setEmailError("");
+      }
+    }
+  };
 
   const valido =
     form.nombre.trim().length >= 2 &&
@@ -104,6 +113,7 @@ function Registro() {
               <div className="campo">
                 <label>Email</label>
                 <input type="email" name="email" value={form.email} onChange={handleChange} required />
+                {emailError && <p className="error-msg">{emailError}</p>}
               </div>
             </div>
 
