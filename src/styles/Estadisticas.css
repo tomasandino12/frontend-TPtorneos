@@ -3,6 +3,7 @@
   background-color: #f5fdf7;
 }
 
+/* ===== ENCABEZADO ===== */
 .estadisticas-header {
   background-color: #e5f8eb;
   text-align: center;
@@ -21,6 +22,7 @@
   color: #555;
 }
 
+/* ===== RESUMEN ===== */
 .resumen-boxes {
   display: flex;
   gap: 1.2rem;
@@ -57,17 +59,20 @@
 .rojo span { color: #d32f2f; }
 .azul span { color: #1e88e5; }
 
+/* ===== CONTENIDO PRINCIPAL ===== */
 .estadisticas-contenido {
   display: flex;
   flex-wrap: wrap;
   gap: 2rem;
 }
 
-.partidos-jugados, .plantilla-jugadores {
+.partidos-jugados,
+.plantilla-jugadores {
   flex: 1;
   min-width: 320px;
 }
 
+/* ===== TITULOS DE SECCIONES ===== */
 .partidos-jugados h2,
 .plantilla-jugadores h2 {
   color: #2e7d32;
@@ -83,6 +88,7 @@
   margin-bottom: 1rem;
 }
 
+/* ===== TARJETAS DE PARTIDOS ===== */
 .partido-card {
   border-radius: 10px;
   padding: 0.75rem 1rem;
@@ -94,17 +100,9 @@
   font-weight: 500;
 }
 
-.partido-card.verde {
-  background-color: #c8e6c9;
-}
-
-.partido-card.amarillo {
-  background-color: #ffecb3;
-}
-
-.partido-card.rojo {
-  background-color: #ef9a9a;
-}
+.partido-card.verde { background-color: #c8e6c9; }
+.partido-card.amarillo { background-color: #ffecb3; }
+.partido-card.rojo { background-color: #ef9a9a; }
 
 .partido-vs {
   font-weight: bold;
@@ -118,12 +116,14 @@
   font-size: 0.95rem;
 }
 
+/* ===== PLANTEL DE JUGADORES ===== */
 .plantilla-jugadores h3 {
   margin-top: 1.2rem;
   font-size: 1rem;
   color: #444;
 }
 
+/* Tarjeta individual del jugador */
 .jugador-card {
   background: white;
   border-radius: 10px;
@@ -135,12 +135,22 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
+/* Aseguramos que el nombre y apellido se vean */
+.jugador-card strong {
+  color: #000;
+  font-size: 1rem;
+  font-weight: 600;
+  display: block;
+}
+
+/* Posición del jugador debajo del nombre */
 .jugador-pos {
   margin: 0;
   font-size: 0.85rem;
-  color: #777;
+  color: #666;
 }
 
+/* Edad del jugador al costado derecho */
 .jugador-edad {
   background-color: #f1f1f1;
   padding: 6px 10px;
