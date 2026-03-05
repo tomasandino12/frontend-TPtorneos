@@ -26,11 +26,8 @@ function Registro() {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     if (e.target.name === "email") {
-      if (!/\S+@\S+\.\S+/.test(e.target.value)) {
-        setEmailError("El email no es válido");
-      } else {
-        setEmailError("");
-      }
+      if (!/\S+@\S+\.\S+/.test(e.target.value)) setEmailError("El email no es válido");
+      else setEmailError("");
     }
   };
 
@@ -89,38 +86,90 @@ function Registro() {
   };
 
   return (
-    <div className="pagina-fondo-verde">
-      <div className="formulario">
-        <h1>Registro de Jugador</h1>
-        <form onSubmit={handleSubmit}>
-          <div className="form-columns">
-            <div className="columna">
-              <div className="campo">
-                <label>Nombre</label>
-                <input type="text" name="nombre" value={form.nombre} onChange={handleChange} required />
-              </div>
+    <div className="auth-wrap">
+      <div className="auth-card auth-card--wide">
+        <div className="auth-header">
+          <h1 className="auth-brand">
+            Gestor<span>Torneos</span>
+          </h1>
+          <div className="auth-sep"></div>
+          <h2 className="auth-title">Registro de Jugador</h2>
+          <p className="auth-subtitle">Completá tus datos para crear tu cuenta</p>
+        </div>
 
-              <div className="campo">
-                <label>Apellido</label>
-                <input type="text" name="apellido" value={form.apellido} onChange={handleChange} required />
-              </div>
-
-              <div className="campo">
-                <label>DNI</label>
-                <input type="text" name="dni" value={form.dni} onChange={handleChange} required />
-              </div>
-
-              <div className="campo">
-                <label>Email</label>
-                <input type="email" name="email" value={form.email} onChange={handleChange} required />
-                {emailError && <p className="error-msg">{emailError}</p>}
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <div className="grid-2">
+            <div className="field">
+              <label className="field-label" htmlFor="nombre">Nombre</label>
+              <div className="field-control">
+                <i className="bx bx-user field-icon"></i>
+                <input
+                  id="nombre"
+                  type="text"
+                  name="nombre"
+                  value={form.nombre}
+                  onChange={handleChange}
+                  placeholder="Juan"
+                  required
+                />
               </div>
             </div>
 
-            <div className="columna">
-              <div className="campo">
-                <label>Fecha de nacimiento</label>
+            <div className="field">
+              <label className="field-label" htmlFor="apellido">Apellido</label>
+              <div className="field-control">
+                <i className="bx bx-user field-icon"></i>
                 <input
+                  id="apellido"
+                  type="text"
+                  name="apellido"
+                  value={form.apellido}
+                  onChange={handleChange}
+                  placeholder="Pérez"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="field">
+              <label className="field-label" htmlFor="dni">DNI</label>
+              <div className="field-control">
+                <i className="bx bx-id-card field-icon"></i>
+                <input
+                  id="dni"
+                  type="text"
+                  name="dni"
+                  value={form.dni}
+                  onChange={handleChange}
+                  placeholder="40111222"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="field">
+              <label className="field-label" htmlFor="email">Email</label>
+              <div className="field-control">
+                <i className="bx bx-envelope field-icon"></i>
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="juanperez@email.com"
+                  required
+                />
+              </div>
+              {emailError && <p className="auth-error">{emailError}</p>}
+            </div>
+
+            <div className="field">
+              <label className="field-label" htmlFor="fecha_nacimiento">Fecha de nacimiento</label>
+              <div className="field-control">
+                <i className="bx bx-calendar field-icon"></i>
+                <input
+                  id="fecha_nacimiento"
                   type="date"
                   name="fecha_nacimiento"
                   value={form.fecha_nacimiento}
@@ -128,52 +177,64 @@ function Registro() {
                   required
                 />
               </div>
+            </div>
 
-              <div className="campo">
-                <label>Posición</label>
+            <div className="field">
+              <label className="field-label" htmlFor="posicion">Posición</label>
+              <div className="field-control">
+                <i className="bx bx-football field-icon"></i>
                 <select
+                  id="posicion"
                   name="posicion"
                   value={form.posicion}
                   onChange={handleChange}
                   required
                 >
-                  <option value="">— Seleccionar posición —</option>
+                  <option value="" disabled>— Seleccionar posición —</option>
                   <option value="Arquero">Arquero</option>
                   <option value="Defensor">Defensor</option>
                   <option value="Mediocampista">Mediocampista</option>
                   <option value="Delantero">Delantero</option>
                 </select>
               </div>
+            </div>
 
-              <div className="campo">
-                <label>Contraseña</label>
+            <div className="field field-full">
+              <label className="field-label" htmlFor="contraseña">Contraseña</label>
+              <div className="field-control">
+                <i className="bx bx-lock-alt field-icon"></i>
                 <input
+                  id="contraseña"
                   type="password"
                   name="contraseña"
                   value={form.contraseña}
                   onChange={handleChange}
+                  placeholder="••••••••"
                   required
                 />
               </div>
             </div>
           </div>
 
-          <input
+          <button
+            className="btn-primary"
             type="submit"
-            value="Registrarse"
             disabled={!valido}
             style={{
-              opacity: valido ? 1 : 0.5,
+              opacity: valido ? 1 : 0.6,
               cursor: valido ? "pointer" : "not-allowed",
-              marginTop: "25px",
             }}
-          />
+          >
+            Registrarse
+          </button>
 
-          {error && <p className="error-msg">{error}</p>}
+          {error && <p className="auth-error">{error}</p>}
 
-          <div className="registrarse">
-            <Link to="/">Volver al inicio</Link>
-          </div>
+          <p className="bottom-text">
+            <Link to="/" className="link-green">
+              Volver al inicio
+            </Link>
+          </p>
         </form>
       </div>
     </div>

@@ -7,7 +7,10 @@ function InicioSesion() {
 
   const [usuario, setUsuario] = useState("");
   const [contraseña, setContraseña] = useState("");
+  const [mostrarPass, setMostrarPass] = useState(false);
+  const [recordar, setRecordar] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     document.body.classList.add("bg-login");
@@ -17,13 +20,12 @@ function InicioSesion() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     try {
       const response = await fetch("http://localhost:3000/api/jugadores/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: usuario,
           contraseña: contraseña
@@ -36,83 +38,150 @@ function InicioSesion() {
       }
 
       const data = await response.json();
-
-      
       localStorage.setItem("token", data.token);
 
-      
       const jugadorResp = await fetch(
         `http://localhost:3000/api/jugadores/by-email?email=${encodeURIComponent(usuario)}`
-        );
-
+      );
 
       if (!jugadorResp.ok) {
-     const err = await jugadorResp.json();
-      throw new Error(err.message || "No se pudo obtener el jugador");
-        }
+        const err = await jugadorResp.json();
+        throw new Error(err.message || "No se pudo obtener el jugador");
+      }
 
-          const jugadorJson = await jugadorResp.json();
-          const jugador = jugadorJson.data;
+      const jugadorJson = await jugadorResp.json();
+      const jugador = jugadorJson.data;
 
-          
-          localStorage.removeItem("jugador");
-          localStorage.setItem("jugador", JSON.stringify(jugador));
+      localStorage.removeItem("jugador");
+      localStorage.setItem("jugador", JSON.stringify(jugador));
 
-          alert(`✅ Bienvenido ${jugador.nombre}!`);
-          navigate("/gestorTorneos");
+      if (recordar) localStorage.setItem("rememberEmail", usuario);
+      else localStorage.removeItem("rememberEmail");
 
-
+      alert(`✅ Bienvenido ${jugador.nombre}!`);
+      navigate("/gestorTorneos");
     } catch (err) {
       console.error("Error en inicio de sesión:", err);
       setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    const remembered = localStorage.getItem("rememberEmail");
+    if (remembered) {
+      setUsuario(remembered);
+      setRecordar(true);
+    }
+  }, []);
+
   return (
-    <div className="pagina-fondo-verde">
-      <div className="formulario">
-        <h1>Inicio de sesión</h1>
+    <div className="login-wrap">
+      <div className="login-card">
+        <div className="login-header">
+          <h1 className="login-brand">
+            Gestor<span>Torneos</span>
+          </h1>
+          <h2 className="login-title">Bienvenido de vuelta!</h2>
+          <p className="login-subtitle">
+            Ingrese sus datos para acceder a los datos del torneo
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="icons">
-            <i className="bx bxl-google"></i>
-            <i className="bx bxl-gmail"></i>
+        <form className="login-form" onSubmit={handleSubmit}>
+          <div className="field">
+            <label className="field-label" htmlFor="email">
+              Email
+            </label>
+            <div className="field-control">
+              <i className="bx bx-envelope field-icon"></i>
+              <input
+                id="email"
+                type="email"
+                placeholder="juanperez@email.com"
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
-          <div className="username">
-            <input
-              type="text"
-              name="usuario"
-              value={usuario}
-              onChange={(e) => setUsuario(e.target.value)}
-              required
-            />
-            <label>Email del jugador</label>
-            <span></span>
+          <div className="field">
+            <label className="field-label" htmlFor="password">
+              Contraseña
+            </label>
+            <div className="field-control">
+              <i className="bx bx-lock-alt field-icon"></i>
+              <input
+                id="password"
+                type={mostrarPass ? "text" : "password"}
+                placeholder="••••••••"
+                value={contraseña}
+                onChange={(e) => setContraseña(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="field-action"
+                onClick={() => setMostrarPass(!mostrarPass)}
+                aria-label={mostrarPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+                <i className={`bx ${mostrarPass ? "bx-hide" : "bx-show"}`}></i>
+              </button>
+            </div>
           </div>
 
-          <div className="contraseña">
-            <input
-              type="password"
-              name="contraseña"
-              value={contraseña}
-              onChange={(e) => setContraseña(e.target.value)}
-              required
-            />
-            <label>Contraseña</label>
-            <span></span>
+          <div className="row-between">
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={recordar}
+                onChange={(e) => setRecordar(e.target.checked)}
+              />
+              <span>Recordar</span>
+            </label>
+
+            <button type="button" className="link-green">
+              Olvidé mi contraseña
+            </button>
           </div>
 
-          <div className="recordar">¿Olvidó su contraseña?</div>
+          <button className="btn-primary" type="submit" disabled={isLoading}>
+            {isLoading ? "Entrando..." : "Entrar"}
+          </button>
 
-          <input type="submit" value="Iniciar Sesión" />
+          {error && <p className="login-error">{error}</p>}
 
-          {error && <p style={{ color: "red" }}>{error}</p>}
-
-          <div className="links-abajo">
-            <Link to="/registro">Registrarse</Link>
-            <Link to="/admin/login">Administrar Torneos</Link>
+          <div className="divider">
+            <span>o</span>
           </div>
+
+          <div className="social">
+            <button type="button" className="btn-outline">
+              <span className="social-ico">G</span>
+              Continuar con Google
+            </button>
+
+            <button type="button" className="btn-outline">
+              <span className="social-ico">f</span>
+              Continuar con Facebook
+            </button>
+          </div>
+
+          <p className="bottom-text">
+            No tenes una cuenta?{" "}
+            <Link to="/registro" className="link-green">
+              Registrarse
+            </Link>
+          </p>
+
+          <p className="bottom-text bottom-admin">
+            Sos administrador de un torneo?{" "}
+            <Link to="/admin/login" className="link-green">
+              Ingresar como Admin
+            </Link>
+          </p>
         </form>
       </div>
     </div>
