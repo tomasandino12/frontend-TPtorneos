@@ -247,3 +247,89 @@ input[type="text"] {
   font-size: 1rem;
 }
 
+/* === Detalle de Equipo (ajustes visuales) === */
+
+.header-detalle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Encabezado del detalle */
+.header-detalle h1 {
+  font-size: 2rem;
+  color: #2e7d32; /* Verde coherente con el resto */
+  margin: 0;
+}
+
+/* Botón volver */
+.btn-volver {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-volver:hover {
+  background-color: #1b5e20;
+}
+
+/* Secciones del detalle */
+.detalle-seccion {
+  margin-top: 2rem;
+}
+
+.titulo-seccion {
+  color: #2e7d32;
+  font-weight: 700;
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+
+/* Lista de jugadores del equipo */
+.detalle-seccion .lista-jugadores {
+  list-style: none;
+  padding: 0;
+}
+
+.detalle-seccion .lista-jugadores li {
+  background-color: #ffffff;
+  color: #222;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 0.8rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 1.1rem;
+}
+
+/* Tabla del historial de partidos */
+.tabla-partidos {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.tabla-partidos th {
+  background-color: #e5f8eb;
+  color: #2e7d32;
+  font-weight: 700;
+  padding: 0.8rem;
+  text-align: left;
+}
+
+.tabla-partidos td {
+  padding: 0.8rem;
+  border-top: 1px solid #ddd;
+  color: #333;
+}
+
+.tabla-partidos tr:hover {
+  background-color: #f9fdfb;
+}

@@ -158,3 +158,34 @@
   font-size: 0.85rem;
   color: #333;
 }
+
+/* Mensaje de error */
+.mensaje-error {
+  background-color: #fdecea;
+  border: 1px solid #f5c2c7;
+  color: #842029;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  margin-top: 2rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.mensaje-error i {
+  font-size: 2rem;
+  color: #dc3545;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.mensaje-error h3 {
+  margin: 0.5rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.mensaje-error p {
+  margin: 0;
+  font-size: 1rem;
+  color: #7a1f1f;
+}

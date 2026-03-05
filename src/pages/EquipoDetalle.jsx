@@ -1,10 +1,11 @@
 import "../styles/IndexStyle.css";
 import "../styles/Equipos.css";
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 function EquipoDetalle() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [equipo, setEquipo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,30 +33,43 @@ function EquipoDetalle() {
 
   // Combinar partidos de todas las participaciones
   const allPartidos = [];
-  equipo.participaciones.forEach(participacion => {
+  equipo.participaciones.forEach((participacion) => {
     allPartidos.push(...participacion.partidosLocal, ...participacion.partidosVisitante);
   });
 
   // Filtrar partidos únicos y finalizados
-  const partidosUnicos = allPartidos.filter((partido, index, self) =>
-    index === self.findIndex(p => p.id === partido.id) && partido.estado_partido === 'finalizado'
+  const partidosUnicos = allPartidos.filter(
+    (partido, index, self) =>
+      index === self.findIndex((p) => p.id === partido.id) &&
+      partido.estado_partido === "finalizado"
   );
 
   return (
     <main className="subpagina-container">
       <section className="equipos-header">
-        <h1><i className="bx bx-group"></i> Detalle del Equipo: {equipo.nombreEquipo}</h1>
+        <div className="header-detalle">
+          <h1>
+            <i className="bx bx-group"></i> Detalle del Equipo: {equipo.nombreEquipo}
+          </h1>
+          <button
+            className="btn-volver"
+            onClick={() => navigate("/gestorTorneos")}
+          >
+            ← Volver al menú
+          </button>
+        </div>
         <p>Información completa del equipo</p>
       </section>
 
       {/* Jugadores */}
       <section className="detalle-seccion">
-        <h2>Jugadores</h2>
+        <h2 className="titulo-seccion">Jugadores</h2>
         {equipo.jugadores.length > 0 ? (
           <ul className="lista-jugadores">
-            {equipo.jugadores.map(jugador => (
+            {equipo.jugadores.map((jugador) => (
               <li key={jugador.id}>
-                {jugador.nombre} {jugador.apellido} {jugador.esCapitan ? "(Capitán)" : ""}
+                {jugador.nombre} {jugador.apellido}{" "}
+                {jugador.esCapitan ? "(Capitán)" : ""}
               </li>
             ))}
           </ul>
@@ -66,7 +80,7 @@ function EquipoDetalle() {
 
       {/* Historial de Partidos */}
       <section className="detalle-seccion">
-        <h2>Historial de Partidos</h2>
+        <h2 className="titulo-seccion">Historial de Partidos</h2>
         {partidosUnicos.length > 0 ? (
           <table className="tabla-partidos">
             <thead>
@@ -79,11 +93,13 @@ function EquipoDetalle() {
               </tr>
             </thead>
             <tbody>
-              {partidosUnicos.map(partido => (
+              {partidosUnicos.map((partido) => (
                 <tr key={partido.id}>
-                  <td>{new Date(partido.fecha_partido).toLocaleDateString()}</td>
+                  <td>{new Date(partido.fecha_partido).toLocaleDateString("es-AR")}</td>
                   <td>{partido.local?.equipo?.nombreEquipo || "N/A"}</td>
-                  <td>{partido.goles_local} - {partido.goles_visitante}</td>
+                  <td>
+                    {partido.goles_local} - {partido.goles_visitante}
+                  </td>
                   <td>{partido.visitante?.equipo?.nombreEquipo || "N/A"}</td>
                   <td>{partido.estado_partido}</td>
                 </tr>

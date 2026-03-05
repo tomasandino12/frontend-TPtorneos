@@ -73,7 +73,18 @@ useEffect(() => {
   };
 
   if (loading) return <p>Cargando tabla de posiciones...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (error) return (
+    <div className="mensaje-error">
+      <i className="bx bx-error-circle"></i>
+      <h3>
+        No perteneces a un equipo o tu equipo no tiene un torneo activo
+      </h3>
+      <p>
+        Uníte o creá un equipo, o participá de un torneo activo para
+        visualizar los próximos encuentros.
+      </p>
+    </div>
+  );
 
   return (
     <div className="tabla-container">
