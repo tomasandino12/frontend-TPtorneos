@@ -177,10 +177,13 @@ function InicioSesion() {
           </p>
 
           <p className="bottom-text bottom-admin">
-            Sos administrador de un torneo?{" "}
-            <Link to="/admin/login" className="link-green">
-              Ingresar como Admin
-            </Link>
+                Sos administrador de un torneo?{" "}
+                <span
+                 className="link-green"
+                  onClick={() => navigate("/admin")}
+                                                      >
+                  Ingresar como Admin
+                </span>
           </p>
         </form>
       </div>
