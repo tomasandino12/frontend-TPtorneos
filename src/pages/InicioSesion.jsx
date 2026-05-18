@@ -59,7 +59,7 @@ function InicioSesion() {
       else localStorage.removeItem("rememberEmail");
 
       alert(`✅ Bienvenido ${jugador.nombre}!`);
-      navigate("/gestorTorneos");
+      navigate("/gestorTorneos/inicio");
     } catch (err) {
       console.error("Error en inicio de sesión:", err);
       setError(err.message);

@@ -9,48 +9,58 @@ body {
   width: 100%;
   box-sizing: border-box;
   font-family: sans-serif;
-  overflow-x: hidden; /* evita scroll lateral */
+  overflow-x: hidden;
+  background-color: #eaf6ec;
 }
 
 .navbar {
-  background-color: white;
-  border-bottom: 1px solid #d2d1d1;
+  background-color: #ffffff;
+  border-bottom: 2px solid #b7dfbe;
   position: sticky;
   top: 0;
   z-index: 10;
   width: 100%;
   margin: 0;
   padding: 0;
-  border-bottom-left-radius: 12px;  
-  border-bottom-right-radius: 12px; 
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.1);
 }
 
 .navdiv {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 16px 32px;
+  padding: 14px 32px;
   width: 100%;
   box-sizing: border-box;
 }
 
+.logo {
+  flex: 1;
+}
+
 .logo a {
-  font-size: 30px;
+  font-size: 24px;
   font-weight: bold;
   color: #2e7d32;
   text-decoration: none;
   display: flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
 }
 
 .navlinks {
   list-style: none;
   display: flex;
-  gap: 12px;
+  gap: 4px;
   margin: 0;
   padding: 0;
+  flex-shrink: 0;
+}
+
+.nav-spacer {
+  flex: 1;
 }
 
 .navlinks a {
@@ -94,6 +104,10 @@ td {
 }
 
 /* tamaño y posicion de navBar, footer y body */
+html {
+  background-color: #eaf6ec;
+}
+
 html, body {
   height: 100%;
   margin: 0;
@@ -116,8 +130,8 @@ main, .content {
 }
 
 footer {
-  background-color: #222;
-  color: white;
+  background-color: #1b5e20;
+  color: #d4f4dc;
   text-align: center;
   padding: 12px;
   width: 100%;

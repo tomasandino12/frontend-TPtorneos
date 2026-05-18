@@ -11,6 +11,7 @@ import Equipos from "./pages/Equipos.jsx"
 import MiPerfil from "./pages/MiPerfil.jsx"
 import EquipoDetalle from "./pages/EquipoDetalle.jsx"
 import MenuAdmin from "./pages/MenuAdmin.jsx"
+import Inicio from "./pages/Inicio.jsx"
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="fixture" element={<FixtureTorneo />} />
           <Route path="equipos" element={<Equipos />} />
           <Route path="miPerfil" element={<MiPerfil />} />
+          <Route path="inicio" element={<Inicio />} />
         </Route>
 
         {/* Ruta para detalle de equipo */}

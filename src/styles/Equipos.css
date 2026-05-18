@@ -190,6 +190,28 @@
   font-size: 0.95rem;
 }
 
+.color-pickers-grupo {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.color-picker-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.formulario-crear-equipo input[type="color"] {
+  width: 100%;
+  height: 42px;
+  padding: 3px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  background: none;
+}
+
 /* === LISTA DE JUGADORES SIN EQUIPO === */
 .lista-jugadores {
   list-style: none;

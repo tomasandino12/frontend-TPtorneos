@@ -7,7 +7,8 @@ function Equipos() {
   const [jugador, setJugador] = useState(null);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [nombreEquipo, setNombreEquipo] = useState("");
-  const [colorCamiseta, setColorCamiseta] = useState("");
+  const [colorPrimario, setColorPrimario] = useState("#ffffff");
+  const [colorSecundario, setColorSecundario] = useState("#000000");
 
   // 👇 nuevos estados para la búsqueda de jugadores sin equipo
   const [jugadoresSinEquipo, setJugadoresSinEquipo] = useState([]);
@@ -39,7 +40,7 @@ function Equipos() {
   const handleSubmitEquipo = async (e) => {
     e.preventDefault();
 
-    if (!nombreEquipo || !colorCamiseta) {
+    if (!nombreEquipo || !colorPrimario || !colorSecundario) {
       alert("Completá todos los campos.");
       return;
     }
@@ -55,7 +56,8 @@ function Equipos() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombreEquipo,
-          colorCamiseta,
+          colorPrimario,
+          colorSecundario,
           idJugador: jugador.id,
         }),
       });
@@ -74,7 +76,8 @@ function Equipos() {
       localStorage.setItem("jugador", JSON.stringify(jugadorActualizado));
       setJugador(jugadorActualizado);
       setNombreEquipo("");
-      setColorCamiseta("");
+      setColorPrimario("#ffffff");
+      setColorSecundario("#000000");
       setMostrarFormulario(false);
     } catch (error) {
       console.error("Error:", error);
@@ -178,13 +181,24 @@ function Equipos() {
                   onChange={(e) => setNombreEquipo(e.target.value)}
                   required
                 />
-                <label>Color de Camiseta</label>
-                <input
-                  type="text"
-                  value={colorCamiseta}
-                  onChange={(e) => setColorCamiseta(e.target.value)}
-                  required
-                />
+                <div className="color-pickers-grupo">
+                  <div className="color-picker-item">
+                    <label>Color Primario</label>
+                    <input
+                      type="color"
+                      value={colorPrimario}
+                      onChange={(e) => setColorPrimario(e.target.value)}
+                    />
+                  </div>
+                  <div className="color-picker-item">
+                    <label>Color Secundario</label>
+                    <input
+                      type="color"
+                      value={colorSecundario}
+                      onChange={(e) => setColorSecundario(e.target.value)}
+                    />
+                  </div>
+                </div>
                 <div className="formulario-botones">
                   <button type="submit">Crear</button>
                   <button type="button" onClick={() => setMostrarFormulario(false)}>Cancelar</button>
