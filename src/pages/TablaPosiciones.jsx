@@ -87,6 +87,7 @@ useEffect(() => {
   );
 
   return (
+    <div className="tabla-wrapper">
     <div className="tabla-container">
       <h2 className="tabla-titulo">🏆 Tabla de Posiciones</h2>
       <p className="tabla-subtitulo">Tabla de Posiciones - Temporada Regular</p>
@@ -121,6 +122,7 @@ useEffect(() => {
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   );
 }

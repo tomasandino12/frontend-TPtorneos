@@ -1,6 +1,12 @@
+.tabla-wrapper {
+  background-color: #eaf6ec;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
 .tabla-container {
   max-width: 1000px;
-  margin: 2rem auto;
+  margin: 0 auto;
   padding: 2rem;
   background-color: #fefefe;
   border-radius: 12px;
