@@ -1,18 +1,20 @@
+import "../styles/IndexStyle.css";
 import "../styles/MenuAdmin.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaSignOutAlt } from "react-icons/fa";
 
-const NAV_ITEMS = [
-  { label: "Torneos",    icon: "bx-trophy"   },
-  { label: "Jugadores",  icon: "bx-user"      },
-  { label: "Partidos",   icon: "bx-football"  },
-  { label: "Árbitros",   icon: "bx-whistle"   },
+const ADMIN_NAV = [
+  { label: "Crear Torneo", icon: "bx-trophy"   },
+  { label: "Arbitraje",    icon: "bx-whistle"  },
+  { label: "Canchas",      icon: "bx-football" },
+  { label: "Jugadores",    icon: "bx-group"    },
 ];
 
 function MenuAdmin() {
   const navigate = useNavigate();
   const [admin, setAdmin] = useState(null);
-  const [activeItem, setActiveItem] = useState("Torneos");
+  const [activeItem, setActiveItem] = useState("Crear Torneo");
 
   useEffect(() => {
     const stored = localStorage.getItem("admin");
@@ -34,48 +36,86 @@ function MenuAdmin() {
 
   if (!admin) return null;
 
+  const initials = `${admin.nombre?.[0] ?? ""}${admin.apellido?.[0] ?? ""}`.toUpperCase();
+
   return (
-    <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <div className="admin-brand">
-          Gestor<span>Torneos</span>
+    <div className="layout">
+
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <nav className="navbar">
+        <div className="navdiv">
+
+          {/* IZQUIERDA: Logo + badge ADMIN */}
+          <div className="logo">
+            <div className="logo-admin-wrap">
+              <span className="logo-admin-text">Gestor de Torneos</span>
+              <span className="admin-badge">ADMIN</span>
+            </div>
+          </div>
+
+          {/* CENTRO: Nav links */}
+          <ul className="navlinks">
+            {ADMIN_NAV.map(({ label, icon }) => (
+              <li key={label}>
+                <button
+                  className={`admin-nav-btn${activeItem === label ? " active" : ""}`}
+                  onClick={() => {
+                    if (label === "Crear Torneo") {
+                      navigate("/admin/torneos");
+                    } else {
+                      setActiveItem(label);
+                    }
+                  }}
+                >
+                  <i className={`bx ${icon}`}></i>
+                  {label}
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          {/* DERECHA: Avatar + nombre + logout */}
+          <div className="nav-actions">
+            <div className="admin-user-info">
+              <div className="admin-avatar">{initials}</div>
+              <div className="admin-user-text">
+                <span className="admin-user-name">
+                  {admin.nombre} {admin.apellido}
+                </span>
+                <span className="admin-user-role">Administrador</span>
+              </div>
+              <button className="btn-logout" onClick={handleLogout}>
+                <FaSignOutAlt />
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+
         </div>
-        <span className="admin-role-badge">Administrador</span>
-        <div className="admin-sep" />
+      </nav>
 
-        <nav className="admin-nav">
-          {NAV_ITEMS.map(({ label, icon }) => (
-            <button
-              key={label}
-              className={`admin-nav-btn${activeItem === label ? " active" : ""}`}
-              onClick={() => setActiveItem(label)}
-            >
-              <i className={`bx ${icon}`}></i>
-              {label}
-            </button>
-          ))}
-        </nav>
+      {/* ── Contenido ───────────────────────────────────────────────────── */}
+      <main className="admin-main-content">
 
-        <button className="admin-logout" onClick={handleLogout}>
-          <i className="bx bx-log-out"></i>
-          Cerrar sesión
-        </button>
-      </aside>
-
-      <main className="admin-main">
-        <div className="admin-welcome-card">
+        <div className="admin-welcome">
           <h1>
-            Bienvenido, <span>{admin.nombre} {admin.apellido}</span>
+            Bienvenido,{" "}
+            <span className="admin-welcome-name">
+              {admin.nombre} {admin.apellido}
+            </span>
           </h1>
           <p>Panel de administración · {admin.email}</p>
         </div>
 
         <div className="admin-grid">
-          {NAV_ITEMS.map(({ label, icon }) => (
+          {ADMIN_NAV.map(({ label, icon }) => (
             <div
               key={label}
-              className="admin-card"
-              onClick={() => setActiveItem(label)}
+              className={`admin-card${activeItem === label ? " admin-card-active" : ""}`}
+              onClick={() => {
+                if (label === "Crear Torneo") navigate("/admin/torneos");
+                else setActiveItem(label);
+              }}
             >
               <div className="admin-card-icon">
                 <i className={`bx ${icon}`}></i>
@@ -85,6 +125,7 @@ function MenuAdmin() {
             </div>
           ))}
         </div>
+
       </main>
     </div>
   );

@@ -13,6 +13,7 @@ import EquipoDetalle from "./pages/EquipoDetalle.jsx"
 import InicioSesionAdmin from "./pages/InicioSesionAdmin.jsx"
 import MenuAdmin from "./pages/MenuAdmin.jsx"
 import Inicio from "./pages/Inicio.jsx"
+import CrearTorneo from "./pages/CrearTorneo.jsx"
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -28,6 +29,7 @@ function App() {
         <Route path="/registro" element={<Registro />} />
         <Route path="/admin" element={<InicioSesionAdmin />} />
         <Route path="/menu-admin" element={<MenuAdmin />} />
+        <Route path="/admin/torneos" element={<CrearTorneo />} />
 
         {/* 📂 Sección con layout: Gestor de Torneos */}
         <Route path="/gestorTorneos" element={<PrivateRoute><GestorTorneos /></PrivateRoute>}>

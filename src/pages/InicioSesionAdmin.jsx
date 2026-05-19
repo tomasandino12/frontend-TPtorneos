@@ -22,7 +22,7 @@ function MenuAdmin() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/admin/login", {
+      const response = await fetch("http://localhost:3000/api/adminTorneo/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,9 +39,10 @@ function MenuAdmin() {
         throw new Error(data.message || "Error al iniciar sesión");
       }
 
-      localStorage.setItem("admin", JSON.stringify(data));
+      localStorage.setItem("admin", JSON.stringify(data.admin));
+      localStorage.setItem("adminToken", data.token);
 
-      navigate("/menu-admin"); // o a donde quieras ir después
+      navigate("/menu-admin");
     } catch (err) {
       setError(err.message);
     } finally {
