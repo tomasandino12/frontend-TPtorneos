@@ -1,8 +1,16 @@
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import "../styles/IndexStyle.css"; // si querés, después podés mover esto a GestorTorneos.css
-import { FaTrophy, FaChartBar, FaCalendarAlt, FaUsers, FaUser } from "react-icons/fa";
+import { FaTrophy, FaChartBar, FaCalendarAlt, FaUsers, FaUser, FaSignOutAlt } from "react-icons/fa";
 
 function GestorTorneos() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("jugador");
+    navigate("/");
+  };
+
   return (
     <div className="layout">
       <nav className="navbar">
@@ -42,7 +50,12 @@ function GestorTorneos() {
               </NavLink>
             </li>
           </ul>
-          <div className="nav-spacer"></div>
+          <div className="nav-actions">
+            <button className="btn-logout" onClick={handleLogout}>
+              <FaSignOutAlt />
+              Cerrar sesión
+            </button>
+          </div>
         </div>
       </nav>
 
