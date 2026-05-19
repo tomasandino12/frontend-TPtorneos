@@ -1,6 +1,7 @@
 import "../styles/IndexStyle.css";
 import "../styles/MiPerfil.css";
 import { useEffect, useState } from "react";
+import { apiFetch } from "../utils/api.js";
 
 function MiPerfil() {
   const [jugador, setJugador] = useState(null);
@@ -14,7 +15,7 @@ function MiPerfil() {
     const fetchJugador = async () => {
       try {
         console.log("Obteniendo datos de jugador con ID:", jugadorId);
-        const response = await fetch(`http://localhost:3000/api/jugadores/${jugadorId}`);
+        const response = await apiFetch(`/jugadores/${jugadorId}`);
         if (!response.ok) throw new Error("Error al obtener los datos del jugador");
 
         const data = await response.json();
@@ -40,9 +41,8 @@ function MiPerfil() {
   if (!confirmar) return;
 
   try {
-    const response = await fetch(`http://localhost:3000/api/jugadores/${jugador.id}`, {
+    const response = await apiFetch(`/jugadores/${jugador.id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...jugador, equipo: null }),
     });
 

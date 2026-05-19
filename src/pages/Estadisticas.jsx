@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "../styles/IndexStyle.css";
 import "../styles/Estadisticas.css";
+import { apiFetch } from "../utils/api.js";
 
 function Estadisticas() {
   const [equipo, setEquipo] = useState(null);
@@ -20,16 +21,12 @@ function Estadisticas() {
         }
 
         // Obtener equipo
-        const equipoRes = await fetch(
-          `http://localhost:3000/api/equipos/${jugadorLogueado.equipo.id}`
-        );
+        const equipoRes = await apiFetch(`/equipos/${jugadorLogueado.equipo.id}`);
         const equipoJson = await equipoRes.json();
         const equipoData = equipoJson?.data ?? equipoJson;
 
         // Obtener estadísticas
-        const estadisticasRes = await fetch(
-          `http://localhost:3000/api/equipos/${jugadorLogueado.equipo.id}/estadisticas`
-        );
+        const estadisticasRes = await apiFetch(`/equipos/${jugadorLogueado.equipo.id}/estadisticas`);
         const estadisticasJson = await estadisticasRes.json();
         const estad =
           estadisticasJson?.estadisticas ??

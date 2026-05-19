@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "../styles/FixtureTorneo.css";
 import "../styles/IndexStyle.css";
+import { apiFetch } from "../utils/api.js";
 
 function FixtureTorneo() {
   const [partidos, setPartidos] = useState([]);
@@ -33,9 +34,7 @@ function FixtureTorneo() {
             : jugador.equipo;
 
         // 3️⃣ Obtener el equipo con sus participaciones
-        const resEquipo = await fetch(
-          `http://localhost:3000/api/equipos/${equipoId}`
-        );
+        const resEquipo = await apiFetch(`/equipos/${equipoId}`);
         const equipoJson = await resEquipo.json();
         if (!resEquipo.ok)
           throw new Error(equipoJson.message || "Error al obtener el equipo.");
@@ -75,9 +74,7 @@ function FixtureTorneo() {
         }
 
         // 5️⃣ Traer partidos del torneo y filtrar programados
-        const response = await fetch(
-          `http://localhost:3000/api/partidos/torneo/${torneoId}`
-        );
+        const response = await apiFetch(`/partidos/torneo/${torneoId}`);
         const data = await response.json();
         if (!response.ok)
           throw new Error(data.message || "Error al cargar los partidos.");

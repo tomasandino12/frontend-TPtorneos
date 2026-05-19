@@ -2,6 +2,7 @@ import "../styles/IndexStyle.css";
 import "../styles/Equipos.css";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { apiFetch } from "../utils/api.js";
 
 function EquipoDetalle() {
   const { id } = useParams();
@@ -13,7 +14,7 @@ function EquipoDetalle() {
   useEffect(() => {
     const fetchEquipo = async () => {
       try {
-        const response = await fetch(`http://localhost:3000/api/equipos/${id}`);
+        const response = await apiFetch(`/equipos/${id}`);
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || "Error al cargar equipo");
         setEquipo(data.data);

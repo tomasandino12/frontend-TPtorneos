@@ -2,6 +2,7 @@ import "../styles/IndexStyle.css";
 import "../styles/TablaPosiciones.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../utils/api.js";
 
 function TablaPosiciones() {
   const [estadisticas, setEstadisticas] = useState([]);
@@ -20,7 +21,7 @@ useEffect(() => {
       }
 
       // Traemos el equipo completo desde el backend (con participaciones)
-      const resEquipo = await fetch(`http://localhost:3000/api/equipos/${jugador.equipo.id}`);
+      const resEquipo = await apiFetch(`/equipos/${jugador.equipo.id}`);
       const equipoJson = await resEquipo.json();
       if (!resEquipo.ok) throw new Error(equipoJson.message || "Error al obtener el equipo.");
 
@@ -53,7 +54,7 @@ useEffect(() => {
       }
 
       // Pedimos estadísticas solo del torneo activo
-      const response = await fetch(`http://localhost:3000/api/equipos/estadisticas/${torneoId}`);
+      const response = await apiFetch(`/equipos/estadisticas/${torneoId}`);
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Error al cargar estadísticas");
 

@@ -1,6 +1,7 @@
 import "../styles/InicioSesion.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { apiFetch } from "../utils/api.js";
 
 function InicioSesion() {
   const navigate = useNavigate();
@@ -40,8 +41,8 @@ function InicioSesion() {
       const data = await response.json();
       localStorage.setItem("token", data.token);
 
-      const jugadorResp = await fetch(
-        `http://localhost:3000/api/jugadores/by-email?email=${encodeURIComponent(usuario)}`
+      const jugadorResp = await apiFetch(
+        `/jugadores/by-email?email=${encodeURIComponent(usuario)}`
       );
 
       if (!jugadorResp.ok) {
