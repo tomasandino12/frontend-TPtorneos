@@ -1,6 +1,7 @@
 import "../styles/IndexStyle.css";
 import "../styles/Equipos.css";
 import { useState, useEffect } from "react";
+import { apiFetch } from "../utils/api.js";
 
 function Equipos() {
   const [jugadores, setJugadores] = useState([]);
@@ -51,9 +52,8 @@ function Equipos() {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/equipos", {
+      const response = await apiFetch("/equipos", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombreEquipo,
           colorPrimario,
@@ -88,7 +88,7 @@ function Equipos() {
   // === Cargar jugadores sin equipo (solo si es capitán) ===
   useEffect(() => {
     if (jugador?.esCapitan) {
-      fetch("http://localhost:3000/api/jugadores/sin-equipo")
+      apiFetch("/jugadores/sin-equipo")
         .then((res) => res.json())
         .then((data) => {
           // 🔒 validamos que sea un array
@@ -120,9 +120,8 @@ function Equipos() {
     }
 
     try {
-      const response = await fetch(`http://localhost:3000/api/jugadores/${idJugador}`, {
+      const response = await apiFetch(`/jugadores/${idJugador}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           equipo: jugador.equipo.id,
           esCapitan: false,
