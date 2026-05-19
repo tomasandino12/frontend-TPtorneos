@@ -13,6 +13,7 @@ import EquipoDetalle from "./pages/EquipoDetalle.jsx"
 import InicioSesionAdmin from "./pages/InicioSesionAdmin.jsx"
 import MenuAdmin from "./pages/MenuAdmin.jsx"
 import Inicio from "./pages/Inicio.jsx"
+import MisTorneos from "./pages/MisTorneos.jsx"
 import CrearTorneo from "./pages/CrearTorneo.jsx"
 
 function PrivateRoute({ children }) {
@@ -29,7 +30,8 @@ function App() {
         <Route path="/registro" element={<Registro />} />
         <Route path="/admin" element={<InicioSesionAdmin />} />
         <Route path="/menu-admin" element={<MenuAdmin />} />
-        <Route path="/admin/torneos" element={<CrearTorneo />} />
+        <Route path="/admin/torneos" element={<MisTorneos />} />
+        <Route path="/admin/torneos/nuevo" element={<CrearTorneo />} />
 
         {/* 📂 Sección con layout: Gestor de Torneos */}
         <Route path="/gestorTorneos" element={<PrivateRoute><GestorTorneos /></PrivateRoute>}>

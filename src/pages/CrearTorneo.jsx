@@ -3,16 +3,9 @@ import "../styles/MenuAdmin.css";
 import "../styles/CrearTorneo.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaSignOutAlt } from "react-icons/fa";
+import AdminHeader from "../components/AdminHeader.jsx";
 
 // ── Config ─────────────────────────────────────────────────────────────────
-
-const ADMIN_NAV = [
-  { label: "Crear Torneo", icon: "bx-trophy"   },
-  { label: "Arbitraje",    icon: "bx-whistle"  },
-  { label: "Canchas",      icon: "bx-football" },
-  { label: "Jugadores",    icon: "bx-group"    },
-];
 
 const CANCHAS_INIT = [
   { nombre: "Cancha Central",      activa: true  },
@@ -22,7 +15,7 @@ const CANCHAS_INIT = [
   { nombre: "Cancha 5",            activa: false },
 ];
 
-const FORMATOS = ["Solo ida", "Ida y vuelta", "Eliminación directa"];
+const FORMATOS = ["Solo ida", "Ida y vuelta"];
 
 function calcularPartidos(n, formato) {
   const eq = Math.max(0, parseInt(n) || 0);
@@ -50,6 +43,7 @@ export default function CrearTorneo() {
   const [form, setForm] = useState({
     nombre:          "Apertura 2025",
     fechaInicio:     "2025-08-09",
+    fechaFin:        "",
     tipo:            "Liga (todos contra todos)",
     categoria:       "Mayores",
     cantEquipos:     12,
@@ -75,56 +69,10 @@ export default function CrearTorneo() {
 
   if (!admin) return null;
 
-  const initials = `${admin.nombre?.[0] ?? ""}${admin.apellido?.[0] ?? ""}`.toUpperCase();
-
   return (
     <div className="layout">
 
-      {/* ── Header ────────────────────────────────────────────────────────── */}
-      <nav className="navbar">
-        <div className="navdiv">
-
-          <div className="logo">
-            <div className="logo-admin-wrap">
-              <span className="logo-admin-text">Gestor de Torneos</span>
-              <span className="admin-badge">ADMIN</span>
-            </div>
-          </div>
-
-          <ul className="navlinks">
-            {ADMIN_NAV.map(({ label, icon }) => (
-              <li key={label}>
-                <button
-                  className={`admin-nav-btn${label === "Crear Torneo" ? " active" : ""}`}
-                  onClick={() =>
-                    label === "Crear Torneo"
-                      ? navigate("/admin/torneos")
-                      : navigate("/menu-admin")
-                  }
-                >
-                  <i className={`bx ${icon}`}></i>
-                  {label}
-                </button>
-              </li>
-            ))}
-          </ul>
-
-          <div className="nav-actions">
-            <div className="admin-user-info">
-              <div className="admin-avatar">{initials}</div>
-              <div className="admin-user-text">
-                <span className="admin-user-name">{admin.nombre} {admin.apellido}</span>
-                <span className="admin-user-role">Administrador</span>
-              </div>
-              <button className="btn-logout" onClick={handleLogout}>
-                <FaSignOutAlt />
-                Cerrar sesión
-              </button>
-            </div>
-          </div>
-
-        </div>
-      </nav>
+      <AdminHeader admin={admin} onLogout={handleLogout} />
 
       {/* ── Main ──────────────────────────────────────────────────────────── */}
       <main style={{ backgroundColor: "#f9fafb" }}>
@@ -184,14 +132,25 @@ export default function CrearTorneo() {
                 />
               </div>
 
-              {/* Fecha */}
-              <div className="ct-field">
-                <label>Fecha de inicio</label>
-                <input
-                  type="date"
-                  value={form.fechaInicio}
-                  onChange={e => upd("fechaInicio", e.target.value)}
-                />
+              {/* Fechas */}
+              <div className="ct-field-row ct-field-row-2">
+                <div className="ct-field">
+                  <label>Fecha de inicio</label>
+                  <input
+                    type="date"
+                    value={form.fechaInicio}
+                    onChange={e => upd("fechaInicio", e.target.value)}
+                  />
+                </div>
+                <div className="ct-field">
+                  <label>Fecha de fin</label>
+                  <input
+                    type="date"
+                    value={form.fechaFin}
+                    min={form.fechaInicio || undefined}
+                    onChange={e => upd("fechaFin", e.target.value)}
+                  />
+                </div>
               </div>
 
               {/* Tipo / Categoría / Equipos */}
@@ -200,7 +159,6 @@ export default function CrearTorneo() {
                   <label>Tipo de torneo</label>
                   <select value={form.tipo} onChange={e => upd("tipo", e.target.value)}>
                     <option>Liga (todos contra todos)</option>
-                    <option>Eliminación directa</option>
                   </select>
                 </div>
                 <div className="ct-field">
@@ -216,10 +174,17 @@ export default function CrearTorneo() {
                   <input
                     type="number"
                     min={2}
-                    max={64}
+                    max={30}
                     value={form.cantEquipos}
                     onChange={e => upd("cantEquipos", e.target.value)}
+                    className={Number(form.cantEquipos) > 30 ? "ct-input-error" : ""}
                   />
+                  {Number(form.cantEquipos) > 30 && (
+                    <div className="ct-field-warning">
+                      <i className="bx bx-error-circle"></i>
+                      El máximo permitido es 30 equipos.
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -337,6 +302,7 @@ export default function CrearTorneo() {
                 { label: "Formato",           value: form.formato },
                 { label: "Canchas",           value: `${canchasActivas.length} habilitadas` },
                 { label: "Inicio",            value: form.fechaInicio || "—" },
+                { label: "Fin",               value: form.fechaFin || "—" },
                 { label: "Partidos estimados", value: partidos },
                 { label: "Puntos (V/E/D)",    value: `${form.puntosVictoria} / ${form.puntosEmpate} / ${form.puntosDerrota}` },
               ].map(({ label, value }) => (

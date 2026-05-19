@@ -171,6 +171,10 @@
   gap: 16px;
 }
 
+.ct-field-row.ct-field-row-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
 /* ── Format pills ────────────────────────────────────────────────────────── */
 
 .ct-pill-group {
@@ -442,6 +446,33 @@
   color: #92400e;
   margin: 0;
   line-height: 1.5;
+}
+
+/* ── Input error + field warning ─────────────────────────────────────────── */
+
+.ct-input-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+}
+
+.ct-field-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 7px 12px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  color: #c2410c;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.ct-field-warning i {
+  font-size: 15px;
+  flex-shrink: 0;
+  color: #ea580c;
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
