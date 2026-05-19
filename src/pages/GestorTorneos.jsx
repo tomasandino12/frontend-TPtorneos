@@ -8,7 +8,7 @@ function GestorTorneos() {
       <nav className="navbar">
         <div className="navdiv">
           <div className="logo">
-            <NavLink to="/gestorTorneos" end>Gestor de Torneos</NavLink>
+            <NavLink to="/gestorTorneos/inicio">Gestor de Torneos</NavLink>
           </div>
           <ul className="navlinks">
             <li>
@@ -42,6 +42,7 @@ function GestorTorneos() {
               </NavLink>
             </li>
           </ul>
+          <div className="nav-spacer"></div>
         </div>
       </nav>
 

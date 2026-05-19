@@ -59,7 +59,7 @@ function InicioSesion() {
       else localStorage.removeItem("rememberEmail");
 
       alert(`✅ Bienvenido ${jugador.nombre}!`);
-      navigate("/gestorTorneos");
+      navigate("/gestorTorneos/inicio");
     } catch (err) {
       console.error("Error en inicio de sesión:", err);
       setError(err.message);
@@ -177,10 +177,13 @@ function InicioSesion() {
           </p>
 
           <p className="bottom-text bottom-admin">
-            Sos administrador de un torneo?{" "}
-            <Link to="/admin/login" className="link-green">
-              Ingresar como Admin
-            </Link>
+                Sos administrador de un torneo?{" "}
+                <span
+                 className="link-green"
+                  onClick={() => navigate("/admin")}
+                                                      >
+                  Ingresar como Admin
+                </span>
           </p>
         </form>
       </div>

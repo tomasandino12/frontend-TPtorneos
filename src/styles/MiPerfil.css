@@ -1,10 +1,12 @@
 /* === Fondo general de la página === */
 .MiPerfil {
-  background-color: #1e1e1e; /* mismo tono oscuro que el resto del sitio */
+  background-color: #eaf6ec;
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  padding-top: 60px;
+  padding-top: 40px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* === Contenedor principal === */
