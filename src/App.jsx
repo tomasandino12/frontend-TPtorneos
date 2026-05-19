@@ -10,7 +10,7 @@ import FixtureTorneo from "./pages/FixtureTorneo.jsx"
 import Equipos from "./pages/Equipos.jsx"
 import MiPerfil from "./pages/MiPerfil.jsx"
 import EquipoDetalle from "./pages/EquipoDetalle.jsx"
-import MenuAdmin from "./pages/MenuAdmin.jsx"
+import MenuAdmin from "./pages/InicioSesionAdmin.jsx"
 import Inicio from "./pages/Inicio.jsx"
 
 function App() {

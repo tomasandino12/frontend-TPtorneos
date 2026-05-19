@@ -102,13 +102,13 @@ body.bg-login {
 }
 
 .field-control {
-  position: relative;
   display: flex;
   align-items: center;
   height: 44px;
   border-radius: 10px;
   background: rgba(15, 23, 42, 0.65);
   border: 1px solid rgba(34, 197, 94, 0.25);
+  overflow: hidden;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -118,27 +118,57 @@ body.bg-login {
 }
 
 .field-icon {
-  position: absolute;
-  left: 12px;
+  flex-shrink: 0;
+  width: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 20px;
   color: rgba(148, 163, 184, 0.85);
+  pointer-events: none;
 }
 
 .field-control input,
 .field-control select {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   height: 100%;
-  padding: 0 14px 0 42px;
+  padding: 0 8px;
   background: transparent;
   border: none;
   outline: none;
   color: #ffffff;
   font-size: 14px;
+  text-align: left;
   appearance: none;
 }
 
 .field-control input::placeholder {
   color: rgba(148, 163, 184, 0.55);
+}
+
+.field-action {
+  flex-shrink: 0;
+  height: 44px;
+  width: 44px;
+  border: none;
+  background: transparent;
+  color: rgba(148, 163, 184, 0.9);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.field-action:hover {
+  background: rgba(148, 163, 184, 0.12);
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.field-action i {
+  font-size: 20px;
 }
 
 .field-control select option {
@@ -206,6 +236,7 @@ body.bg-login {
   border: 0 !important;
   outline: 0 !important;
   box-shadow: none !important;
+  text-align: left !important;
 }
 
 /* Chrome / Edge */

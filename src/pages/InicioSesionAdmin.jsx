@@ -1,4 +1,4 @@
-import "../styles/MenuAdmin.css";
+import "../styles/InicioSesionAdmin.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -88,6 +88,7 @@ function MenuAdmin() {
                 placeholder="********"
                 value={contrasena}
                 onChange={(e) => setContrasena(e.target.value)}
+                style={{ textAlign: "left" }}
                 required
               />
               <button
@@ -110,7 +111,7 @@ function MenuAdmin() {
             Volver al inicio{" "}
             <span
               className="link-green"
-              onClick={() => navigate("/InicioSesion")}
+              onClick={() => navigate("/")}
             >
               Usuario
             </span>
