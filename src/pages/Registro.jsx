@@ -13,10 +13,14 @@ function Registro() {
     fecha_nacimiento: "",
     posicion: "",
     contraseña: "",
+    confirmarContraseña: "",
   });
 
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [confirmarError, setConfirmarError] = useState("");
+  const [mostrarPass, setMostrarPass] = useState(false);
+  const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
 
   useEffect(() => {
     document.body.classList.add("bg-login");
@@ -24,10 +28,17 @@ function Registro() {
   }, []);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const updated = { ...form, [e.target.name]: e.target.value };
+    setForm(updated);
     if (e.target.name === "email") {
       if (!/\S+@\S+\.\S+/.test(e.target.value)) setEmailError("El email no es válido");
       else setEmailError("");
+    }
+    if (e.target.name === "contraseña" || e.target.name === "confirmarContraseña") {
+      const nueva = e.target.name === "contraseña" ? e.target.value : updated.contraseña;
+      const confirmar = e.target.name === "confirmarContraseña" ? e.target.value : updated.confirmarContraseña;
+      if (confirmar && nueva !== confirmar) setConfirmarError("Las contraseñas no coinciden");
+      else setConfirmarError("");
     }
   };
 
@@ -38,7 +49,9 @@ function Registro() {
     /\S+@\S+\.\S+/.test(form.email) &&
     form.fecha_nacimiento !== "" &&
     form.posicion !== "" &&
-    form.contraseña.length >= 6;
+    form.contraseña.length >= 6 &&
+    form.confirmarContraseña === form.contraseña &&
+    form.confirmarContraseña !== "";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -205,14 +218,49 @@ function Registro() {
                 <i className="bx bx-lock-alt field-icon"></i>
                 <input
                   id="contraseña"
-                  type="password"
+                  type={mostrarPass ? "text" : "password"}
                   name="contraseña"
                   value={form.contraseña}
                   onChange={handleChange}
                   placeholder="••••••••"
+                  style={{ textAlign: "left" }}
                   required
                 />
+                <button
+                  type="button"
+                  className="field-action"
+                  onClick={() => setMostrarPass(!mostrarPass)}
+                  aria-label={mostrarPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  <i className={`bx ${mostrarPass ? "bx-hide" : "bx-show"}`}></i>
+                </button>
               </div>
+            </div>
+
+            <div className="field field-full">
+              <label className="field-label" htmlFor="confirmarContraseña">Confirmar contraseña</label>
+              <div className="field-control">
+                <i className="bx bx-lock field-icon"></i>
+                <input
+                  id="confirmarContraseña"
+                  type={mostrarConfirmar ? "text" : "password"}
+                  name="confirmarContraseña"
+                  value={form.confirmarContraseña}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  style={{ textAlign: "left" }}
+                  required
+                />
+                <button
+                  type="button"
+                  className="field-action"
+                  onClick={() => setMostrarConfirmar(!mostrarConfirmar)}
+                  aria-label={mostrarConfirmar ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  <i className={`bx ${mostrarConfirmar ? "bx-hide" : "bx-show"}`}></i>
+                </button>
+              </div>
+              {confirmarError && <p className="auth-error">{confirmarError}</p>}
             </div>
           </div>
 

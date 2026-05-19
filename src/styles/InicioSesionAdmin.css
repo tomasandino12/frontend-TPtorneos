@@ -343,3 +343,6 @@ body.bg-login {
   opacity: 0.85;
   cursor: pointer;
 }
+.login-title {
+  color: #22c55e;
+}

@@ -10,6 +10,7 @@ import FixtureTorneo from "./pages/FixtureTorneo.jsx"
 import Equipos from "./pages/Equipos.jsx"
 import MiPerfil from "./pages/MiPerfil.jsx"
 import EquipoDetalle from "./pages/EquipoDetalle.jsx"
+import InicioSesionAdmin from "./pages/InicioSesionAdmin.jsx"
 import MenuAdmin from "./pages/MenuAdmin.jsx"
 import Inicio from "./pages/Inicio.jsx"
 
@@ -19,7 +20,8 @@ function App() {
       <Routes>
         <Route path="/" element={<InicioSesion />} />
         <Route path="/registro" element={<Registro />} />
-        <Route path="/admin" element={<MenuAdmin />} />
+        <Route path="/admin" element={<InicioSesionAdmin />} />
+        <Route path="/menu-admin" element={<MenuAdmin />} />
 
         {/* 📂 Sección con layout: Gestor de Torneos */}
         <Route path="/gestorTorneos" element={<GestorTorneos />}>
