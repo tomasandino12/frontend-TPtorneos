@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 
 import InicioSesion from "./pages/InicioSesion.jsx"
@@ -14,6 +14,12 @@ import InicioSesionAdmin from "./pages/InicioSesionAdmin.jsx"
 import MenuAdmin from "./pages/MenuAdmin.jsx"
 import Inicio from "./pages/Inicio.jsx"
 
+function PrivateRoute({ children }) {
+  const token = localStorage.getItem("token");
+  if (!token) return <Navigate to="/" replace />;
+  return children;
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -24,9 +30,9 @@ function App() {
         <Route path="/menu-admin" element={<MenuAdmin />} />
 
         {/* 📂 Sección con layout: Gestor de Torneos */}
-        <Route path="/gestorTorneos" element={<GestorTorneos />}>
-          <Route index element={<TablaPosiciones />} /> {/* /gestorTorneos */}
-          <Route path="estadisticas" element={<Estadisticas />} /> {/* /gestorTorneos/estadisticas */}
+        <Route path="/gestorTorneos" element={<PrivateRoute><GestorTorneos /></PrivateRoute>}>
+          <Route index element={<TablaPosiciones />} />
+          <Route path="estadisticas" element={<Estadisticas />} />
           <Route path="fixture" element={<FixtureTorneo />} />
           <Route path="equipos" element={<Equipos />} />
           <Route path="miPerfil" element={<MiPerfil />} />
@@ -34,7 +40,7 @@ function App() {
         </Route>
 
         {/* Ruta para detalle de equipo */}
-        <Route path="/equipo/:id" element={<EquipoDetalle />} />
+        <Route path="/equipo/:id" element={<PrivateRoute><EquipoDetalle /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
   )

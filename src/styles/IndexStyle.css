@@ -59,8 +59,37 @@ body {
   flex-shrink: 0;
 }
 
-.nav-spacer {
+.nav-actions {
   flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1.5px solid #e53935;
+  border-radius: 8px;
+  background: transparent;
+  color: #e53935;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.btn-logout:hover {
+  background-color: #e53935;
+  color: #fff;
+}
+
+.btn-logout svg {
+  font-size: 1rem;
 }
 
 .navlinks a {
