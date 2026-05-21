@@ -15,6 +15,7 @@ import MenuAdmin from "./pages/MenuAdmin.jsx"
 import Inicio from "./pages/Inicio.jsx"
 import MisTorneos from "./pages/MisTorneos.jsx"
 import CrearTorneo from "./pages/CrearTorneo.jsx"
+import InscribirEquipos from "./pages/InscribirEquipos.jsx"
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -32,6 +33,7 @@ function App() {
         <Route path="/menu-admin" element={<MenuAdmin />} />
         <Route path="/admin/torneos" element={<MisTorneos />} />
         <Route path="/admin/torneos/nuevo" element={<CrearTorneo />} />
+        <Route path="/admin/torneos/:id/equipos" element={<InscribirEquipos />} />
 
         {/* 📂 Sección con layout: Gestor de Torneos */}
         <Route path="/gestorTorneos" element={<PrivateRoute><GestorTorneos /></PrivateRoute>}>

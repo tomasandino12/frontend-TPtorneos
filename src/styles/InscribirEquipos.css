@@ -1,0 +1,302 @@
+/* ── InscribirEquipos ────────────────────────────────────────────── */
+
+.ie-hero {
+  padding: 2rem 2.5rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+}
+.ie-hero-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+.ie-hero-title h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+.ie-hero-icon {
+  font-size: 1.8rem;
+  color: #16a34a;
+}
+.ie-hero-subtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0;
+}
+.ie-hero-meta {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+.ie-meta-chip {
+  background: #f3f4f6;
+  border-radius: 20px;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.85rem;
+  color: #374151;
+  font-weight: 500;
+}
+.ie-meta-chip span {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+/* ── Main layout ─────────────────────────────────────────────────── */
+.ie-main {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.5rem;
+  padding: 1.5rem 2.5rem 2rem;
+  max-width: 1100px;
+}
+
+/* ── Panel equipos ───────────────────────────────────────────────── */
+.ie-panel {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+.ie-panel-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ie-panel-header h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+.ie-panel-header p {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin: 0.2rem 0 0;
+}
+.ie-badge-count {
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 20px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.ie-search {
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.ie-search i { color: #9ca3af; font-size: 1.1rem; }
+.ie-search input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 0.9rem;
+  color: #111827;
+  font-family: inherit;
+}
+
+.ie-list {
+  max-height: 420px;
+  overflow-y: auto;
+}
+.ie-equipo-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.5rem;
+  border-bottom: 1px solid #f9fafb;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ie-equipo-row:hover { background: #f9fafb; }
+.ie-equipo-row.inscripto { opacity: 0.55; cursor: default; }
+.ie-equipo-row input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: #16a34a;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.ie-equipo-row.inscripto input[type="checkbox"] { cursor: default; }
+.ie-color-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid #e5e7eb;
+}
+.ie-equipo-info { flex: 1; min-width: 0; }
+.ie-equipo-nombre {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ie-equipo-sub {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+.ie-tag-inscripto {
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 20px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Panel derecho ───────────────────────────────────────────────── */
+.ie-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.ie-summary-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 1.25rem 1.5rem;
+}
+.ie-summary-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 1rem;
+}
+.ie-summary-rows { display: flex; flex-direction: column; gap: 0.6rem; }
+.ie-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+}
+.ie-summary-label { color: #6b7280; }
+.ie-summary-value { color: #111827; font-weight: 600; }
+
+.ie-btn-inscribir {
+  width: 100%;
+  padding: 0.85rem;
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ie-btn-inscribir:hover:not(:disabled) { background: #15803d; }
+.ie-btn-inscribir:disabled { background: #9ca3af; cursor: default; }
+
+.ie-btn-outline {
+  width: 100%;
+  padding: 0.75rem;
+  background: transparent;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ie-btn-outline:hover { background: #f9fafb; }
+
+/* ── Fixture card ────────────────────────────────────────────────── */
+.ie-fixture-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 1.25rem 1.5rem;
+}
+.ie-fixture-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.75rem;
+}
+.ie-fixture-field { margin-bottom: 0.85rem; }
+.ie-fixture-field label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.35rem;
+}
+.ie-fixture-field input,
+.ie-fixture-field select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-family: inherit;
+  color: #111827;
+  box-sizing: border-box;
+}
+.ie-fixture-field input:focus,
+.ie-fixture-field select:focus {
+  outline: none;
+  border-color: #16a34a;
+}
+.ie-check-list { display: flex; flex-direction: column; gap: 0.4rem; }
+.ie-check-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #374151;
+  cursor: pointer;
+}
+.ie-check-item input[type="checkbox"] { accent-color: #16a34a; }
+
+.ie-btn-fixture {
+  width: 100%;
+  padding: 0.85rem;
+  background: #1d4ed8;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 0.5rem;
+}
+.ie-btn-fixture:hover:not(:disabled) { background: #1e40af; }
+.ie-btn-fixture:disabled { background: #9ca3af; cursor: default; }
+
+.ie-msg-ok {
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+.ie-msg-err {
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .ie-main { grid-template-columns: 1fr; padding: 1rem; }
+  .ie-hero { padding: 1.25rem 1rem; }
+}

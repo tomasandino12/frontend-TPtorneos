@@ -4,33 +4,31 @@ import "../styles/CrearTorneo.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminHeader from "../components/AdminHeader.jsx";
-
-// ── Config ─────────────────────────────────────────────────────────────────
-
-const CANCHAS_INIT = [
-  { nombre: "Cancha Central",      activa: true  },
-  { nombre: "Cancha 2 - Sintética", activa: true  },
-  { nombre: "Cancha Auxiliar",     activa: true  },
-  { nombre: "Cancha 4 - Techada",  activa: false },
-  { nombre: "Cancha 5",            activa: false },
-];
+import { adminApiFetch } from "../utils/api.js";
 
 const FORMATOS = ["Solo ida", "Ida y vuelta"];
+
+const CATEGORIAS = [
+  { value: "sub15",     label: "Sub-15" },
+  { value: "sub17",     label: "Sub-17" },
+  { value: "mayores",   label: "Mayores (+18)" },
+  { value: "veteranos", label: "Veteranos" },
+  { value: "femenino",  label: "Femenino" },
+];
 
 function calcularPartidos(n, formato) {
   const eq = Math.max(0, parseInt(n) || 0);
   if (eq < 2) return 0;
-  if (formato === "Solo ida")              return (eq * (eq - 1)) / 2;
-  if (formato === "Ida y vuelta")          return eq * (eq - 1);
-  if (formato === "Eliminación directa")   return eq - 1;
+  if (formato === "Solo ida")     return (eq * (eq - 1)) / 2;
+  if (formato === "Ida y vuelta") return eq * (eq - 1);
   return 0;
 }
-
-// ── Componente ─────────────────────────────────────────────────────────────
 
 export default function CrearTorneo() {
   const navigate = useNavigate();
   const [admin, setAdmin] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const stored = localStorage.getItem("admin");
@@ -39,44 +37,80 @@ export default function CrearTorneo() {
     catch { navigate("/admin"); }
   }, [navigate]);
 
-  // ── Form state ────────────────────────────────────────────────────────────
   const [form, setForm] = useState({
-    nombre:          "Apertura 2025",
-    fechaInicio:     "2025-08-09",
-    fechaFin:        "",
-    tipo:            "Liga (todos contra todos)",
-    categoria:       "Mayores",
-    cantEquipos:     12,
-    formato:         "Ida y vuelta",
-    puntosVictoria:  3,
-    puntosEmpate:    1,
-    puntosDerrota:   0,
-    permitirDescarga: true,
-    generarFixture:   true,
+    nombre:         "",
+    fechaInicio:    "",
+    fechaFin:       "",
+    categoria:      "sub15",
+    cantEquipos:    8,
+    formato:        "Solo ida",
+    puntosVictoria: 3,
+    puntosEmpate:   1,
+    puntosDerrota:  0,
+    generarFixture: false,
   });
-  const [canchas, setCanchas] = useState(CANCHAS_INIT);
 
-  const upd = (key, val) => setForm(prev => ({ ...prev, [key]: val }));
-  const toggleCancha = i => setCanchas(prev => prev.map((c, j) => j === i ? { ...c, activa: !c.activa } : c));
+  const upd = (key, val) => setForm((prev) => ({ ...prev, [key]: val }));
 
-  const canchasActivas = canchas.filter(c => c.activa);
   const partidos = calcularPartidos(form.cantEquipos, form.formato);
 
   const handleLogout = () => {
     localStorage.removeItem("admin");
+    localStorage.removeItem("adminToken");
     navigate("/admin");
   };
+
+  async function submitTorneo(estado) {
+    setError("");
+
+    if (!form.nombre.trim()) { setError("El nombre del torneo es obligatorio."); return; }
+    if (!form.fechaInicio)   { setError("La fecha de inicio es obligatoria."); return; }
+    if (!form.fechaFin)      { setError("La fecha de fin es obligatoria."); return; }
+    if (Number(form.cantEquipos) < 2) { setError("Se necesitan al menos 2 equipos."); return; }
+
+    setLoading(true);
+    try {
+      const body = {
+        nombreTorneo:    form.nombre.trim(),
+        fechaInicio:     form.fechaInicio,
+        fechaFin:        form.fechaFin,
+        estado,
+        categoria:       form.categoria,
+        cantidadEquipos: Number(form.cantEquipos),
+        formato:         form.formato === "Ida y vuelta" ? "idayvuelta" : "ida",
+        adminTorneo:     admin.id,
+      };
+
+      const res = await adminApiFetch("/torneo", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Error al crear el torneo");
+
+      const torneoId = data.data?.id;
+
+      if (estado === "borrador") {
+        navigate("/admin/torneos");
+      } else {
+        // Ir a inscribir equipos
+        navigate(`/admin/torneos/${torneoId}/equipos`);
+      }
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   if (!admin) return null;
 
   return (
     <div className="layout">
-
       <AdminHeader admin={admin} onLogout={handleLogout} />
 
-      {/* ── Main ──────────────────────────────────────────────────────────── */}
       <main style={{ backgroundColor: "#f9fafb" }}>
-
         {/* Hero */}
         <section className="ct-hero">
           <div className="ct-hero-title">
@@ -86,29 +120,9 @@ export default function CrearTorneo() {
           <p className="ct-hero-subtitle">
             Configurá el nuevo certamen y armá el fixture en minutos.
           </p>
-          <div className="ct-metrics">
-            <div className="ct-metric-card">
-              <i className="bx bx-trophy"></i>
-              <div><span className="ct-metric-value">3</span><span className="ct-metric-label">Torneos activos</span></div>
-            </div>
-            <div className="ct-metric-card">
-              <i className="bx bx-group"></i>
-              <div><span className="ct-metric-value">36</span><span className="ct-metric-label">Equipos inscriptos</span></div>
-            </div>
-            <div className="ct-metric-card">
-              <i className="bx bx-football"></i>
-              <div><span className="ct-metric-value">4</span><span className="ct-metric-label">Canchas disponibles</span></div>
-            </div>
-            <div className="ct-metric-card">
-              <i className="bx bx-calendar"></i>
-              <div><span className="ct-metric-value">14</span><span className="ct-metric-label">Partidos esta semana</span></div>
-            </div>
-          </div>
         </section>
 
-        {/* Form + Summary */}
         <section className="ct-main">
-
           {/* ── Formulario ──────────────────────────────────────────────── */}
           <div className="ct-form-card">
             <div className="ct-form-header">
@@ -127,7 +141,7 @@ export default function CrearTorneo() {
                 <input
                   type="text"
                   value={form.nombre}
-                  onChange={e => upd("nombre", e.target.value)}
+                  onChange={(e) => upd("nombre", e.target.value)}
                   placeholder="Ej: Apertura 2025"
                 />
               </div>
@@ -139,7 +153,7 @@ export default function CrearTorneo() {
                   <input
                     type="date"
                     value={form.fechaInicio}
-                    onChange={e => upd("fechaInicio", e.target.value)}
+                    onChange={(e) => upd("fechaInicio", e.target.value)}
                   />
                 </div>
                 <div className="ct-field">
@@ -148,25 +162,19 @@ export default function CrearTorneo() {
                     type="date"
                     value={form.fechaFin}
                     min={form.fechaInicio || undefined}
-                    onChange={e => upd("fechaFin", e.target.value)}
+                    onChange={(e) => upd("fechaFin", e.target.value)}
                   />
                 </div>
               </div>
 
-              {/* Tipo / Categoría / Equipos */}
+              {/* Categoría / Equipos */}
               <div className="ct-field-row">
                 <div className="ct-field">
-                  <label>Tipo de torneo</label>
-                  <select value={form.tipo} onChange={e => upd("tipo", e.target.value)}>
-                    <option>Liga (todos contra todos)</option>
-                  </select>
-                </div>
-                <div className="ct-field">
                   <label>Categoría</label>
-                  <select value={form.categoria} onChange={e => upd("categoria", e.target.value)}>
-                    <option>Mayores</option>
-                    <option>Sub-17</option>
-                    <option>Femenino</option>
+                  <select value={form.categoria} onChange={(e) => upd("categoria", e.target.value)}>
+                    {CATEGORIAS.map((c) => (
+                      <option key={c.value} value={c.value}>{c.label}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="ct-field">
@@ -176,13 +184,12 @@ export default function CrearTorneo() {
                     min={2}
                     max={30}
                     value={form.cantEquipos}
-                    onChange={e => upd("cantEquipos", e.target.value)}
+                    onChange={(e) => upd("cantEquipos", e.target.value)}
                     className={Number(form.cantEquipos) > 30 ? "ct-input-error" : ""}
                   />
                   {Number(form.cantEquipos) > 30 && (
                     <div className="ct-field-warning">
-                      <i className="bx bx-error-circle"></i>
-                      El máximo permitido es 30 equipos.
+                      <i className="bx bx-error-circle"></i> El máximo permitido es 30 equipos.
                     </div>
                   )}
                 </div>
@@ -192,7 +199,7 @@ export default function CrearTorneo() {
               <div className="ct-field">
                 <label>Formato de juego</label>
                 <div className="ct-pill-group">
-                  {FORMATOS.map(f => (
+                  {FORMATOS.map((f) => (
                     <button
                       key={f}
                       className={`ct-pill${form.formato === f ? " active" : ""}`}
@@ -204,86 +211,47 @@ export default function CrearTorneo() {
                 </div>
               </div>
 
-              {/* Canchas */}
-              <div className="ct-field">
-                <label>
-                  Canchas habilitadas{" "}
-                  <small>tocá para activar/desactivar</small>
-                </label>
-                <div className="ct-canchas">
-                  {canchas.map((c, i) => (
-                    <button
-                      key={i}
-                      className={`ct-cancha-chip${c.activa ? " active" : ""}`}
-                      onClick={() => toggleCancha(i)}
-                    >
-                      {c.activa ? "✓ " : ""}{c.nombre}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Puntos */}
               <div className="ct-field-row">
                 <div className="ct-field">
                   <label>Puntos por victoria</label>
-                  <input
-                    type="number" min={0} max={10}
-                    value={form.puntosVictoria}
-                    onChange={e => upd("puntosVictoria", Number(e.target.value))}
-                  />
+                  <input type="number" min={0} max={10} value={form.puntosVictoria}
+                    onChange={(e) => upd("puntosVictoria", Number(e.target.value))} />
                 </div>
                 <div className="ct-field">
                   <label>Puntos por empate</label>
-                  <input
-                    type="number" min={0} max={10}
-                    value={form.puntosEmpate}
-                    onChange={e => upd("puntosEmpate", Number(e.target.value))}
-                  />
+                  <input type="number" min={0} max={10} value={form.puntosEmpate}
+                    onChange={(e) => upd("puntosEmpate", Number(e.target.value))} />
                 </div>
                 <div className="ct-field">
                   <label>Puntos por derrota</label>
-                  <input
-                    type="number" min={0} max={10}
-                    value={form.puntosDerrota}
-                    onChange={e => upd("puntosDerrota", Number(e.target.value))}
-                  />
+                  <input type="number" min={0} max={10} value={form.puntosDerrota}
+                    onChange={(e) => upd("puntosDerrota", Number(e.target.value))} />
                 </div>
               </div>
 
-              {/* Toggles */}
-              <div className="ct-toggles">
-                {[
-                  {
-                    key: "permitirDescarga",
-                    label: "Permitir descargar planteles",
-                    desc: "Los usuarios pueden exportar listas de jugadores",
-                  },
-                  {
-                    key: "generarFixture",
-                    label: "Generar fixture automático",
-                    desc: "Se creará el calendario de partidos al confirmar",
-                  },
-                ].map(({ key, label, desc }) => (
-                  <div
-                    key={key}
-                    className={`ct-toggle-row${form[key] ? " active" : ""}`}
-                    onClick={() => upd(key, !form[key])}
-                  >
-                    <div className="ct-toggle-info">
-                      <span>{label}</span>
-                      <small>{desc}</small>
-                    </div>
-                    <div className={`ct-toggle-switch${form[key] ? " on" : ""}`} />
-                  </div>
-                ))}
-              </div>
+              {error && (
+                <div style={{ color: "#dc2626", background: "#fef2f2", border: "1px solid #fca5a5", borderRadius: "8px", padding: "0.75rem 1rem", fontSize: "0.9rem" }}>
+                  {error}
+                </div>
+              )}
 
               {/* Botones */}
               <div className="ct-actions">
-                <button className="ct-btn-outline">Guardar borrador</button>
-                <button className="ct-btn-outline-green">Vista previa</button>
-                <button className="ct-btn-primary">+ Crear Torneo</button>
+                <button
+                  className="ct-btn-outline"
+                  disabled={loading}
+                  onClick={() => submitTorneo("borrador")}
+                >
+                  {loading ? "Guardando..." : "Guardar borrador"}
+                </button>
+                <button
+                  className="ct-btn-primary"
+                  disabled={loading}
+                  onClick={() => submitTorneo("borrador")}
+                >
+                  {loading ? "Creando..." : "+ Crear Torneo"}
+                </button>
               </div>
 
             </div>
@@ -292,15 +260,12 @@ export default function CrearTorneo() {
           {/* ── Resumen ─────────────────────────────────────────────────── */}
           <div className="ct-summary-card">
             <h3 className="ct-summary-title">Resumen</h3>
-
             <div className="ct-summary-rows">
               {[
                 { label: "Nombre",            value: form.nombre || "—" },
-                { label: "Tipo",              value: form.tipo.replace(" (todos contra todos)", "") },
-                { label: "Categoría",         value: form.categoria.toLowerCase() },
+                { label: "Categoría",         value: CATEGORIAS.find(c => c.value === form.categoria)?.label ?? form.categoria },
                 { label: "Equipos",           value: form.cantEquipos },
                 { label: "Formato",           value: form.formato },
-                { label: "Canchas",           value: `${canchasActivas.length} habilitadas` },
                 { label: "Inicio",            value: form.fechaInicio || "—" },
                 { label: "Fin",               value: form.fechaFin || "—" },
                 { label: "Partidos estimados", value: partidos },
@@ -316,17 +281,15 @@ export default function CrearTorneo() {
             <div className="ct-warning">
               <i className="bx bx-error-circle ct-warning-icon"></i>
               <p>
-                Vas a generar <strong>{partidos} partidos</strong> distribuidos en{" "}
-                <strong>{canchasActivas.length} cancha(s)</strong>. Revisá la
-                disponibilidad antes de confirmar.
+                Vas a generar <strong>{partidos} partidos</strong> en formato{" "}
+                <strong>{form.formato.toLowerCase()}</strong>. Después de crear el torneo
+                podrás inscribir equipos y generar el fixture.
               </p>
             </div>
           </div>
-
         </section>
       </main>
 
-      {/* ── Footer ────────────────────────────────────────────────────────── */}
       <footer className="footer">
         <h5>
           © 2025 - Gestor de Torneos · Panel del Administrador · Para mas información o
@@ -334,7 +297,6 @@ export default function CrearTorneo() {
           instagram @todotorneos
         </h5>
       </footer>
-
     </div>
   );
 }

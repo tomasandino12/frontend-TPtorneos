@@ -25,3 +25,24 @@ export async function apiFetch(endpoint, options = {}) {
 
   return res;
 }
+
+export async function adminApiFetch(endpoint, options = {}) {
+  const token = localStorage.getItem("adminToken");
+  const res = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...options.headers,
+    },
+  });
+
+  if (res.status === 401) {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("admin");
+    window.location.href = "/admin";
+    return res;
+  }
+
+  return res;
+}
