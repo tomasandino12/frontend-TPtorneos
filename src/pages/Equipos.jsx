@@ -1,15 +1,18 @@
 import "../styles/IndexStyle.css";
 import "../styles/Equipos.css";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../utils/api.js";
 
 function Equipos() {
+  const navigate = useNavigate();
   const [jugadores, setJugadores] = useState([]);
   const [jugador, setJugador] = useState(null);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [nombreEquipo, setNombreEquipo] = useState("");
   const [colorPrimario, setColorPrimario] = useState("#ffffff");
   const [colorSecundario, setColorSecundario] = useState("#000000");
+  const [descripcion, setDescripcion] = useState("");
 
   // 👇 nuevos estados para la búsqueda de jugadores sin equipo
   const [jugadoresSinEquipo, setJugadoresSinEquipo] = useState([]);
@@ -58,6 +61,7 @@ function Equipos() {
           nombreEquipo,
           colorPrimario,
           colorSecundario,
+          descripcion,
           idJugador: jugador.id,
         }),
       });
@@ -78,6 +82,7 @@ function Equipos() {
       setNombreEquipo("");
       setColorPrimario("#ffffff");
       setColorSecundario("#000000");
+      setDescripcion("");
       setMostrarFormulario(false);
     } catch (error) {
       console.error("Error:", error);
@@ -198,6 +203,12 @@ function Equipos() {
                     />
                   </div>
                 </div>
+                <label>Descripción</label>
+                <textarea
+                  placeholder="Ej: Equipo de amigos, buena onda, nos gusta el juego asociado..."
+                  value={descripcion}
+                  onChange={(e) => setDescripcion(e.target.value)}
+                />
                 <div className="formulario-botones">
                   <button type="submit">Crear</button>
                   <button type="button" onClick={() => setMostrarFormulario(false)}>Cancelar</button>
@@ -205,6 +216,20 @@ function Equipos() {
               </form>
             </div>
           )}
+        </section>
+      )}
+
+      {/* === Ver mi equipo (siempre visible si ya pertenece a uno) === */}
+      {jugador?.equipo?.id && (
+        <section className="crear-equipo-card">
+          <h2>{jugador.equipo.nombreEquipo}</h2>
+          <p>Descripción, escudo, jugadores e historial de tu equipo</p>
+          <button
+            className="btn-crear-equipo"
+            onClick={() => navigate(`/equipo/${jugador.equipo.id}`)}
+          >
+            <i className="bx bx-shield"></i> Ver mi equipo
+          </button>
         </section>
       )}
 

@@ -160,6 +160,16 @@
   font-size: 1rem;
 }
 
+.formulario-crear-equipo textarea {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  font-family: inherit;
+  min-height: 70px;
+  resize: vertical;
+}
+
 .formulario-botones {
   display: flex;
   justify-content: flex-end;
@@ -310,6 +320,103 @@ input[type="text"] {
   font-weight: 700;
   font-size: 1.4rem;
   margin-bottom: 1rem;
+}
+
+.descripcion-seccion {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 1.2rem 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.descripcion-seccion p {
+  color: #333;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.descripcion-seccion textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 0.75rem;
+}
+
+.btn-editar-descripcion {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.75rem;
+}
+
+.btn-editar-descripcion:hover {
+  background-color: #1b5e20;
+}
+
+.descripcion-botones {
+  display: flex;
+  gap: 10px;
+}
+
+.descripcion-botones button[type="submit"] {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.descripcion-botones button[type="button"] {
+  background-color: #ccc;
+  color: #222;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* === Escudo de equipo === */
+.escudo-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  vertical-align: middle;
+}
+
+.escudo-fallback-dot {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  vertical-align: middle;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.escudo-upload {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.escudo-upload input[type="file"] {
+  font-size: 0.85rem;
 }
 
 /* Lista de jugadores del equipo */

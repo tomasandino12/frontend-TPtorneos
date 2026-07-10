@@ -2,265 +2,279 @@
   box-sizing: border-box;
 }
 
-/* ── Layout ──────────────────────────────────────────────── */
+/* ── Logo + badge ADMIN ──────────────────────────────────────────────── */
 
-.admin-layout {
+.logo-admin-wrap {
   display: flex;
-  min-height: 100vh;
+  align-items: center;
+  gap: 8px;
 }
 
-/* ── Sidebar ─────────────────────────────────────────────── */
-
-.admin-sidebar {
-  width: 240px;
-  flex-shrink: 0;
-  background: rgba(10, 16, 30, 0.95);
-  border-right: 1px solid rgba(34, 197, 94, 0.2);
-  display: flex;
-  flex-direction: column;
-  padding: 28px 16px 20px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
+.logo-admin-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2e7d32;
+  white-space: nowrap;
 }
 
-.admin-brand {
-  font-size: 26px;
-  font-weight: 800;
-  color: #ffffff;
-  letter-spacing: -0.5px;
-  margin-bottom: 6px;
-  padding: 0 8px;
-}
-
-.admin-brand span {
-  color: #22c55e;
-}
-
-.admin-role-badge {
-  display: inline-block;
-  margin: 0 8px 20px;
-  padding: 3px 10px;
-  border-radius: 20px;
-  background: rgba(34, 197, 94, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  color: #22c55e;
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  background: #166534;
+  color: #fff;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.5px;
+  border-radius: 4px;
   text-transform: uppercase;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
-.admin-sep {
-  height: 1px;
-  background: rgba(148, 163, 184, 0.15);
-  margin: 0 8px 20px;
-}
-
-.admin-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  flex: 1;
-}
+/* ── Nav buttons — replica de .navlinks a de IndexStyle.css ─────────── */
 
 .admin-nav-btn {
+  text-decoration: none;
+  color: #444;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s, color 0.2s;
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 12px;
+  gap: 6px;
+  background: none;
   border: none;
-  border-radius: 10px;
-  background: transparent;
-  color: rgba(226, 232, 240, 0.75);
-  font-size: 14px;
-  font-weight: 600;
   font-family: inherit;
+  font-size: 1em;
   cursor: pointer;
-  text-align: left;
-  transition: background 0.18s ease, color 0.18s ease;
+  white-space: nowrap;
 }
 
 .admin-nav-btn i {
+  font-size: 1rem;
+  vertical-align: middle;
+}
+
+.admin-nav-btn:hover {
+  background-color: #dcf7e3;
+  color: #338637;
+}
+
+.admin-nav-btn.active {
+  background-color: #d4f4dc;
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+/* ── Derecha: avatar + nombre + rol ─────────────────────────────────── */
+
+.admin-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #166534;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.admin-user-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-right: 4px;
+}
+
+.admin-user-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2937;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.admin-user-role {
+  font-size: 11px;
+  color: #9ca3af;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* ── Dropdown ────────────────────────────────────────────────────────── */
+
+.admin-nav-chevron {
+  font-size: 16px;
+  margin-left: 2px;
+}
+
+.admin-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 200;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  min-width: 268px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-dropdown-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.admin-dropdown-item:hover {
+  background: #f0fdf4;
+}
+
+.admin-dropdown-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f0fdf4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #16a34a;
   font-size: 18px;
   flex-shrink: 0;
 }
 
-.admin-nav-btn:hover {
-  background: rgba(34, 197, 94, 0.1);
-  color: #ffffff;
-}
-
-.admin-nav-btn.active {
-  background: rgba(34, 197, 94, 0.15);
-  color: #22c55e;
-  border: 1px solid rgba(34, 197, 94, 0.25);
-}
-
-.admin-logout {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  border-radius: 10px;
-  background: transparent;
-  color: rgba(254, 202, 202, 0.85);
+.admin-dropdown-label {
+  display: block;
   font-size: 14px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  text-align: left;
-  margin-top: 8px;
-  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1.3;
 }
 
-.admin-logout i {
-  font-size: 18px;
+.admin-dropdown-desc {
+  display: block;
+  font-size: 12px;
+  color: #9ca3af;
+  line-height: 1.4;
+  margin-top: 2px;
 }
 
-.admin-logout:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #fca5a5;
-  border-color: rgba(239, 68, 68, 0.5);
-}
+/* ── Contenido principal ─────────────────────────────────────────────── */
 
-/* ── Main content ────────────────────────────────────────── */
-
-.admin-main {
+.admin-main-content {
   flex: 1;
-  padding: 36px 40px;
-  background: radial-gradient(900px 500px at 70% 10%, rgba(34, 197, 94, 0.08), transparent 60%),
-              linear-gradient(160deg, #0b1220 0%, #0f1a2b 100%);
-  min-height: 100vh;
+  background-color: #f9fafb;
+  padding: 2rem 2.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* ── Welcome card ────────────────────────────────────────── */
+/* ── Welcome card ────────────────────────────────────────────────────── */
 
-.admin-welcome-card {
-  background: rgba(10, 16, 30, 0.7);
-  border: 1px solid rgba(34, 197, 94, 0.2);
+.admin-welcome {
+  background: #fff;
+  border: 1px solid #f0f0f0;
   border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   padding: 28px 32px;
   margin-bottom: 28px;
-  backdrop-filter: blur(6px);
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.admin-welcome-card h1 {
-  margin: 0 0 8px 0;
-  font-size: 26px;
+.admin-welcome h1 {
+  margin: 0 0 6px 0;
+  font-size: 24px;
   font-weight: 800;
-  color: #ffffff;
+  color: #1f2937;
 }
 
-.admin-welcome-card h1 span {
-  color: #22c55e;
+.admin-welcome-name {
+  color: #166534;
 }
 
-.admin-welcome-card p {
+.admin-welcome p {
   margin: 0;
   font-size: 14px;
-  color: rgba(226, 232, 240, 0.65);
+  color: #9ca3af;
 }
 
-/* ── Quick actions grid ──────────────────────────────────── */
+/* ── Quick-action grid ───────────────────────────────────────────────── */
 
 .admin-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .admin-card {
-  background: rgba(10, 16, 30, 0.7);
-  border: 1px solid rgba(34, 197, 94, 0.18);
-  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 16px;
   padding: 24px 20px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
+  gap: 10px;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.1s ease;
+  transition: border-color 0.18s, transform 0.12s, box-shadow 0.18s;
 }
 
-.admin-card:hover {
-  border-color: rgba(34, 197, 94, 0.5);
-  background: rgba(34, 197, 94, 0.06);
+.admin-card:hover,
+.admin-card-active {
+  border-color: #86efac;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .admin-card-icon {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: rgba(34, 197, 94, 0.12);
+  background: #f0fdf4;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #22c55e;
-  font-size: 22px;
+  color: #16a34a;
+  font-size: 20px;
 }
 
 .admin-card h3 {
   margin: 0;
   font-size: 15px;
   font-weight: 700;
-  color: #ffffff;
+  color: #1f2937;
 }
 
 .admin-card p {
   margin: 0;
   font-size: 12px;
-  color: rgba(148, 163, 184, 0.75);
-}
-
-/* ── Responsive ──────────────────────────────────────────── */
-
-@media (max-width: 768px) {
-  .admin-layout {
-    flex-direction: column;
-  }
-
-  .admin-sidebar {
-    width: 100%;
-    height: auto;
-    position: static;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 16px;
-  }
-
-  .admin-brand {
-    width: 100%;
-    margin-bottom: 0;
-  }
-
-  .admin-role-badge,
-  .admin-sep {
-    display: none;
-  }
-
-  .admin-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-    flex: unset;
-  }
-
-  .admin-nav-btn {
-    width: auto;
-  }
-
-  .admin-logout {
-    width: auto;
-    margin-top: 0;
-  }
-
-  .admin-main {
-    padding: 20px 16px;
-    min-height: unset;
-  }
+  color: #9ca3af;
 }

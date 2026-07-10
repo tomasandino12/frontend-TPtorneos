@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import "../styles/FixtureTorneo.css";
 import "../styles/IndexStyle.css";
 import { apiFetch } from "../utils/api.js";
@@ -7,6 +7,7 @@ function FixtureTorneo() {
   const [partidos, setPartidos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [jornadaSeleccionada, setJornadaSeleccionada] = useState("todas");
 
   useEffect(() => {
     const fetchPartidos = async () => {
@@ -97,6 +98,19 @@ function FixtureTorneo() {
     fetchPartidos();
   }, []);
 
+  const jornadasDisponibles = useMemo(
+    () => [...new Set(partidos.map((p) => p.jornada))].sort((a, b) => a - b),
+    [partidos]
+  );
+
+  const partidosFiltrados = useMemo(
+    () =>
+      jornadaSeleccionada === "todas"
+        ? partidos
+        : partidos.filter((p) => p.jornada === Number(jornadaSeleccionada)),
+    [partidos, jornadaSeleccionada]
+  );
+
   return (
     <main className="subpagina-container">
       <section className="fixture-header">
@@ -109,6 +123,25 @@ function FixtureTorneo() {
       <section className="fixture-lista">
         <h2>Próximos Partidos</h2>
         <p className="fixture-sub">Calendario de encuentros programados</p>
+
+        {!loading && !error && jornadasDisponibles.length > 0 && (
+          <div className="fixture-filtro">
+            <label htmlFor="filtro-jornada">Filtrar por jornada</label>
+            <select
+              id="filtro-jornada"
+              className="fixture-filtro-select"
+              value={jornadaSeleccionada}
+              onChange={(e) => setJornadaSeleccionada(e.target.value)}
+            >
+              <option value="todas">Todas las jornadas</option>
+              {jornadasDisponibles.map((j) => (
+                <option key={j} value={j}>
+                  Jornada {j}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {loading && <p className="mensaje-info">Cargando partidos...</p>}
 
@@ -133,7 +166,16 @@ function FixtureTorneo() {
 
         {!loading &&
           !error &&
-          partidos.map((partido) => (
+          partidos.length > 0 &&
+          partidosFiltrados.length === 0 && (
+            <p className="mensaje-info">
+              No hay partidos programados para esa jornada.
+            </p>
+          )}
+
+        {!loading &&
+          !error &&
+          partidosFiltrados.map((partido) => (
             <div className="fixture-card" key={partido.id}>
               <div className="fixture-card-estado">
                 <span className="jornada">Jornada {partido.jornada}</span>

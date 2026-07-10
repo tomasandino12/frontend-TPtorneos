@@ -1,18 +1,12 @@
+import "../styles/IndexStyle.css";
 import "../styles/MenuAdmin.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const NAV_ITEMS = [
-  { label: "Torneos",    icon: "bx-trophy"   },
-  { label: "Jugadores",  icon: "bx-user"      },
-  { label: "Partidos",   icon: "bx-football"  },
-  { label: "Árbitros",   icon: "bx-whistle"   },
-];
+import AdminHeader from "../components/AdminHeader.jsx";
 
 function MenuAdmin() {
   const navigate = useNavigate();
   const [admin, setAdmin] = useState(null);
-  const [activeItem, setActiveItem] = useState("Torneos");
 
   useEffect(() => {
     const stored = localStorage.getItem("admin");
@@ -35,47 +29,35 @@ function MenuAdmin() {
   if (!admin) return null;
 
   return (
-    <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <div className="admin-brand">
-          Gestor<span>Torneos</span>
-        </div>
-        <span className="admin-role-badge">Administrador</span>
-        <div className="admin-sep" />
+    <div className="layout">
 
-        <nav className="admin-nav">
-          {NAV_ITEMS.map(({ label, icon }) => (
-            <button
-              key={label}
-              className={`admin-nav-btn${activeItem === label ? " active" : ""}`}
-              onClick={() => setActiveItem(label)}
-            >
-              <i className={`bx ${icon}`}></i>
-              {label}
-            </button>
-          ))}
-        </nav>
+      <AdminHeader admin={admin} onLogout={handleLogout} />
 
-        <button className="admin-logout" onClick={handleLogout}>
-          <i className="bx bx-log-out"></i>
-          Cerrar sesión
-        </button>
-      </aside>
+      {/* ── Contenido ───────────────────────────────────────────────────── */}
+      <main className="admin-main-content">
 
-      <main className="admin-main">
-        <div className="admin-welcome-card">
+        <div className="admin-welcome">
           <h1>
-            Bienvenido, <span>{admin.nombre} {admin.apellido}</span>
+            Bienvenido,{" "}
+            <span className="admin-welcome-name">
+              {admin.nombre} {admin.apellido}
+            </span>
           </h1>
           <p>Panel de administración · {admin.email}</p>
         </div>
 
         <div className="admin-grid">
-          {NAV_ITEMS.map(({ label, icon }) => (
+          {[
+            { label: "Mis Torneos",  icon: "bx-trophy",   path: "/admin/torneos" },
+            { label: "Arbitraje",    icon: "bx-whistle",  path: "/admin/arbitros" },
+            { label: "Canchas",      icon: "bx-football", path: null },
+            { label: "Jugadores",    icon: "bx-group",    path: null },
+          ].map(({ label, icon, path }) => (
             <div
               key={label}
               className="admin-card"
-              onClick={() => setActiveItem(label)}
+              onClick={() => path && navigate(path)}
+              style={path ? { cursor: "pointer" } : { cursor: "default", opacity: 0.6 }}
             >
               <div className="admin-card-icon">
                 <i className={`bx ${icon}`}></i>
@@ -85,6 +67,7 @@ function MenuAdmin() {
             </div>
           ))}
         </div>
+
       </main>
     </div>
   );
