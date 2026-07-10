@@ -2,69 +2,119 @@
   box-sizing: border-box;
 }
 
+/*
+  .navbar/.navdiv/.navlinks/.btn-logout base layout (posición sticky, padding,
+  etc.) siguen viniendo de IndexStyle.css — ese archivo quedó fuera del
+  alcance de esta fase salvo la regla de background de main/.content, así que
+  acá solo se pisan los COLORES (mismo patrón que ya usaba este archivo para
+  ".admin-nav-btn — replica de .navlinks a") para que el header admin use los
+  tokens, sin tocar IndexStyle.css.
+*/
+.navbar {
+  background-color: var(--color-surface);
+  border-bottom: 2px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-logout {
+  border: 1.5px solid var(--color-alert);
+  color: var(--color-alert);
+}
+
+.btn-logout:hover {
+  background-color: var(--color-alert);
+  color: var(--color-surface);
+}
+
+/* Responsive del navbar admin (antes no tenía ningún @media: con 4 botones +
+   avatar + logout se recortaba en viewports angostos). */
+@media (max-width: 900px) {
+  .navdiv {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+
+  .navlinks {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .nav-actions {
+    order: 2;
+  }
+}
+
 /* ── Logo + badge ADMIN ──────────────────────────────────────────────── */
 
 .logo-admin-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .logo-admin-text {
-  font-size: 24px;
-  font-weight: bold;
-  color: #2e7d32;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  letter-spacing: 0.02em;
+  color: var(--color-pitch);
   white-space: nowrap;
 }
 
 .admin-badge {
   display: inline-flex;
   align-items: center;
-  padding: 3px 8px;
-  background: #166534;
-  color: #fff;
-  font-size: 11px;
+  padding: 0.2rem 0.5rem;
+  background: var(--color-pitch);
+  color: var(--color-surface);
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.5px;
-  border-radius: 4px;
+  letter-spacing: 0.03em;
+  border-radius: var(--radius-sm);
   text-transform: uppercase;
   line-height: 1;
   flex-shrink: 0;
 }
 
-/* ── Nav buttons — replica de .navlinks a de IndexStyle.css ─────────── */
+/* ── Nav buttons ─────────────────────────────────────────────────────── */
 
 .admin-nav-btn {
   text-decoration: none;
-  color: #444;
-  padding: 8px 12px;
-  border-radius: 8px;
+  color: var(--color-muted);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
   transition: background-color 0.2s, color 0.2s;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 0.4rem;
   background: none;
   border: none;
-  font-family: inherit;
-  font-size: 1em;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
   cursor: pointer;
   white-space: nowrap;
 }
 
-.admin-nav-btn i {
+.admin-nav-btn svg {
   font-size: 1rem;
   vertical-align: middle;
 }
 
 .admin-nav-btn:hover {
-  background-color: #dcf7e3;
-  color: #338637;
+  background-color: var(--color-surface-muted);
+  color: var(--color-ink);
 }
 
 .admin-nav-btn.active {
-  background-color: #d4f4dc;
-  color: #2e7d32;
+  background-color: var(--color-success-bg);
+  color: var(--color-pitch);
   font-weight: 600;
+}
+
+.admin-nav-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 /* ── Derecha: avatar + nombre + rol ─────────────────────────────────── */
@@ -72,19 +122,19 @@
 .admin-user-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.6rem;
 }
 
 .admin-avatar {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #166534;
-  color: #fff;
+  background: var(--color-pitch);
+  color: var(--color-surface);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 0.8rem;
   font-weight: 700;
   flex-shrink: 0;
   user-select: none;
@@ -94,28 +144,32 @@
   display: flex;
   flex-direction: column;
   gap: 1px;
-  margin-right: 4px;
+  margin-right: 0.25rem;
 }
 
 .admin-user-name {
-  font-size: 13px;
+  font-size: 0.8rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--color-ink);
   white-space: nowrap;
   line-height: 1.2;
 }
 
 .admin-user-role {
-  font-size: 11px;
-  color: #9ca3af;
+  font-size: 0.7rem;
+  color: var(--color-muted);
   white-space: nowrap;
   line-height: 1.2;
 }
 
 /* ── Dropdown ────────────────────────────────────────────────────────── */
 
+.admin-dropdown-wrap {
+  position: relative;
+}
+
 .admin-nav-chevron {
-  font-size: 16px;
+  font-size: 1rem;
   margin-left: 2px;
 }
 
@@ -123,62 +177,67 @@
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
-  z-index: 200;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  padding: 8px;
+  z-index: var(--z-dropdown);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 0.5rem;
   min-width: 268px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0.25rem;
 }
 
 .admin-dropdown-item {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 8px;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
   background: none;
   border: none;
   cursor: pointer;
   text-align: left;
   width: 100%;
-  font-family: inherit;
+  font-family: var(--font-body);
   transition: background 0.15s;
 }
 
 .admin-dropdown-item:hover {
-  background: #f0fdf4;
+  background: var(--color-success-bg);
+}
+
+.admin-dropdown-item:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .admin-dropdown-icon {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
-  background: #f0fdf4;
+  border-radius: var(--radius-sm);
+  background: var(--color-success-bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #16a34a;
-  font-size: 18px;
+  color: var(--color-pitch);
+  font-size: 1.1rem;
   flex-shrink: 0;
 }
 
 .admin-dropdown-label {
   display: block;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--color-ink);
   line-height: 1.3;
 }
 
 .admin-dropdown-desc {
   display: block;
-  font-size: 12px;
-  color: #9ca3af;
+  font-size: 0.75rem;
+  color: var(--color-muted);
   line-height: 1.4;
   margin-top: 2px;
 }
@@ -187,94 +246,146 @@
 
 .admin-main-content {
   flex: 1;
-  background-color: #f9fafb;
+  background-color: var(--color-paper);
   padding: 2rem 2.5rem;
   width: 100%;
   box-sizing: border-box;
 }
 
-/* ── Welcome card ────────────────────────────────────────────────────── */
+/* ── Welcome card (contenedor de superficie viene de <Card>) ──────────── */
 
 .admin-welcome {
-  background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  padding: 28px 32px;
-  margin-bottom: 28px;
+  margin-bottom: 1.75rem;
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
 }
 
 .admin-welcome h1 {
-  margin: 0 0 6px 0;
-  font-size: 24px;
+  margin: 0 0 0.4rem 0;
+  font-size: 1.5rem;
   font-weight: 800;
-  color: #1f2937;
+  color: var(--color-ink);
 }
 
 .admin-welcome-name {
-  color: #166534;
+  color: var(--color-pitch);
 }
 
 .admin-welcome p {
   margin: 0;
-  font-size: 14px;
-  color: #9ca3af;
+  font-size: 0.875rem;
+  color: var(--color-muted);
 }
 
-/* ── Quick-action grid ───────────────────────────────────────────────── */
+/* ── Quick-action grid (cards vienen de <Card>) ───────────────────────── */
 
 .admin-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
+  gap: 1rem;
   max-width: 1200px;
   margin: 0 auto;
 }
 
 .admin-card {
-  background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 16px;
-  padding: 24px 20px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 10px;
+  gap: 0.6rem;
   cursor: pointer;
   transition: border-color 0.18s, transform 0.12s, box-shadow 0.18s;
 }
 
-.admin-card:hover,
-.admin-card-active {
-  border-color: #86efac;
+.admin-card:hover {
+  border-color: var(--color-turf);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-md);
+}
+
+.admin-card-disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.admin-card-disabled:hover {
+  border-color: var(--color-border);
+  transform: none;
+  box-shadow: var(--shadow-sm);
 }
 
 .admin-card-icon {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
-  background: #f0fdf4;
+  border-radius: var(--radius-md);
+  background: var(--color-success-bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #16a34a;
-  font-size: 20px;
+  color: var(--color-pitch);
+  font-size: 1.25rem;
 }
 
 .admin-card h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 0.95rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--color-ink);
 }
 
 .admin-card p {
   margin: 0;
-  font-size: 12px;
-  color: #9ca3af;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+/*
+  ── Hero compartido del panel de torneos (CrearTorneo, MisTorneos, Arbitros) ──
+  Antes .ct-hero/.mt-hero/.ar-hero triplicaban el mismo bloque byte a byte en
+  3 archivos distintos. Ahora es una sola clase acá (MenuAdmin.css ya se
+  importa en las 4 pantallas del panel de torneos) con unidades en rem, igual
+  que el resto del panel. Cada página solo mantiene lo que le es propio
+  (ej. .mt-metrics en MisTorneos).
+*/
+.admin-hero {
+  background: var(--color-success-bg);
+  border-radius: var(--radius-lg);
+  width: calc(100% - 3rem);
+  max-width: 1100px;
+  margin: 1.5rem auto 0;
+  padding: 1.75rem 2rem 1.5rem;
+}
+
+.admin-hero-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.375rem;
+}
+
+.admin-hero-icon {
+  font-size: 2.375rem;
+  color: var(--color-pitch);
+  flex-shrink: 0;
+}
+
+.admin-hero-title h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.admin-hero-subtitle {
+  color: var(--color-muted);
+  font-size: 0.9375rem;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .admin-hero {
+    width: calc(100% - 1.5rem);
+    margin-top: 0.75rem;
+    padding: 1.25rem;
+  }
 }

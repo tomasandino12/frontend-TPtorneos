@@ -1,6 +1,8 @@
 import "../styles/InicioSesion.css";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { FiLock } from "react-icons/fi";
+import { Button, TextField, Card, Alert } from "../components/ui";
 
 function RestablecerPassword() {
   const navigate = useNavigate();
@@ -9,15 +11,9 @@ function RestablecerPassword() {
 
   const [nuevaContraseña, setNuevaContraseña] = useState("");
   const [confirmar, setConfirmar] = useState("");
-  const [mostrarPass, setMostrarPass] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
   const [exito, setExito] = useState(false);
-
-  useEffect(() => {
-    document.body.classList.add("bg-login");
-    return () => document.body.classList.remove("bg-login");
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,82 +54,58 @@ function RestablecerPassword() {
   };
 
   return (
-    <div className="login-wrap">
-      <div className="login-card">
-        <div className="login-header">
-          <h1 className="login-brand">
+    <div className="auth-page">
+      <Card className="auth-card">
+        <div className="auth-header">
+          <h1 className="auth-brand">
             Gestor<span>Torneos</span>
           </h1>
-          <h2 className="login-title">Elegí una nueva contraseña</h2>
+          <h2 className="auth-title">Elegí una nueva contraseña</h2>
         </div>
 
         {exito ? (
-          <div className="login-form">
-            <p className="bottom-text">✅ Tu contraseña fue actualizada correctamente.</p>
-            <button className="btn-primary" type="button" onClick={() => navigate("/")}>
+          <div className="auth-form">
+            <Alert variant="success">Tu contraseña fue actualizada correctamente.</Alert>
+            <Button type="button" onClick={() => navigate("/")}>
               Ir a iniciar sesión
-            </button>
+            </Button>
           </div>
         ) : (
-          <form className="login-form" onSubmit={handleSubmit}>
-            <div className="field">
-              <label className="field-label" htmlFor="nuevaContraseña">
-                Nueva contraseña
-              </label>
-              <div className="field-control">
-                <i className="bx bx-lock-alt field-icon"></i>
-                <input
-                  id="nuevaContraseña"
-                  type={mostrarPass ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={nuevaContraseña}
-                  onChange={(e) => setNuevaContraseña(e.target.value)}
-                  style={{ textAlign: "left" }}
-                  required
-                />
-                <button
-                  type="button"
-                  className="field-action"
-                  onClick={() => setMostrarPass(!mostrarPass)}
-                  aria-label={mostrarPass ? "Ocultar contraseña" : "Mostrar contraseña"}
-                >
-                  <i className={`bx ${mostrarPass ? "bx-hide" : "bx-show"}`}></i>
-                </button>
-              </div>
-            </div>
+          <form className="auth-form" onSubmit={handleSubmit}>
+            <TextField
+              label="Nueva contraseña"
+              type="password"
+              icon={<FiLock />}
+              placeholder="••••••••"
+              value={nuevaContraseña}
+              onChange={(e) => setNuevaContraseña(e.target.value)}
+              required
+            />
 
-            <div className="field">
-              <label className="field-label" htmlFor="confirmar">
-                Confirmar contraseña
-              </label>
-              <div className="field-control">
-                <i className="bx bx-lock-alt field-icon"></i>
-                <input
-                  id="confirmar"
-                  type={mostrarPass ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={confirmar}
-                  onChange={(e) => setConfirmar(e.target.value)}
-                  style={{ textAlign: "left" }}
-                  required
-                />
-              </div>
-            </div>
+            <TextField
+              label="Confirmar contraseña"
+              type="password"
+              icon={<FiLock />}
+              placeholder="••••••••"
+              value={confirmar}
+              onChange={(e) => setConfirmar(e.target.value)}
+              required
+            />
 
-            <button className="btn-primary" type="submit" disabled={guardando}>
+            {error && <Alert variant="error">{error}</Alert>}
+
+            <Button type="submit" disabled={guardando}>
               {guardando ? "Guardando..." : "Guardar nueva contraseña"}
-            </button>
+            </Button>
 
-            {error && <p className="login-error">{error}</p>}
-
-            <p className="bottom-text">
-              <Link to="/" className="link-green">
+            <p className="auth-bottom-text">
+              <Link to="/" className="auth-link">
                 Volver al inicio de sesión
               </Link>
             </p>
           </form>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

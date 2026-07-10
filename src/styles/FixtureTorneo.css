@@ -1,33 +1,15 @@
-.fixture-container {
-  padding: 2rem;
-  background-color: #f5fdf7;
-  min-height: 100vh;
-}
-
-.fixture-header {
-  background-color: #e5f8eb;
-  text-align: center;
-  padding: 2rem;
-  border-radius: 12px;
-  margin-bottom: 2rem;
-}
-
-.fixture-header h1 {
-  color: #2e7d32;
-  font-size: 2rem;
-}
-
-.fixture-header p {
-  color: #666;
-  margin-top: 0.5rem;
-}
+/*
+  El encabezado de página (antes .fixture-header) ahora es la clase compartida
+  .page-header en IndexStyle.css. El mensaje de error (antes .mensaje-error)
+  ahora es <Alert variant="error">.
+*/
 
 .fixture-lista h2 {
-  color: #2e7d32;
+  color: var(--color-pitch);
 }
 
 .fixture-sub {
-  color: #888;
+  color: var(--color-muted);
   font-size: 0.95rem;
   margin-bottom: 1.5rem;
 }
@@ -40,37 +22,39 @@
 }
 
 .fixture-filtro label {
-  color: #2e7d32;
+  color: var(--color-pitch);
   font-weight: 600;
   font-size: 0.9rem;
 }
 
 .fixture-filtro-select {
-  background-color: white;
-  border: 1px solid #cde9d8;
-  border-radius: 6px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   padding: 6px 10px;
   font-size: 0.9rem;
-  color: #333;
+  color: var(--color-ink);
+  font-family: var(--font-body);
   cursor: pointer;
 }
 
 .fixture-filtro-select:focus {
   outline: none;
-  border-color: #2e7d32;
+  border-color: var(--color-turf);
+  box-shadow: var(--focus-ring);
 }
 
 .fixture-card {
-  background-color: white;
-  border-radius: 12px;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .fixture-card h3 {
   font-size: 1.2rem;
-  color: #333;
+  color: var(--color-ink);
   margin-bottom: 1rem;
 }
 
@@ -80,86 +64,65 @@
   margin-bottom: 0.5rem;
 }
 
+/* Etiqueta de jornada: es categórica, no un estado — colores neutros a propósito
+   (antes usaba un azul #0366d6 sin relación con el resto de la paleta). */
 .jornada {
-  background-color: #e1ecf4;
-  color: #0366d6;
+  background-color: var(--color-surface-muted);
+  color: var(--color-ink);
   padding: 4px 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 0.8rem;
 }
 
 .estado {
   padding: 4px 8px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   font-size: 0.8rem;
   text-transform: capitalize;
   font-weight: 500;
 }
 
 .estado.programado {
-  background-color: #eee;
-  color: #444;
+  background-color: var(--color-surface-muted);
+  color: var(--color-muted);
 }
 
 .estado.finalizado {
-  background-color: #c8e6c9;
-  color: #2e7d32;
+  background-color: var(--color-success-bg);
+  color: var(--color-pitch);
 }
 
 .estado.en_juego {
-  background-color: #fff3cd;
-  color: #856404;
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
 }
 
 .estado.suspendido {
-  background-color: #ffebee;
-  color: #c62828;
+  background-color: var(--color-error-bg);
+  color: var(--color-error-text);
 }
 
 .fixture-detalles {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  color: #555;
+  color: var(--color-muted);
   font-size: 0.95rem;
 }
 
-.mensaje-error {
-  background-color: #fdecea;
-  border: 1px solid #f5c2c7;
-  color: #842029;
-  padding: 1.5rem;
-  border-radius: 12px;
-  text-align: center;
-  margin-top: 2rem;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
-
-.mensaje-error i {
-  font-size: 2rem;
-  color: #dc3545;
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-.mensaje-error h3 {
-  margin: 0.5rem 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.mensaje-error p {
+.fixture-detalles p {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
   margin: 0;
-  font-size: 1rem;
-  color: #7a1f1f;
 }
 
 .mensaje-info {
   text-align: center;
-  color: #444;
-  background-color: #f1f8f4;
-  border: 1px solid #cde9d8;
-  border-radius: 10px;
+  color: var(--color-ink);
+  background-color: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 1rem;
   margin-top: 1.5rem;
 }

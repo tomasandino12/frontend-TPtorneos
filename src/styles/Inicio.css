@@ -6,6 +6,9 @@
 .inicio-hero {
   position: fixed;
   inset: 0;
+  /* Explícito y menor al z-index:10 del Navbar (src/styles/Navbar.css) para
+     que nunca compita con él por la parte superior de la pantalla. */
+  z-index: 1;
   background-image: url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1600');
   background-size: cover;
   background-position: center;
@@ -38,7 +41,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: #c62828;
+  background-color: var(--color-alert);
   color: white;
   font-size: 0.75rem;
   font-weight: 700;
@@ -100,7 +103,7 @@
 }
 
 .inicio-dato svg {
-  color: #81c784;
+  color: var(--color-turf);
   font-size: 1rem;
   flex-shrink: 0;
 }
@@ -109,36 +112,32 @@
   display: flex;
   gap: 1rem;
   justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
 }
 
-.btn-hero-primary {
-  background-color: #2e7d32;
-  color: white;
-  border: none;
-  padding: 14px 34px;
-  font-size: 1rem;
-  font-weight: 700;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.15s;
-}
-
-.btn-hero-primary:hover {
-  background-color: #1b5e20;
-  transform: translateY(-2px);
-}
-
+/*
+  El CTA principal ("Ver Fixture") usa <Button> (src/components/ui). El
+  secundario se mantiene con su propio estilo "outline sobre foto" porque
+  ninguna de las 4 variantes de Button está pensada para texto blanco +
+  borde translúcido sobre una imagen — forzarlo ahí se vería mal.
+*/
 .btn-hero-secondary {
   background-color: transparent;
   color: white;
   border: 2px solid rgba(255, 255, 255, 0.65);
   padding: 14px 34px;
+  font-family: var(--font-body);
   font-size: 1rem;
   font-weight: 700;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
+}
+
+.btn-hero-secondary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.55);
 }
 
 .btn-hero-secondary:hover {

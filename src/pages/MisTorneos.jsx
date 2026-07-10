@@ -3,8 +3,10 @@ import "../styles/MenuAdmin.css";
 import "../styles/MisTorneos.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiAward, FiEdit2, FiCheckCircle, FiUsers, FiSearch, FiPlus, FiTrash2 } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
+import { Button, TextField, Card } from "../components/ui";
 
 // estado backend → etiqueta UI
 const ESTADO_LABEL = {
@@ -13,10 +15,14 @@ const ESTADO_LABEL = {
   finalizado: "Finalizado",
 };
 
+// "En curso" es el único estado que amerita resaltarse (activo/en progreso);
+// "Borrador" y "Finalizado" son estados neutrales/inactivos — antes Borrador
+// usaba el color de advertencia (--color-whistle), que la app reserva para
+// alertas reales, no para un estado neutral.
 const ESTADO_CONFIG = {
-  "En curso":   { color: "#16a34a", badgeBg: "#dcfce7", badgeColor: "#166534" },
-  "Borrador":   { color: "#d97706", badgeBg: "#fef9c3", badgeColor: "#92400e" },
-  "Finalizado": { color: "#2563eb", badgeBg: "#dbeafe", badgeColor: "#1e40af" },
+  "En curso":   { color: "var(--color-turf)",  badgeBg: "var(--color-success-bg)",  badgeColor: "var(--color-pitch)" },
+  "Borrador":   { color: "var(--color-muted)", badgeBg: "var(--color-surface-muted)", badgeColor: "var(--color-ink)" },
+  "Finalizado": { color: "var(--color-muted)", badgeBg: "var(--color-surface-muted)", badgeColor: "var(--color-ink)" },
 };
 
 const TABS = ["Todos", "En curso", "Borradores", "Finalizados"];
@@ -128,31 +134,31 @@ export default function MisTorneos() {
     <div className="layout">
       <AdminHeader admin={admin} onLogout={handleLogout} />
 
-      <main style={{ backgroundColor: "#f9fafb" }}>
+      <main>
         {/* ── Hero ────────────────────────────────────────────────────────── */}
-        <section className="mt-hero">
-          <div className="mt-hero-title">
-            <i className="bx bx-trophy mt-trophy-icon"></i>
+        <section className="admin-hero">
+          <div className="admin-hero-title">
+            <FiAward className="admin-hero-icon" />
             <h1>Mis Torneos</h1>
           </div>
-          <p className="mt-hero-subtitle">
+          <p className="admin-hero-subtitle">
             Todos los torneos que creaste · editá, sumá equipos o eliminá los que ya no necesités.
           </p>
           <div className="mt-metrics">
             <div className="mt-metric-card">
-              <i className="bx bx-trophy"></i>
+              <FiAward />
               <div><span className="mt-metric-value">{counts["En curso"]}</span><span className="mt-metric-label">En curso</span></div>
             </div>
             <div className="mt-metric-card">
-              <i className="bx bx-edit"></i>
+              <FiEdit2 />
               <div><span className="mt-metric-value">{counts["Borradores"]}</span><span className="mt-metric-label">Borradores</span></div>
             </div>
             <div className="mt-metric-card">
-              <i className="bx bx-check-circle"></i>
+              <FiCheckCircle />
               <div><span className="mt-metric-value">{counts["Finalizados"]}</span><span className="mt-metric-label">Finalizados</span></div>
             </div>
             <div className="mt-metric-card">
-              <i className="bx bx-group"></i>
+              <FiUsers />
               <div>
                 <span className="mt-metric-value">
                   {torneos.reduce((acc, t) => acc + t.equipos.actual, 0)}
@@ -179,22 +185,20 @@ export default function MisTorneos() {
           </div>
 
           <div className="mt-controls">
-            <div className="mt-search">
-              <i className="bx bx-search"></i>
-              <input
-                type="text"
-                placeholder="Buscar torneo..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            <button className="mt-btn-new" onClick={() => navigate("/admin/torneos/nuevo")}>
-              + Nuevo torneo
-            </button>
+            <TextField
+              icon={<FiSearch />}
+              placeholder="Buscar torneo..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="mt-search"
+            />
+            <Button icon={<FiPlus />} onClick={() => navigate("/admin/torneos/nuevo")}>
+              Nuevo torneo
+            </Button>
           </div>
 
-          {loading && <p style={{ padding: "2rem", textAlign: "center", color: "#6b7280" }}>Cargando torneos...</p>}
-          {error && <p style={{ padding: "2rem", textAlign: "center", color: "#dc2626" }}>{error}</p>}
+          {loading && <Card className="mt-status-card">Cargando torneos...</Card>}
+          {error && <Card className="mt-status-card mt-status-error">{error}</Card>}
 
           {!loading && !error && (
             <div className="mt-grid">
@@ -240,20 +244,46 @@ export default function MisTorneos() {
                     <div className="mt-card-actions">
                       {torneo.estado === "En curso" && (
                         <>
-                          <button className="mt-btn-outline" onClick={() => navigate(`/admin/torneos/${torneo.id}/equipos`)}>👥 Equipos</button>
-                          <button className="mt-btn-trash" onClick={() => handleEliminar(torneo.id)}><i className="bx bx-trash"></i></button>
+                          <Button
+                            variant="secondary"
+                            className="mt-btn-full"
+                            icon={<FiUsers />}
+                            onClick={() => navigate(`/admin/torneos/${torneo.id}/equipos`)}
+                          >
+                            Equipos
+                          </Button>
+                          <button className="mt-btn-trash" onClick={() => handleEliminar(torneo.id)}>
+                            <FiTrash2 />
+                          </button>
                         </>
                       )}
                       {torneo.estado === "Borrador" && (
                         <>
-                          <button className="mt-btn-add" onClick={() => navigate(`/admin/torneos/${torneo.id}/equipos`)}>👥 Agregar equipos</button>
-                          <button className="mt-btn-trash" onClick={() => handleEliminar(torneo.id)}><i className="bx bx-trash"></i></button>
+                          <Button
+                            className="mt-btn-full"
+                            icon={<FiUsers />}
+                            onClick={() => navigate(`/admin/torneos/${torneo.id}/equipos`)}
+                          >
+                            Agregar equipos
+                          </Button>
+                          <button className="mt-btn-trash" onClick={() => handleEliminar(torneo.id)}>
+                            <FiTrash2 />
+                          </button>
                         </>
                       )}
                       {torneo.estado === "Finalizado" && (
                         <>
-                          <button className="mt-btn-outline mt-btn-full">🏆 Ver resumen</button>
-                          <button className="mt-btn-trash" onClick={() => handleEliminar(torneo.id)}><i className="bx bx-trash"></i></button>
+                          <Button
+                            variant="secondary"
+                            className="mt-btn-full"
+                            icon={<FiAward />}
+                            onClick={() => navigate(`/admin/torneos/${torneo.id}/equipos`)}
+                          >
+                            Ver resumen
+                          </Button>
+                          <button className="mt-btn-trash" onClick={() => handleEliminar(torneo.id)}>
+                            <FiTrash2 />
+                          </button>
                         </>
                       )}
                     </div>
@@ -261,8 +291,15 @@ export default function MisTorneos() {
                 );
               })}
 
+              {/*
+                .mt-card-new + el botón "Nuevo torneo" de arriba: revisado — no es
+                una duplicación accidental, es el patrón habitual de "tile para
+                agregar" al final de una grilla de cards, complementario al CTA
+                del toolbar (se deja tal cual, ambos apuntan a la misma acción
+                por caminos de descubrimiento distintos).
+              */}
               <div className="mt-card-new" onClick={() => navigate("/admin/torneos/nuevo")}>
-                <div className="mt-card-new-icon"><i className="bx bx-plus"></i></div>
+                <div className="mt-card-new-icon"><FiPlus /></div>
                 <span className="mt-card-new-label">Crear nuevo torneo</span>
                 <span className="mt-card-new-sub">Comenzá la próxima competencia</span>
               </div>

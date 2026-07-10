@@ -1,5 +1,5 @@
 .tabla-wrapper {
-  background-color: #eaf6ec;
+  background-color: var(--color-paper);
   min-height: 100vh;
   padding: 2rem 1rem;
 }
@@ -8,111 +8,81 @@
   max-width: 1000px;
   margin: 0 auto;
   padding: 2rem;
-  background-color: #fefefe;
-  border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
-  color: #222;
-  font-family: 'Segoe UI', sans-serif;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  color: var(--color-ink);
+  font-family: var(--font-body);
 }
 
 .tabla-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   font-size: 2rem;
-  color: #2e7d32;
+  color: var(--color-pitch);
   margin-bottom: 0.25rem;
   text-align: center;
 }
 
 .tabla-subtitulo {
   text-align: center;
-  color: #555;
+  color: var(--color-muted);
   margin-bottom: 1.5rem;
+}
+
+/*
+  Contenedor de scroll propio para la tabla: en mobile permite desplazar
+  horizontalmente y ver todas las columnas (PJ..Pts), en vez de depender de
+  pisar el overflow-x: hidden global del body (antes las columnas de la
+  derecha quedaban recortadas sin forma de verlas).
+*/
+.tabla-scroll {
+  overflow-x: auto;
 }
 
 .tabla-posiciones {
   width: 100%;
+  min-width: 560px;
   border-collapse: collapse;
   font-size: 1rem;
   text-align: center;
 }
 
 .tabla-posiciones th {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background-color: var(--color-success-bg);
+  color: var(--color-pitch);
   padding: 12px 8px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .tabla-posiciones td {
   padding: 10px 8px;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .tabla-posiciones tbody tr:nth-child(odd) {
-  background-color: #f9f9f9;
+  background-color: var(--color-surface-muted);
+}
+
+.fila-clickeable {
+  cursor: pointer;
 }
 
 .tabla-posiciones tbody tr:hover {
-  background-color: #eef4f0;
+  background-color: var(--color-success-bg);
 }
 
 .positivo {
-  color: #388e3c;
-  font-weight: bold;
+  color: var(--color-turf);
 }
 
 .negativo {
-  color: #c62828;
-  font-weight: bold;
+  color: var(--color-alert);
 }
 
 .puntos {
-  font-weight: bold;
-  font-size: 1.1rem;
-}
-
-
-
-/* Aplica a NavLink activo */
-.navlinks a.active {
-  background-color: #d4f4dc;  /* verde claro */
-  color: #2e7d32;             /* verde oscuro */
-  font-weight: 600;
-  border-radius: 6px;
-}
-
-/* Animación suave */
-.navlinks a {
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-/* Mensaje de error */
-.mensaje-error {
-  background-color: #fdecea;
-  border: 1px solid #f5c2c7;
-  color: #842029;
-  padding: 1.5rem;
-  border-radius: 12px;
-  text-align: center;
-  margin: 2rem auto 0;
-  max-width: 800px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
-
-.mensaje-error i {
-  font-size: 2rem;
-  color: #dc3545;
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-.mensaje-error h3 {
-  margin: 0.5rem 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.mensaje-error p {
-  margin: 0;
-  font-size: 1rem;
-  color: #7a1f1f;
+  font-size: 1.15rem;
 }

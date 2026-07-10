@@ -1,7 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import "../styles/FixtureTorneo.css";
 import "../styles/IndexStyle.css";
+import { FiCalendar, FiClock, FiMapPin } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
+import { Alert } from "../components/ui";
 
 function FixtureTorneo() {
   const [partidos, setPartidos] = useState([]);
@@ -113,9 +115,9 @@ function FixtureTorneo() {
 
   return (
     <main className="subpagina-container">
-      <section className="fixture-header">
+      <section className="page-header">
         <h1>
-          <i className="bx bx-calendar"></i> Fixture del Torneo
+          <FiCalendar /> Fixture del Torneo
         </h1>
         <p>Próximos partidos a disputarse en el torneo</p>
       </section>
@@ -146,31 +148,24 @@ function FixtureTorneo() {
         {loading && <p className="mensaje-info">Cargando partidos...</p>}
 
         {error && (
-          <div className="mensaje-error">
-            <i className="bx bx-error-circle"></i>
-            <h3>
-              No perteneces a un equipo o tu equipo no tiene un torneo activo
-            </h3>
+          <Alert variant="error">
+            <strong>No perteneces a un equipo o tu equipo no tiene un torneo activo</strong>
             <p>
               Uníte o creá un equipo, o participá de un torneo activo para
               visualizar los próximos encuentros.
             </p>
-          </div>
+          </Alert>
         )}
 
         {!loading && !error && partidos.length === 0 && (
-          <p className="mensaje-info">
-            No hay partidos programados actualmente.
-          </p>
+          <Alert variant="info">No hay partidos programados actualmente.</Alert>
         )}
 
         {!loading &&
           !error &&
           partidos.length > 0 &&
           partidosFiltrados.length === 0 && (
-            <p className="mensaje-info">
-              No hay partidos programados para esa jornada.
-            </p>
+            <Alert variant="info">No hay partidos programados para esa jornada.</Alert>
           )}
 
         {!loading &&
@@ -191,15 +186,13 @@ function FixtureTorneo() {
 
               <div className="fixture-detalles">
                 <p>
-                  <i className="bx bx-calendar"></i>{" "}
-                  {new Date(partido.fecha_partido).toLocaleDateString()}
+                  <FiCalendar /> {new Date(partido.fecha_partido).toLocaleDateString()}
                 </p>
                 <p>
-                  <i className="bx bx-time"></i> {partido.hora_partido}
+                  <FiClock /> {partido.hora_partido}
                 </p>
                 <p>
-                  <i className="bx bx-map"></i>{" "}
-                  {partido.cancha?.nombre || "Cancha"}
+                  <FiMapPin /> {partido.cancha?.nombre || "Cancha"}
                 </p>
               </div>
             </div>

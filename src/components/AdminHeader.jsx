@@ -1,23 +1,53 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaSignOutAlt } from "react-icons/fa";
+import { FiAward, FiChevronDown, FiList, FiPlusCircle, FiFlag, FiMapPin, FiUsers, FiLogOut } from "react-icons/fi";
 import "../styles/IndexStyle.css";
 import "../styles/MenuAdmin.css";
 
 const OTHER_NAV = [
-  { label: "Arbitraje", icon: "bx-whistle",  path: "/admin/arbitros" },
-  { label: "Canchas",   icon: "bx-football", path: null },
-  { label: "Jugadores", icon: "bx-group",    path: null },
+  { label: "Arbitraje", icon: FiFlag, path: "/admin/arbitros" },
+  { label: "Canchas", icon: FiMapPin, path: null },
+  { label: "Jugadores", icon: FiUsers, path: null },
 ];
 
 export default function AdminHeader({ admin, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [dropOpen, setDropOpen] = useState(false);
-  const closeTimer = useRef(null);
+  const wrapRef = useRef(null);
+  const triggerRef = useRef(null);
 
-  const openDrop  = () => { clearTimeout(closeTimer.current); setDropOpen(true); };
-  const closeDrop = () => { closeTimer.current = setTimeout(() => setDropOpen(false), 120); };
+  // Click para abrir/cerrar (en vez de hover + setTimeout): evita el bug de
+  // que el dropdown se cierre si el mouse se mueve en diagonal antes de
+  // llegar a él, y es accesible por teclado (Enter/Espacio en el trigger).
+  useEffect(() => {
+    if (!dropOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setDropOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    const handleClickOutside = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
+        setDropOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropOpen]);
+
+  const handleBlur = (e) => {
+    if (!wrapRef.current?.contains(e.relatedTarget)) {
+      setDropOpen(false);
+    }
+  };
 
   const isTorneos = location.pathname.startsWith("/admin/torneos");
   const initials = `${admin.nombre?.[0] ?? ""}${admin.apellido?.[0] ?? ""}`.toUpperCase();
@@ -39,28 +69,30 @@ export default function AdminHeader({ admin, onLogout }) {
 
         <ul className="navlinks">
           {/* Dropdown: Mis Torneos */}
-          <li
-            style={{ position: "relative" }}
-            onMouseEnter={openDrop}
-            onMouseLeave={closeDrop}
-          >
-            <button className={`admin-nav-btn${isTorneos ? " active" : ""}`}>
-              <i className="bx bx-trophy"></i>
+          <li className="admin-dropdown-wrap" ref={wrapRef} onBlur={handleBlur}>
+            <button
+              ref={triggerRef}
+              className={`admin-nav-btn${isTorneos ? " active" : ""}`}
+              onClick={() => setDropOpen((v) => !v)}
+              aria-haspopup="true"
+              aria-expanded={dropOpen}
+            >
+              <FiAward />
               Mis Torneos
-              <i className="bx bx-chevron-down admin-nav-chevron"></i>
+              <FiChevronDown className="admin-nav-chevron" />
             </button>
 
             {dropOpen && (
-              <div className="admin-dropdown" onMouseEnter={openDrop} onMouseLeave={closeDrop}>
+              <div className="admin-dropdown">
                 <button
                   className="admin-dropdown-item"
                   onClick={() => { navigate("/admin/torneos"); setDropOpen(false); }}
                 >
                   <div className="admin-dropdown-icon">
-                    <i className="bx bx-list-ul"></i>
+                    <FiList />
                   </div>
                   <div>
-                    <span className="admin-dropdown-label">📋 Mis Torneos</span>
+                    <span className="admin-dropdown-label">Mis Torneos</span>
                     <span className="admin-dropdown-desc">Listá, editá o eliminá tus torneos</span>
                   </div>
                 </button>
@@ -69,10 +101,10 @@ export default function AdminHeader({ admin, onLogout }) {
                   onClick={() => { navigate("/admin/torneos/nuevo"); setDropOpen(false); }}
                 >
                   <div className="admin-dropdown-icon">
-                    <i className="bx bx-plus-circle"></i>
+                    <FiPlusCircle />
                   </div>
                   <div>
-                    <span className="admin-dropdown-label">➕ Crear Torneo</span>
+                    <span className="admin-dropdown-label">Crear Torneo</span>
                     <span className="admin-dropdown-desc">Nuevo certamen desde cero</span>
                   </div>
                 </button>
@@ -80,17 +112,20 @@ export default function AdminHeader({ admin, onLogout }) {
             )}
           </li>
 
-          {OTHER_NAV.map(({ label, icon, path }) => (
-            <li key={label}>
-              <button
-                className="admin-nav-btn"
-                onClick={() => navigate(path ?? "/menu-admin")}
-              >
-                <i className={`bx ${icon}`}></i>
-                {label}
-              </button>
-            </li>
-          ))}
+          {OTHER_NAV.map((item) => {
+            const Icon = item.icon;
+            return (
+              <li key={item.label}>
+                <button
+                  className="admin-nav-btn"
+                  onClick={() => navigate(item.path ?? "/menu-admin")}
+                >
+                  <Icon />
+                  {item.label}
+                </button>
+              </li>
+            );
+          })}
         </ul>
 
         <div className="nav-actions">
@@ -101,7 +136,7 @@ export default function AdminHeader({ admin, onLogout }) {
               <span className="admin-user-role">Administrador</span>
             </div>
             <button className="btn-logout" onClick={onLogout}>
-              <FaSignOutAlt />
+              <FiLogOut />
               Cerrar sesión
             </button>
           </div>

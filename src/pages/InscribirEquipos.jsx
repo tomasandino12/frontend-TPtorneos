@@ -3,8 +3,10 @@ import "../styles/MenuAdmin.css";
 import "../styles/InscribirEquipos.css";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { FiUsers, FiSearch, FiArrowLeft, FiZap, FiCheck } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch, ASSETS_URL } from "../utils/api.js";
+import { Button, TextField, Alert } from "../components/ui";
 
 const LABEL_CATEGORIA = {
   sub15:     "Sub-15",
@@ -203,7 +205,7 @@ export default function InscribirEquipos() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Error al generar el fixture");
-      setOkFixture(`✓ ${data.message}`);
+      setOkFixture(data.message);
       // Recargar torneo para reflejar estado "en_curso"
       const resTorneo = await adminApiFetch(`/torneo/${torneoId}`);
       const dTorneo = await resTorneo.json();
@@ -220,14 +222,14 @@ export default function InscribirEquipos() {
   if (pageLoading) return (
     <div className="layout">
       <AdminHeader admin={admin} onLogout={() => { localStorage.removeItem("admin"); navigate("/admin"); }} />
-      <main style={{ padding: "3rem", textAlign: "center", color: "#6b7280" }}>Cargando...</main>
+      <main className="ie-page-status">Cargando...</main>
     </div>
   );
 
   if (pageError) return (
     <div className="layout">
       <AdminHeader admin={admin} onLogout={() => { localStorage.removeItem("admin"); navigate("/admin"); }} />
-      <main style={{ padding: "3rem", textAlign: "center", color: "#dc2626" }}>{pageError}</main>
+      <main className="ie-page-status ie-page-status-error">{pageError}</main>
     </div>
   );
 
@@ -243,11 +245,11 @@ export default function InscribirEquipos() {
         onLogout={() => { localStorage.removeItem("admin"); localStorage.removeItem("adminToken"); navigate("/admin"); }}
       />
 
-      <main style={{ backgroundColor: "#f9fafb" }}>
+      <main>
         {/* Hero */}
         <section className="ie-hero">
           <div className="ie-hero-title">
-            <i className="bx bx-group ie-hero-icon"></i>
+            <FiUsers className="ie-hero-icon" />
             <h1>Inscribir Equipos</h1>
           </div>
           <p className="ie-hero-subtitle">
@@ -273,18 +275,15 @@ export default function InscribirEquipos() {
               <span className="ie-badge-count">{seleccionados.size} seleccionado(s)</span>
             </div>
 
-            <div className="ie-search">
-              <i className="bx bx-search"></i>
-              <input
-                type="text"
-                placeholder="Buscar equipo..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
+            <TextField
+              icon={<FiSearch />}
+              placeholder="Buscar equipo..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
 
             {equiposFiltrados.length === 0 && (
-              <p style={{ padding: "2rem", textAlign: "center", color: "#9ca3af" }}>
+              <p className="ie-list-empty">
                 No hay equipos de categoría <strong>{categoriaLabel}</strong> disponibles.
               </p>
             )}
@@ -325,7 +324,11 @@ export default function InscribirEquipos() {
                         {equipo.colorSecundario && ` · ${equipo.colorPrimario}/${equipo.colorSecundario}`}
                       </div>
                     </div>
-                    {yaInscripto && <span className="ie-tag-inscripto">✓ Inscripto</span>}
+                    {yaInscripto && (
+                      <span className="ie-tag-inscripto">
+                        <FiCheck /> Inscripto
+                      </span>
+                    )}
                   </div>
                 );
               })}
@@ -353,25 +356,25 @@ export default function InscribirEquipos() {
                 ))}
               </div>
 
-              {errorInscripcion && <div className="ie-msg-err">{errorInscripcion}</div>}
-              {okInscripcion    && <div className="ie-msg-ok">{okInscripcion}</div>}
+              {errorInscripcion && <Alert variant="error" className="ie-alert">{errorInscripcion}</Alert>}
+              {okInscripcion && <Alert variant="success" className="ie-alert">{okInscripcion}</Alert>}
 
-              <button
-                className="ie-btn-inscribir"
-                style={{ marginTop: "1rem" }}
+              <Button
+                className="ie-btn-block"
                 disabled={seleccionados.size === 0 || loadingInscripcion}
                 onClick={handleInscribir}
               >
                 {loadingInscripcion ? "Inscribiendo..." : `Inscribir ${seleccionados.size > 0 ? seleccionados.size : ""} equipo(s)`}
-              </button>
+              </Button>
 
-              <button
-                className="ie-btn-outline"
-                style={{ marginTop: "0.5rem" }}
+              <Button
+                variant="secondary"
+                className="ie-btn-block"
+                icon={<FiArrowLeft />}
                 onClick={() => navigate("/admin/torneos")}
               >
-                ← Volver a mis torneos
-              </button>
+                Volver a mis torneos
+              </Button>
             </div>
 
             {/* Generar fixture */}
@@ -379,69 +382,77 @@ export default function InscribirEquipos() {
               <h3>Generar Fixture</h3>
 
               {fixtureYaGenerado ? (
-                <div className="ie-msg-ok">
-                  ✓ El fixture ya fue generado. El torneo está en curso.
-                </div>
+                <Alert variant="success">
+                  El fixture ya fue generado. El torneo está en curso.
+                </Alert>
               ) : (
                 <>
-                  <div className="ie-fixture-field">
-                    <label>Fecha de inicio</label>
-                    <input type="date" value={fechaBase} onChange={(e) => setFechaBase(e.target.value)} />
-                  </div>
-                  <div className="ie-fixture-field">
-                    <label>Hora de los partidos</label>
-                    <input type="time" value={horaBase} onChange={(e) => setHoraBase(e.target.value)} />
-                  </div>
-                  <div className="ie-fixture-field">
-                    <label>Días entre jornadas</label>
-                    <input
+                  <div className="ie-fixture-scroll">
+                    <TextField
+                      label="Fecha de inicio"
+                      type="date"
+                      value={fechaBase}
+                      onChange={(e) => setFechaBase(e.target.value)}
+                      className="ie-fixture-field"
+                    />
+                    <TextField
+                      label="Hora de los partidos"
+                      type="time"
+                      value={horaBase}
+                      onChange={(e) => setHoraBase(e.target.value)}
+                      className="ie-fixture-field"
+                    />
+                    <TextField
+                      label="Días entre jornadas"
                       type="number" min={1} max={30}
                       value={diasEntreJornadas}
                       onChange={(e) => setDiasEntreJornadas(e.target.value)}
+                      className="ie-fixture-field"
                     />
+
+                    {canchas.length > 0 && (
+                      <div className="ie-fixture-field">
+                        <label>Canchas</label>
+                        <div className="ie-check-list">
+                          {canchas.map((c) => (
+                            <label key={c.id} className="ie-check-item">
+                              <input
+                                type="checkbox"
+                                checked={canchasSelec.has(c.id)}
+                                onChange={() => toggleCancha(c.id)}
+                              />
+                              {c.nombre}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {arbitros.length > 0 && (
+                      <div className="ie-fixture-field">
+                        <label>Árbitros</label>
+                        <div className="ie-check-list">
+                          {arbitros.map((a) => (
+                            <label key={a.id} className="ie-check-item">
+                              <input
+                                type="checkbox"
+                                checked={arbitrosSelec.has(a.id)}
+                                onChange={() => toggleArbitro(a.id)}
+                              />
+                              {a.nombre} {a.apellido}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {canchas.length > 0 && (
-                    <div className="ie-fixture-field">
-                      <label>Canchas</label>
-                      <div className="ie-check-list">
-                        {canchas.map((c) => (
-                          <label key={c.id} className="ie-check-item">
-                            <input
-                              type="checkbox"
-                              checked={canchasSelec.has(c.id)}
-                              onChange={() => toggleCancha(c.id)}
-                            />
-                            {c.nombre}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  {errorFixture && <Alert variant="error" className="ie-alert">{errorFixture}</Alert>}
+                  {okFixture && <Alert variant="success" className="ie-alert">{okFixture}</Alert>}
 
-                  {arbitros.length > 0 && (
-                    <div className="ie-fixture-field">
-                      <label>Árbitros</label>
-                      <div className="ie-check-list">
-                        {arbitros.map((a) => (
-                          <label key={a.id} className="ie-check-item">
-                            <input
-                              type="checkbox"
-                              checked={arbitrosSelec.has(a.id)}
-                              onChange={() => toggleArbitro(a.id)}
-                            />
-                            {a.nombre} {a.apellido}
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {errorFixture && <div className="ie-msg-err">{errorFixture}</div>}
-                  {okFixture    && <div className="ie-msg-ok">{okFixture}</div>}
-
-                  <button
-                    className="ie-btn-fixture"
+                  <Button
+                    className="ie-btn-block"
+                    icon={<FiZap />}
                     disabled={totalInscriptos < 2 || loadingFixture}
                     onClick={handleGenerarFixture}
                   >
@@ -449,8 +460,8 @@ export default function InscribirEquipos() {
                       ? "Generando..."
                       : totalInscriptos < 2
                       ? "Inscribí al menos 2 equipos"
-                      : "⚡ Generar fixture"}
-                  </button>
+                      : "Generar fixture"}
+                  </Button>
                 </>
               )}
             </div>

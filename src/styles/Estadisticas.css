@@ -1,25 +1,11 @@
-.estadisticas-container {
-  padding: 2rem;
-  background-color: #f5fdf7;
-}
+/*
+  El encabezado de página (antes .estadisticas-header) ahora es la clase
+  compartida .page-header en IndexStyle.css. El mensaje de error (antes
+  .mensaje-error) ahora es <Alert variant="error">.
+*/
 
-/* ===== ENCABEZADO ===== */
-.estadisticas-header {
-  background-color: #e5f8eb;
-  text-align: center;
-  padding: 2rem;
-  border-radius: 12px;
-  margin-bottom: 2rem;
-}
-
-.estadisticas-header h1 {
-  font-size: 2.2rem;
-  color: #2e7d32;
-  margin-bottom: 0.5rem;
-}
-
-.estadisticas-header p {
-  color: #555;
+.page-header .equipo-cross-link {
+  margin-top: 1rem;
 }
 
 /* ===== RESUMEN ===== */
@@ -32,32 +18,32 @@
 }
 
 .resumen-box {
-  background: white;
-  border-radius: 12px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
   padding: 1.2rem 2rem;
   text-align: center;
   width: 150px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .resumen-box span {
   font-size: 2rem;
-  font-weight: bold;
   display: block;
   margin-bottom: 4px;
 }
 
 .resumen-box p {
   margin: 0;
-  color: #555;
+  color: var(--color-muted);
   font-size: 0.95rem;
   font-weight: 500;
 }
 
-.verde span { color: #2e7d32; }
-.gris span { color: #757575; }
-.rojo span { color: #d32f2f; }
-.azul span { color: #1e88e5; }
+.verde span { color: var(--color-turf); }
+.gris span { color: var(--color-muted); }
+.rojo span { color: var(--color-alert); }
+/* "Partidos Jugados" es un total neutral, no un estado de éxito/error/advertencia */
+.total span { color: var(--color-ink); }
 
 /* ===== CONTENIDO PRINCIPAL ===== */
 .estadisticas-contenido {
@@ -66,127 +52,50 @@
   gap: 2rem;
 }
 
-.partidos-jugados,
-.plantilla-jugadores {
+.partidos-jugados {
   flex: 1;
   min-width: 320px;
 }
 
 /* ===== TITULOS DE SECCIONES ===== */
-.partidos-jugados h2,
-.plantilla-jugadores h2 {
-  color: #2e7d32;
+.partidos-jugados h2 {
+  color: var(--color-pitch);
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.partidos-jugados p,
-.plantilla-jugadores p {
-  color: #666;
+.partidos-jugados p {
+  color: var(--color-muted);
   font-size: 0.95rem;
   margin-bottom: 1rem;
 }
 
 /* ===== TARJETAS DE PARTIDOS ===== */
 .partido-card {
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   padding: 0.75rem 1rem;
   margin-bottom: 0.8rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #222;
+  color: var(--color-ink);
   font-weight: 500;
 }
 
-.partido-card.verde { background-color: #c8e6c9; }
-.partido-card.amarillo { background-color: #ffecb3; }
-.partido-card.rojo { background-color: #ef9a9a; }
+.partido-card.verde { background-color: var(--color-success-bg); }
+.partido-card.amarillo { background-color: var(--color-warning-bg); }
+.partido-card.rojo { background-color: var(--color-error-bg); }
+.partido-card.gris { background-color: var(--color-surface-muted); }
 
 .partido-vs {
   font-weight: bold;
 }
 
 .partido-resultado {
-  background: white;
+  background: var(--color-surface);
   padding: 6px 12px;
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.95rem;
-}
-
-/* ===== PLANTEL DE JUGADORES ===== */
-.plantilla-jugadores h3 {
-  margin-top: 1.2rem;
-  font-size: 1rem;
-  color: #444;
-}
-
-/* Tarjeta individual del jugador */
-.jugador-card {
-  background: white;
-  border-radius: 10px;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.6rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-/* Aseguramos que el nombre y apellido se vean */
-.jugador-card strong {
-  color: #000;
-  font-size: 1rem;
-  font-weight: 600;
-  display: block;
-}
-
-/* Posición del jugador debajo del nombre */
-.jugador-pos {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #666;
-}
-
-/* Edad del jugador al costado derecho */
-.jugador-edad {
-  background-color: #f1f1f1;
-  padding: 6px 10px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  color: #333;
-}
-
-/* Mensaje de error */
-.mensaje-error {
-  background-color: #fdecea;
-  border: 1px solid #f5c2c7;
-  color: #842029;
-  padding: 1.5rem;
-  border-radius: 12px;
-  text-align: center;
-  margin: 2rem auto 0;
-  max-width: 800px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
-
-.mensaje-error i {
-  font-size: 2rem;
-  color: #dc3545;
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-.mensaje-error h3 {
-  margin: 0.5rem 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.mensaje-error p {
-  margin: 0;
-  font-size: 1rem;
-  color: #7a1f1f;
 }

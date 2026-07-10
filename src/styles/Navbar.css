@@ -1,0 +1,118 @@
+/*
+  Estilos del Navbar principal (src/components/Navbar.jsx). Usa clases nuevas
+  (prefijo gt-) en vez de las históricas .navbar/.navlinks/.btn-logout de
+  IndexStyle.css: esas clases también las usa AdminHeader.jsx (panel admin,
+  Fase 4, fuera de alcance acá), así que evitamos tocarlas para no afectar
+  pantallas que todavía no fueron migradas.
+*/
+
+.gt-navbar {
+  background-color: var(--color-surface);
+  border-bottom: 2px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  width: 100%;
+  box-shadow: var(--shadow-sm);
+}
+
+.gt-navbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.85rem 2rem;
+}
+
+.gt-logo {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.03em;
+  color: var(--color-pitch);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.gt-logo span {
+  color: var(--color-turf);
+}
+
+.gt-navlinks {
+  list-style: none;
+  display: flex;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.gt-navlinks a {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  text-decoration: none;
+  color: var(--color-muted);
+  padding: 0.5em 0.75em;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.gt-navlinks a:hover {
+  background-color: var(--color-surface-muted);
+  color: var(--color-ink);
+}
+
+.gt-navlinks a.active {
+  background-color: var(--color-success-bg);
+  color: var(--color-pitch);
+  font-weight: 600;
+}
+
+.gt-nav-actions {
+  display: flex;
+  align-items: center;
+}
+
+.gt-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.5em 0.9em;
+  border: 1.5px solid var(--color-alert);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-alert);
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: var(--font-body);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.gt-logout-btn:hover {
+  background-color: var(--color-alert);
+  color: var(--color-surface);
+}
+
+.gt-logout-btn:focus-visible,
+.gt-navlinks a:focus-visible,
+.gt-logo:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (max-width: 860px) {
+  .gt-navbar-inner {
+    flex-wrap: wrap;
+    padding: 0.75rem 1rem;
+  }
+
+  .gt-navlinks {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+}

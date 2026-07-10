@@ -1,0 +1,75 @@
+/*
+  Design tokens — sistema de diseño base del Gestor de Torneos.
+  Fase 1 del plan de corrección de UI (ver docs/auditoria-ui.md).
+
+  Este archivo solo declara custom properties y una utility class puntual
+  (.stat-numeral): no define estilos de `body`/elementos globales, para que
+  importarlo no cambie el aspecto de ninguna pantalla existente todavía.
+  Las pantallas se migran en fases posteriores consumiendo estas variables.
+*/
+
+:root {
+  /* ---- Paleta con nombre (dominio: gestor de torneos amateur) ---- */
+  --color-pitch: #1F5233;    /* verde cancha oscuro — marca primaria, botones primarios */
+  --color-pitch-dark: #163D26; /* derivado de pitch, estado :active/pressed */
+  --color-turf: #3F8452;     /* verde cancha medio — hover, acentos secundarios, éxito */
+  --color-whistle: #D98E04;  /* ámbar "silbato" — único color de advertencia/pendiente/borrador */
+  --color-alert: #B3261E;    /* rojo único — reemplaza las 3 paletas de error que conviven hoy */
+  --color-alert-dark: #8F1611; /* derivado de alert, hover de botones destructivos */
+  --color-paper: #F5F1E6;    /* fondo general, marfil cálido */
+  --color-ink: #16241B;      /* texto principal, negro con base verde */
+
+  /* ---- Neutros derivados ---- */
+  --color-surface: #FFFFFF;        /* fondo de cards/inputs sobre --color-paper */
+  --color-surface-muted: #EFE8D6;  /* hover/zebra sobre --color-surface, más oscuro que paper */
+  --color-border: #DCD3BC;         /* bordes sutiles sobre paper/surface */
+  --color-muted: #5B6B5E;          /* texto secundario, gris con matiz verde (deriva de --color-ink) */
+
+  /* ---- Superficies semánticas para Alert (success/error/warning heredan la paleta de marca) ---- */
+  --color-success-bg: #E1F1E4;
+  --color-success-text: var(--color-pitch);
+  --color-error-bg: #F8DEDC;
+  --color-error-text: #7A1B16;
+  --color-warning-bg: #FBEBCB;
+  --color-warning-text: #7A5205;
+  /* "info" es neutral a propósito: la paleta de marca no tiene un azul/hue propio,
+     así que en vez de inventar un color nuevo se apoya en los neutros ya derivados. */
+  --color-info: var(--color-muted);
+  --color-info-bg: var(--color-surface-muted);
+  --color-info-text: var(--color-ink);
+
+  /* ---- Tipografía ---- */
+  --font-display: "Bebas Neue", "Arial Narrow", sans-serif; /* títulos, cifras destacadas — nunca párrafos/formularios */
+  --font-body: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif; /* UI, formularios, tablas */
+
+  /* ---- Radios / sombras / foco (soporte para los componentes de src/components/ui) ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(22, 36, 27, 0.08);
+  --shadow-md: 0 4px 14px rgba(22, 36, 27, 0.12);
+  --focus-ring: 0 0 0 3px rgba(63, 132, 82, 0.45); /* anillo de foco por teclado, basado en --color-turf */
+
+  /* ---- Escala de z-index (Fase 4) ----
+     Reemplaza los números sueltos (10/20/200) que convivían sin relación entre
+     sí. Ya está aplicada donde el archivo estaba en el alcance de esta fase
+     (MenuAdmin.css, Arbitros.css); .navbar/.gt-navbar (IndexStyle.css /
+     Navbar.css) siguen con z-index:10 hardcodeado — incluirlos exigía tocar
+     archivos fuera del alcance explícito de esta fase, así que se deja
+     pendiente a propósito (mismo valor, sin bug de superposición real). */
+  --z-navbar: 100;
+  --z-dropdown: 200;
+  --z-modal: 300;
+}
+
+/*
+  Utility "marcador deportivo" para cifras de Tabla de Posiciones / Estadísticas
+  (PJ, PG, PE, PP, DG, Pts). Token listo desde ya; se aplica a esas tablas en una
+  fase posterior de migración.
+*/
+.stat-numeral {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}

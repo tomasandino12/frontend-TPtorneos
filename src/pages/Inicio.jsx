@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { FaCalendarAlt, FaMapMarkerAlt } from "react-icons/fa";
+import { FiCalendar, FiMapPin } from "react-icons/fi";
 import "../styles/Inicio.css";
+import { Button } from "../components/ui";
 
 function Inicio() {
   const navigate = useNavigate();
@@ -21,22 +22,17 @@ function Inicio() {
 
         <div className="inicio-datos">
           <div className="inicio-dato">
-            <FaCalendarAlt />
+            <FiCalendar />
             <span>{fechaHoy}</span>
           </div>
           <div className="inicio-dato">
-            <FaMapMarkerAlt />
+            <FiMapPin />
             <span>Estadio Municipal, Rosario</span>
           </div>
         </div>
 
         <div className="inicio-botones">
-          <button
-            className="btn-hero-primary"
-            onClick={() => navigate("/gestorTorneos/fixture")}
-          >
-            Ver Fixture
-          </button>
+          <Button onClick={() => navigate("/gestorTorneos/fixture")}>Ver Fixture</Button>
           <button
             className="btn-hero-secondary"
             onClick={() => navigate("/gestorTorneos")}

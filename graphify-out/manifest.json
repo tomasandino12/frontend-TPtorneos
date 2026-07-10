@@ -1,0 +1,122 @@
+{
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\eslint.config.js": {
+    "mtime": 1757025259.134096,
+    "ast_hash": "2c92ee8c1d7c10a6cb0e834c108be353",
+    "semantic_hash": "2c92ee8c1d7c10a6cb0e834c108be353"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\package.json": {
+    "mtime": 1779220413.004007,
+    "ast_hash": "868088b48d8f349422e6fbf52e630e82",
+    "semantic_hash": "868088b48d8f349422e6fbf52e630e82"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\App.jsx": {
+    "mtime": 1779221074.2061958,
+    "ast_hash": "2ae679751657598fbfc99fcaf7c1ce5f",
+    "semantic_hash": "2ae679751657598fbfc99fcaf7c1ce5f"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\main.jsx": {
+    "mtime": 1758901047.5989728,
+    "ast_hash": "86424284cd1577a8df3e2a59294d19a9",
+    "semantic_hash": "86424284cd1577a8df3e2a59294d19a9"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\pages\\CrearTorneo.jsx": {
+    "mtime": 1779220413.019666,
+    "ast_hash": "912ab31b8540768e12e274757add91d1",
+    "semantic_hash": "912ab31b8540768e12e274757add91d1"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\pages\\EquipoDetalle.jsx": {
+    "mtime": 1779220413.019666,
+    "ast_hash": "a2f3eec105ac4f98373ee230938ccb38",
+    "semantic_hash": "a2f3eec105ac4f98373ee230938ccb38"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\pages\\Equipos.jsx": {
+    "mtime": 1779220413.019666,
+    "ast_hash": "40e57b9bda5a927d36fb188ba634a44c",
+    "semantic_hash": "40e57b9bda5a927d36fb188ba634a44c"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\pages\\Estadisticas.jsx": {
+    "mtime": 1779220413.019666,
+    "ast_hash": "f1c168966e5e12b0380e969ba2a37982",
+    "semantic_hash": "f1c168966e5e12b0380e969ba2a37982"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\pages\\FixtureTorneo.jsx": {
+    "mtime": 1779220413.019666,
+    "ast_hash": "943f25ec75ef4a94650e75707af5a255",
+    "semantic_hash": "943f25ec75ef4a94650e75707af5a255"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\pages\\GestorTorneos.jsx": {
+    "mtime": 1779221074.2071996,
+    "ast_hash": "99afaae9b3612a0b254d8c442c377bdc",
+    "semantic_hash": "99afaae9b3612a0b254d8c442c377bdc"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\pages\\Inicio.jsx": {
+    "mtime": 1779212248.3176174,
+    "ast_hash": "9449efbd247c937f8a83b1541eed5845",
+    "semantic_hash": "9449efbd247c937f8a83b1541eed5845"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\pages\\InicioSesion.jsx": {
+    "mtime": 1779220413.019666,
+    "ast_hash": "e163754bc26ed45384802ed18702ff87",
+    "semantic_hash": "e163754bc26ed45384802ed18702ff87"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\pages\\InicioSesionAdmin.jsx": {
+    "mtime": 1779219214.301533,
+    "ast_hash": "e3b9a6b4a2b9dd854b24c05f969a5741",
+    "semantic_hash": "e3b9a6b4a2b9dd854b24c05f969a5741"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\pages\\Layout.jsx": {
+    "mtime": 1759370282.7852435,
+    "ast_hash": "908690a4b6160101cbd4688d46526f3c",
+    "semantic_hash": "908690a4b6160101cbd4688d46526f3c"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\pages\\MenuAdmin.jsx": {
+    "mtime": 1779219214.301533,
+    "ast_hash": "060b487c88621bc1b05cbea59092e23f",
+    "semantic_hash": "060b487c88621bc1b05cbea59092e23f"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\pages\\MiPerfil.jsx": {
+    "mtime": 1779220413.019666,
+    "ast_hash": "c234557da5410e11b436966e3667e665",
+    "semantic_hash": "c234557da5410e11b436966e3667e665"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\pages\\Registro.jsx": {
+    "mtime": 1779219214.301533,
+    "ast_hash": "9d31abaca8f3ec4c620f19c3b7f29178",
+    "semantic_hash": "9d31abaca8f3ec4c620f19c3b7f29178"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\pages\\TablaPosiciones.jsx": {
+    "mtime": 1779220413.019666,
+    "ast_hash": "454a6f6aaa81ac4782ee4dfdb351ed91",
+    "semantic_hash": "454a6f6aaa81ac4782ee4dfdb351ed91"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\utils\\api.js": {
+    "mtime": 1779220413.019666,
+    "ast_hash": "c3406d15afb4c7f394631ef899b0ae05",
+    "semantic_hash": "c3406d15afb4c7f394631ef899b0ae05"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\vite.config.js": {
+    "mtime": 1757025259.143736,
+    "ast_hash": "199e1221ae03d6974fdc8b5e23787b98",
+    "semantic_hash": "199e1221ae03d6974fdc8b5e23787b98"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\README.md": {
+    "mtime": 1757025259.134096,
+    "ast_hash": "22068fd0ed5e9fee1c1d39587d097d7f",
+    "semantic_hash": "22068fd0ed5e9fee1c1d39587d097d7f"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\index.html": {
+    "mtime": 1759368517.311837,
+    "ast_hash": "a10ae6ef91b751ca646b318cabf06b20",
+    "semantic_hash": "a10ae6ef91b751ca646b318cabf06b20"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\public\\vite.svg": {
+    "mtime": 1757025259.1360905,
+    "ast_hash": "8e3a10e157f75ada21ab742c022d5430",
+    "semantic_hash": "8e3a10e157f75ada21ab742c022d5430"
+  },
+  "C:\\Tomas\\UTN\\3er a\u00f1o\\Desarrollo\\Frontend\\src\\assets\\react.svg": {
+    "mtime": 1757025259.139028,
+    "ast_hash": "f0402b67b6ce880f65666bb49e841696",
+    "semantic_hash": "f0402b67b6ce880f65666bb49e841696"
+  }
+}

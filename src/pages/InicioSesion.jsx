@@ -1,22 +1,19 @@
 import "../styles/InicioSesion.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { FiMail, FiLock } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
+import { Button, TextField, Card, Alert } from "../components/ui";
 
 function InicioSesion() {
   const navigate = useNavigate();
 
   const [usuario, setUsuario] = useState("");
   const [contraseña, setContraseña] = useState("");
-  const [mostrarPass, setMostrarPass] = useState(false);
   const [recordar, setRecordar] = useState(false);
   const [error, setError] = useState("");
+  const [bienvenida, setBienvenida] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    document.body.classList.add("bg-login");
-    return () => document.body.classList.remove("bg-login");
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,8 +56,8 @@ function InicioSesion() {
       if (recordar) localStorage.setItem("rememberEmail", usuario);
       else localStorage.removeItem("rememberEmail");
 
-      alert(`✅ Bienvenido ${jugador.nombre}!`);
-      navigate("/gestorTorneos/inicio");
+      setBienvenida(`Bienvenido ${jugador.nombre}!`);
+      setTimeout(() => navigate("/gestorTorneos/inicio"), 900);
     } catch (err) {
       console.error("Error en inicio de sesión:", err);
       setError(err.message);
@@ -78,64 +75,41 @@ function InicioSesion() {
   }, []);
 
   return (
-    <div className="login-wrap">
-      <div className="login-card">
-        <div className="login-header">
-          <h1 className="login-brand">
+    <div className="auth-page">
+      <Card className="auth-card">
+        <div className="auth-header">
+          <h1 className="auth-brand">
             Gestor<span>Torneos</span>
           </h1>
-          <h2 className="login-title">Bienvenido de vuelta!</h2>
-          <p className="login-subtitle">
-            Ingrese sus datos para acceder a los datos del torneo
+          <h2 className="auth-title">Bienvenido de vuelta!</h2>
+          <p className="auth-subtitle">
+            Ingresá tus datos para acceder a los datos del torneo
           </p>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          <div className="field">
-            <label className="field-label" htmlFor="email">
-              Email
-            </label>
-            <div className="field-control">
-              <i className="bx bx-envelope field-icon"></i>
-              <input
-                id="email"
-                type="email"
-                placeholder="juanperez@email.com"
-                value={usuario}
-                onChange={(e) => setUsuario(e.target.value)}
-                required
-              />
-            </div>
-          </div>
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <TextField
+            label="Email"
+            type="email"
+            icon={<FiMail />}
+            placeholder="juanperez@email.com"
+            value={usuario}
+            onChange={(e) => setUsuario(e.target.value)}
+            required
+          />
 
-          <div className="field">
-            <label className="field-label" htmlFor="password">
-              Contraseña
-            </label>
-            <div className="field-control">
-              <i className="bx bx-lock-alt field-icon"></i>
-              <input
-                id="password"
-                type={mostrarPass ? "text" : "password"}
-                placeholder="••••••••"
-                value={contraseña}
-                onChange={(e) => setContraseña(e.target.value)}
-                style={{ textAlign: "left" }}
-                required
-              />
-              <button
-                type="button"
-                className="field-action"
-                onClick={() => setMostrarPass(!mostrarPass)}
-                aria-label={mostrarPass ? "Ocultar contraseña" : "Mostrar contraseña"}
-              >
-                <i className={`bx ${mostrarPass ? "bx-hide" : "bx-show"}`}></i>
-              </button>
-            </div>
-          </div>
+          <TextField
+            label="Contraseña"
+            type="password"
+            icon={<FiLock />}
+            placeholder="••••••••"
+            value={contraseña}
+            onChange={(e) => setContraseña(e.target.value)}
+            required
+          />
 
-          <div className="row-between">
-            <label className="check">
+          <div className="auth-row-between">
+            <label className="auth-check">
               <input
                 type="checkbox"
                 checked={recordar}
@@ -146,53 +120,45 @@ function InicioSesion() {
 
             <button
               type="button"
-              className="link-green"
+              className="auth-link"
               onClick={() => navigate("/olvide-password")}
             >
               Olvidé mi contraseña
             </button>
           </div>
 
-          <button className="btn-primary" type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading}>
             {isLoading ? "Entrando..." : "Entrar"}
-          </button>
+          </Button>
 
-          {error && <p className="login-error">{error}</p>}
+          {error && <Alert variant="error">{error}</Alert>}
+          {bienvenida && <Alert variant="success">{bienvenida}</Alert>}
 
-          <div className="divider">
+          <div className="auth-divider">
             <span>o</span>
           </div>
 
-          <div className="social">
-            <button type="button" className="btn-outline">
-              <span className="social-ico">G</span>
+          <div className="auth-social">
+            <Button type="button" variant="secondary">
               Continuar con Google
-            </button>
-
-            <button type="button" className="btn-outline">
-              <span className="social-ico">f</span>
-              Continuar con Facebook
-            </button>
+            </Button>
           </div>
 
-          <p className="bottom-text">
-            No tenes una cuenta?{" "}
-            <Link to="/registro" className="link-green">
+          <p className="auth-bottom-text">
+            No tenés una cuenta?{" "}
+            <Link to="/registro" className="auth-link">
               Registrarse
             </Link>
           </p>
 
-          <p className="bottom-text bottom-admin">
-                Sos administrador de un torneo?{" "}
-                <span
-                 className="link-green"
-                  onClick={() => navigate("/admin")}
-                                                      >
-                  Ingresar como Admin
-                </span>
+          <p className="auth-bottom-text">
+            Sos administrador de un torneo?{" "}
+            <button type="button" className="auth-link" onClick={() => navigate("/admin")}>
+              Ingresar como Admin
+            </button>
           </p>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }

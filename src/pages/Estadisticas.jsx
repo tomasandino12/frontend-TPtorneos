@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
 import "../styles/IndexStyle.css";
 import "../styles/Estadisticas.css";
+import { useNavigate } from "react-router-dom";
+import { FiCalendar, FiClock, FiSettings } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
+import { Button, Alert } from "../components/ui";
 
 function Estadisticas() {
+  const navigate = useNavigate();
   const [equipo, setEquipo] = useState(null);
   const [partidos, setPartidos] = useState([]);
-  const [jugadores, setJugadores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Solo para el link cruzado hacia "Gestionar mi equipo" (EquipoDetalle) — no altera el fetch de datos.
+  const jugadorLogueado = JSON.parse(localStorage.getItem("jugador") || "null");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,27 +49,6 @@ function Estadisticas() {
           empates: estad?.empates ?? 0,
           derrotas: estad?.derrotas ?? 0,
         });
-
-        // Procesar jugadores
-        const jugadoresData = (equipoData?.jugadores || []).map((j) => ({
-          id: j.id,
-          nombre: j.nombre ?? j.nombreJugador ?? j.Nombre ?? "",
-          apellido: j.apellido ?? j.apellidoJugador ?? j.Apellido ?? "",
-          posicion: j.posicion ?? j.Posicion ?? "Sin posición",
-          fechaNacimiento:
-            j.fechaNacimiento ??
-            j.fecha_nacimiento ??
-            j.fechaNac ??
-            j.FechaNacimiento ??
-            "",
-          esCapitan: j.esCapitan ?? j.EsCapitan ?? false,
-        }));
-
-        const jugadoresOrdenados = jugadoresData.sort((a, b) => {
-          const orden = ["Arquero", "Defensor", "Mediocampista", "Delantero"];
-          return orden.indexOf(a.posicion) - orden.indexOf(b.posicion);
-        });
-        setJugadores(jugadoresOrdenados);
 
         // Procesar partidos (local y visitante)
         const participaciones = equipoData?.participaciones ?? [];
@@ -119,34 +104,17 @@ function Estadisticas() {
   }, []);
 
   if (loading) return <p>Cargando estadísticas...</p>;
-  if (error) return (
-    <div className="mensaje-error">
-      <i className="bx bx-error-circle"></i>
-      <h3>
-        No perteneces a un equipo o tu equipo no tiene un torneo activo
-      </h3>
-      <p>
-        Uníte o creá un equipo, o participá de un torneo activo para
-        visualizar los próximos encuentros.
-      </p>
-    </div>
-  );
+  if (error)
+    return (
+      <Alert variant="error">
+        <strong>No perteneces a un equipo o tu equipo no tiene un torneo activo</strong>
+        <p>
+          Uníte o creá un equipo, o participá de un torneo activo para
+          visualizar los próximos encuentros.
+        </p>
+      </Alert>
+    );
   if (!equipo) return <p>No se encontraron datos del equipo.</p>;
-
-  // Agrupar jugadores por posición
-  const jugadoresPorPosicion = jugadores.reduce((acc, jugador) => {
-    const pos = jugador.posicion ?? "Sin posición";
-    if (!acc[pos]) acc[pos] = [];
-    acc[pos].push(jugador);
-    return acc;
-  }, {});
-
-  const traducciones = {
-    Arquero: "ARQUEROS",
-    Defensor: "DEFENSORES",
-    Mediocampista: "MEDIOCAMPISTAS",
-    Delantero: "DELANTEROS",
-  };
 
   // Colores de resultados
   const getResultadoColor = (resultado, estado, local) => {
@@ -168,27 +136,38 @@ function Estadisticas() {
 
   return (
     <main className="subpagina-container">
-      <header className="estadisticas-header">
+      <header className="page-header">
         <h1>{equipo.nombreEquipo}</h1>
-        <p>Estadísticas del equipo y plantilla de jugadores</p>
+        <p>Estadísticas y resultados de partidos del equipo</p>
+        {jugadorLogueado?.equipo?.id && (
+          <div className="equipo-cross-link">
+            <Button
+              variant="secondary"
+              icon={<FiSettings />}
+              onClick={() => navigate(`/equipo/${jugadorLogueado.equipo.id}`)}
+            >
+              {jugadorLogueado?.esCapitan ? "Gestionar mi equipo" : "Ver mi equipo"}
+            </Button>
+          </div>
+        )}
       </header>
 
       {/* === RESUMEN === */}
       <section className="resumen-boxes">
         <div className="resumen-box verde">
-          <span>{equipo.victorias}</span>
+          <span className="stat-numeral">{equipo.victorias}</span>
           <p>Victorias</p>
         </div>
         <div className="resumen-box gris">
-          <span>{equipo.empates}</span>
+          <span className="stat-numeral">{equipo.empates}</span>
           <p>Empates</p>
         </div>
         <div className="resumen-box rojo">
-          <span>{equipo.derrotas}</span>
+          <span className="stat-numeral">{equipo.derrotas}</span>
           <p>Derrotas</p>
         </div>
-        <div className="resumen-box azul">
-          <span>
+        <div className="resumen-box total">
+          <span className="stat-numeral">
             {(equipo.victorias ?? 0) +
               (equipo.empates ?? 0) +
               (equipo.derrotas ?? 0)}
@@ -200,7 +179,7 @@ function Estadisticas() {
       <div className="estadisticas-contenido">
         {/* === PARTIDOS JUGADOS === */}
         <section className="partidos-jugados">
-          <h2><i className="bx bx-calendar"></i> Partidos Jugados</h2>
+          <h2><FiCalendar /> Partidos Jugados</h2>
           <p>Últimos encuentros del equipo</p>
 
           {partidosJugados.length === 0 ? (
@@ -221,7 +200,7 @@ function Estadisticas() {
                 <div className="partido-fecha">
                   {new Date(p.fecha).toLocaleDateString("es-AR")}
                 </div>
-                <div className="partido-resultado">{p.resultado}</div>
+                <div className="partido-resultado stat-numeral">{p.resultado}</div>
               </div>
             ))
           )}
@@ -229,7 +208,7 @@ function Estadisticas() {
 
         {/* === PRÓXIMOS PARTIDOS === */}
         <section className="partidos-jugados">
-          <h2><i className="bx bx-time-five"></i> Próximos encuentros del equipo</h2>
+          <h2><FiClock /> Próximos encuentros del equipo</h2>
           <p>Partidos programados del equipo</p>
 
           {proximosPartidos.length === 0 ? (
@@ -247,41 +226,6 @@ function Estadisticas() {
                 <div className="partido-resultado">Programado</div>
               </div>
             ))
-          )}
-        </section>
-
-        {/* === PLANTEL === */}
-        <section className="plantilla-jugadores">
-          <h2><i className="bx bx-group"></i> Plantel del equipo</h2>
-
-          {Object.keys(jugadoresPorPosicion).length === 0 ? (
-            <p>No hay jugadores cargados.</p>
-          ) : (
-            ["Arquero", "Defensor", "Mediocampista", "Delantero"].map(
-              (pos) =>
-                jugadoresPorPosicion[pos] && (
-                  <div className="bloque-posicion" key={pos}>
-                    <h3>{traducciones[pos]}</h3>
-                    {jugadoresPorPosicion[pos].map((j, i) => (
-                      <div className="jugador-card" key={i}>
-                        <div>
-                          <strong>
-                            {j.nombre} {j.apellido}
-                          </strong>
-                          <p className="jugador-pos">{j.posicion}</p>
-                        </div>
-                        <div className="jugador-edad">
-                          {j.fechaNacimiento
-                            ? new Date().getFullYear() -
-                              new Date(j.fechaNacimiento).getFullYear()
-                            : "-"}{" "}
-                          años
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )
-            )
           )}
         </section>
       </div>

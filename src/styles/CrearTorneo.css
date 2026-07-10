@@ -1,123 +1,56 @@
-/* ── Hero section ────────────────────────────────────────────────────────── */
+/*
+  El hero (antes .ct-hero) ahora es el bloque compartido .admin-hero de
+  MenuAdmin.css (junto con MisTorneos/Arbitros, que lo triplicaban byte a
+  byte). Acá solo queda lo específico de esta pantalla.
+*/
 
-.ct-hero {
-  background: #f0fdf4;
-  border-radius: 16px;
-  margin: 24px 24px 0;
-  padding: 28px 32px 24px;
-}
-
-.ct-hero-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 6px;
-}
-
-.ct-trophy-icon {
-  font-size: 38px;
-  color: #16a34a;
-}
-
-.ct-hero-title h1 {
-  font-size: 28px;
-  font-weight: 800;
-  color: #1f2937;
-  margin: 0;
-}
-
-.ct-hero-subtitle {
-  color: #6b7280;
-  font-size: 15px;
-  margin: 0 0 24px 0;
-}
-
-.ct-metrics {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-
-.ct-metric-card {
-  background: #fff;
-  border: 1px solid #d1fae5;
-  border-radius: 12px;
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.ct-metric-card > i {
-  font-size: 28px;
-  color: #16a34a;
-  flex-shrink: 0;
-}
-
-.ct-metric-value {
-  font-size: 24px;
-  font-weight: 800;
-  color: #1f2937;
-  display: block;
-  line-height: 1.1;
-}
-
-.ct-metric-label {
-  font-size: 12px;
-  color: #6b7280;
-  display: block;
-}
-
-/* ── Main two-column layout ──────────────────────────────────────────────── */
+/* ── Main two-column layout ─────────────────────────────────────────────── */
 
 .ct-main {
   display: flex;
-  gap: 24px;
-  padding: 24px;
+  gap: 1.5rem;
+  padding: 1.5rem;
   align-items: flex-start;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-/* ── Form card ───────────────────────────────────────────────────────────── */
+/* ── Form card (contenedor de superficie viene de <Card>) ─────────────────── */
 
 .ct-form-card {
   flex: 3;
-  background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  padding: 28px 32px;
 }
 
 .ct-form-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 24px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.125rem;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .ct-form-header h2 {
-  margin: 0 0 4px 0;
-  font-size: 18px;
+  margin: 0 0 0.25rem 0;
+  font-size: 1.125rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--color-ink);
 }
 
 .ct-form-header p {
   margin: 0;
-  font-size: 13px;
-  color: #9ca3af;
+  font-size: 0.8125rem;
+  color: var(--color-muted);
 }
 
 .ct-borrador-badge {
-  background: #f3f4f6;
-  color: #6b7280;
-  font-size: 12px;
+  background: var(--color-surface-muted);
+  color: var(--color-muted);
+  font-size: 0.75rem;
   font-weight: 600;
-  padding: 4px 12px;
+  padding: 0.25rem 0.75rem;
   border-radius: 20px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--color-border);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -125,50 +58,23 @@
 .ct-form-body {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.25rem;
 }
 
 /* ── Fields ──────────────────────────────────────────────────────────────── */
 
 .ct-field label {
   display: block;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
-  color: #374151;
-  margin-bottom: 6px;
-}
-
-.ct-field label small {
-  font-weight: 400;
-  color: #9ca3af;
-  margin-left: 6px;
-}
-
-.ct-field input,
-.ct-field select {
-  width: 100%;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 9px 12px;
-  font-size: 14px;
-  font-family: inherit;
-  color: #1f2937;
-  background: #fff;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  box-sizing: border-box;
-}
-
-.ct-field input:focus,
-.ct-field select:focus {
-  outline: none;
-  border-color: #16a34a;
-  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+  color: var(--color-ink);
+  margin-bottom: 0.375rem;
 }
 
 .ct-field-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .ct-field-row.ct-field-row-2 {
@@ -179,18 +85,18 @@
 
 .ct-pill-group {
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .ct-pill {
   flex: 1;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  color: #6b7280;
-  font-size: 14px;
-  font-family: inherit;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  font-family: var(--font-body);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.18s;
@@ -198,199 +104,55 @@
 }
 
 .ct-pill:hover:not(.active) {
-  border-color: #16a34a;
-  color: #16a34a;
+  border-color: var(--color-turf);
+  color: var(--color-pitch);
 }
 
 .ct-pill.active {
-  background: #166534;
-  color: #fff;
-  border-color: #166534;
+  background: var(--color-pitch);
+  color: var(--color-surface);
+  border-color: var(--color-pitch);
 }
 
-/* ── Cancha chips ────────────────────────────────────────────────────────── */
-
-.ct-canchas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.ct-cancha-chip {
-  padding: 6px 14px;
-  border-radius: 20px;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
-  color: #6b7280;
-  font-size: 13px;
-  font-family: inherit;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.18s;
-}
-
-.ct-cancha-chip:hover:not(.active) {
-  border-color: #9ca3af;
-}
-
-.ct-cancha-chip.active {
-  background: #dcfce7;
-  border-color: #86efac;
-  color: #166534;
-  font-weight: 600;
-}
-
-/* ── Toggle switches ─────────────────────────────────────────────────────── */
-
-.ct-toggles {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.ct-toggle-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 16px;
-  border-radius: 10px;
-  background: #f9fafb;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: background 0.18s, border-color 0.18s;
-  user-select: none;
-}
-
-.ct-toggle-row.active {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
-}
-
-.ct-toggle-info span {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f2937;
-  display: block;
-}
-
-.ct-toggle-info small {
-  font-size: 12px;
-  color: #9ca3af;
-}
-
-.ct-toggle-switch {
-  width: 44px;
-  height: 24px;
-  border-radius: 12px;
-  background: #d1d5db;
-  position: relative;
-  flex-shrink: 0;
-  transition: background 0.2s;
-}
-
-.ct-toggle-switch::after {
-  content: "";
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s;
-}
-
-.ct-toggle-switch.on {
-  background: #16a34a;
-}
-
-.ct-toggle-switch.on::after {
-  transform: translateX(20px);
+.ct-pill:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 /* ── Action buttons ──────────────────────────────────────────────────────── */
 
 .ct-actions {
   display: flex;
-  gap: 10px;
-  padding-top: 6px;
+  gap: 0.625rem;
+  padding-top: 0.375rem;
   flex-wrap: wrap;
   align-items: center;
 }
 
-.ct-btn-outline {
-  padding: 9px 18px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #fff;
-  color: #6b7280;
-  font-size: 14px;
-  font-family: inherit;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.18s;
-}
-
-.ct-btn-outline:hover {
-  background: #f9fafb;
-}
-
-.ct-btn-outline-green {
-  padding: 9px 18px;
-  border: 1px solid #86efac;
-  border-radius: 8px;
-  background: #fff;
-  color: #166534;
-  font-size: 14px;
-  font-family: inherit;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.18s;
-}
-
-.ct-btn-outline-green:hover {
-  background: #f0fdf4;
-}
-
-.ct-btn-primary {
-  padding: 9px 22px;
-  border: none;
-  border-radius: 8px;
-  background: #166534;
-  color: #fff;
-  font-size: 14px;
-  font-family: inherit;
-  font-weight: 600;
-  cursor: pointer;
+.ct-btn-crear {
   margin-left: auto;
-  transition: background 0.18s;
 }
 
-.ct-btn-primary:hover {
-  background: #15803d;
-}
-
-/* ── Summary card ────────────────────────────────────────────────────────── */
+/* ── Summary card (contenedor de superficie viene de <Card>) ──────────────── */
 
 .ct-summary-card {
   flex: 2;
-  background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  padding: 24px 28px;
   position: sticky;
-  top: 80px;
+  /* Igual que antes de la Fase 4, esto sigue acoplado a la altura real del
+     navbar admin (.navbar en IndexStyle.css/MenuAdmin.css) — no hay forma de
+     referenciarla sin una variable dedicada. Medido en el navbar actual
+     (~70px): se corrigió acá un valor (1.5rem) que quedaba por debajo de esa
+     altura y hacía que la tarjeta se metiera debajo del navbar al scrollear. */
+  top: 5rem;
 }
 
 .ct-summary-title {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 700;
-  color: #166534;
-  margin: 0 0 14px 0;
-  padding-bottom: 14px;
-  border-bottom: 1px solid #f3f4f6;
+  color: var(--color-pitch);
+  margin: 0 0 0.875rem 0;
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .ct-summary-rows {
@@ -402,8 +164,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 9px 0;
-  border-bottom: 1px solid #f9fafb;
+  padding: 0.5625rem 0;
+  border-bottom: 1px solid var(--color-surface-muted);
 }
 
 .ct-summary-row:last-child {
@@ -411,84 +173,34 @@
 }
 
 .ct-summary-label {
-  font-size: 13px;
-  color: #9ca3af;
+  font-size: 0.8125rem;
+  color: var(--color-muted);
 }
 
 .ct-summary-value {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--color-ink);
   text-align: right;
   max-width: 55%;
 }
 
-/* ── Warning box ─────────────────────────────────────────────────────────── */
+/* ── Warning box (color/ícono vienen de <Alert variant="warning">) ────────── */
 
 .ct-warning {
-  margin-top: 20px;
-  padding: 18px 16px;
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  border-radius: 12px;
-  text-align: center;
-}
-
-.ct-warning-icon {
-  font-size: 36px;
-  color: #d97706;
-  display: block;
-  margin-bottom: 8px;
-}
-
-.ct-warning p {
-  font-size: 13px;
-  color: #92400e;
-  margin: 0;
-  line-height: 1.5;
-}
-
-/* ── Input error + field warning ─────────────────────────────────────────── */
-
-.ct-input-error {
-  border-color: #ef4444 !important;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
-}
-
-.ct-field-warning {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 6px;
-  padding: 7px 12px;
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
-  border-radius: 8px;
-  color: #c2410c;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.ct-field-warning i {
-  font-size: 15px;
-  flex-shrink: 0;
-  color: #ea580c;
+  margin-top: 1.25rem;
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 
 @media (max-width: 900px) {
-  .ct-metrics { grid-template-columns: 1fr 1fr; }
   .ct-main { flex-direction: column; }
   .ct-form-card, .ct-summary-card { flex: unset; width: 100%; }
   .ct-summary-card { position: static; }
 }
 
 @media (max-width: 640px) {
-  .ct-hero { margin: 12px 12px 0; padding: 20px; }
-  .ct-metrics { grid-template-columns: 1fr 1fr; gap: 8px; }
-  .ct-main { padding: 12px; }
-  .ct-form-card { padding: 20px 16px; }
+  .ct-main { padding: 0.75rem; }
   .ct-field-row { grid-template-columns: 1fr; }
   .ct-pill-group { flex-direction: column; }
 }

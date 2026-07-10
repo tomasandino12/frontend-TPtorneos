@@ -1,7 +1,9 @@
 import "../styles/IndexStyle.css";
 import "../styles/MiPerfil.css";
 import { useEffect, useState } from "react";
+import { FiUser, FiEdit2, FiLogOut } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
+import { Button, TextField, Alert } from "../components/ui";
 
 function MiPerfil() {
   const [jugador, setJugador] = useState(null);
@@ -9,6 +11,7 @@ function MiPerfil() {
   const [editando, setEditando] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState(null);
+  const [salirFeedback, setSalirFeedback] = useState(null);
   const [form, setForm] = useState({
     nombre: "",
     apellido: "",
@@ -46,43 +49,43 @@ function MiPerfil() {
   }, []);
 
   const handleSalirEquipo = async () => {
-  if (!jugador?.equipo) return;
+    if (!jugador?.equipo) return;
 
-  const confirmar = window.confirm("¿Estás seguro de que deseas salir de tu equipo?");
-  if (!confirmar) return;
+    const confirmar = window.confirm("¿Estás seguro de que deseas salir de tu equipo?");
+    if (!confirmar) return;
 
-  try {
-    const response = await apiFetch(`/jugadores/${jugador.id}`, {
-      method: "PUT",
-      body: JSON.stringify({ ...jugador, equipo: null }),
-    });
+    try {
+      const response = await apiFetch(`/jugadores/${jugador.id}`, {
+        method: "PUT",
+        body: JSON.stringify({ ...jugador, equipo: null }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) throw new Error(data.message || "Error al salir del equipo");
+      if (!response.ok) throw new Error(data.message || "Error al salir del equipo");
 
+      const actualizado = { ...jugador, equipo: null };
+      setJugador(actualizado);
+      localStorage.setItem("jugador", JSON.stringify(actualizado));
 
-    const actualizado = { ...jugador, equipo: null };
-    setJugador(actualizado);
-    localStorage.setItem("jugador", JSON.stringify(actualizado));
-
-
-    if (data.message?.includes("Equipo eliminado")) {
-      alert("⚠️ El equipo fue eliminado porque se quedó sin jugadores.");
-    } else if (data.message?.includes("Nuevo capitán")) {
-      alert("👑 Se asignó un nuevo capitán automáticamente.");
-    } else {
-      alert("Has salido del equipo correctamente.");
+      if (data.message?.includes("Equipo eliminado")) {
+        setSalirFeedback({
+          variant: "info",
+          text: "El equipo fue eliminado porque se quedó sin jugadores.",
+        });
+      } else if (data.message?.includes("Nuevo capitán")) {
+        setSalirFeedback({
+          variant: "info",
+          text: "Se asignó un nuevo capitán automáticamente.",
+        });
+      } else {
+        setSalirFeedback({ variant: "success", text: "Has salido del equipo correctamente." });
+      }
+    } catch (error) {
+      console.error("Error al salir del equipo:", error);
+      setSalirFeedback({ variant: "error", text: "Ocurrió un error al salir del equipo." });
     }
-
-
-    window.location.reload();
-
-  } catch (error) {
-    console.error("Error al salir del equipo:", error);
-    alert("Ocurrió un error al salir del equipo.");
-  }
-};
+  };
 
   const handleEmpezarEdicion = () => {
     setForm({
@@ -148,63 +151,53 @@ function MiPerfil() {
   return (
     <div className="MiPerfil">
       <main className="mi-perfil-container">
-        <h1 className="mi-perfil-titulo">👤 Mi Perfil</h1>
+        <h1 className="mi-perfil-titulo">
+          <FiUser /> Mi Perfil
+        </h1>
         <p className="mi-perfil-subtitulo">Gestiona tu información y estadísticas</p>
 
         <form className="perfil-seccion" onSubmit={handleGuardar}>
-          {!editando && (
-            <button
-              type="button"
-              className="boton-editar"
-              onClick={handleEmpezarEdicion}
-            >
-              ✏️ Editar perfil
-            </button>
-          )}
+          <div className="perfil-seccion-header">
+            <div>
+              <h2>Información Personal</h2>
+              <p>Datos básicos del jugador</p>
+            </div>
+            {!editando && (
+              <Button type="button" variant="secondary" icon={<FiEdit2 />} onClick={handleEmpezarEdicion}>
+                Editar perfil
+              </Button>
+            )}
+          </div>
 
-          <h2>Información Personal</h2>
-          <p>Datos básicos del jugador</p>
-
-          {error && <p className="perfil-error">{error}</p>}
+          {error && <Alert variant="error">{error}</Alert>}
 
           {!editando ? (
             <>
               <div className="perfil-campo">
-                <div className="input-grupo">
-                  <label>Nombre Completo</label>
-                  <input
-                    type="text"
-                    value={`${jugador.nombre} ${jugador.apellido}`}
-                    readOnly
-                  />
-                </div>
-                <div className="input-grupo">
-                  <label>Fecha de Nacimiento</label>
-                  <input type="text" value={jugador.fechaNacimiento || "—"} readOnly />
-                </div>
+                <TextField
+                  label="Nombre Completo"
+                  value={`${jugador.nombre} ${jugador.apellido}`}
+                  readOnly
+                />
+                <TextField
+                  label="Fecha de Nacimiento"
+                  value={jugador.fechaNacimiento ? new Date(jugador.fechaNacimiento).toLocaleDateString("es-AR") : "—"}
+                  readOnly
+                />
               </div>
 
               <div className="perfil-campo">
-                <div className="input-grupo">
-                  <label>Equipo</label>
-                  <input
-                    type="text"
-                    value={jugador.equipo?.nombreEquipo || "No perteneces a ningún equipo"}
-                    readOnly
-                    className={!jugador.equipo ? "input-vacio" : ""}
-                  />
-                </div>
-                <div className="input-grupo">
-                  <label>Posición</label>
-                  <input type="text" value={jugador.posicion || "—"} readOnly />
-                </div>
+                <TextField
+                  label="Equipo"
+                  value={jugador.equipo?.nombreEquipo || "No perteneces a ningún equipo"}
+                  readOnly
+                  className={!jugador.equipo ? "input-vacio" : ""}
+                />
+                <TextField label="Posición" value={jugador.posicion || "—"} readOnly />
               </div>
 
               <div className="perfil-campo">
-                <div className="input-grupo">
-                  <label>Email</label>
-                  <input type="text" value={jugador.email || "—"} readOnly />
-                </div>
+                <TextField label="Email" value={jugador.email || "—"} readOnly />
               </div>
 
               <div className="perfil-campo">
@@ -217,61 +210,61 @@ function MiPerfil() {
           ) : (
             <>
               <div className="perfil-campo">
-                <div className="input-grupo">
-                  <label>Nombre</label>
-                  <input
-                    type="text"
-                    name="nombre"
-                    value={form.nombre}
-                    onChange={handleChangeForm}
-                    required
-                  />
-                </div>
-                <div className="input-grupo">
-                  <label>Apellido</label>
-                  <input
-                    type="text"
-                    name="apellido"
-                    value={form.apellido}
-                    onChange={handleChangeForm}
-                    required
-                  />
+                <TextField
+                  label="Nombre"
+                  name="nombre"
+                  value={form.nombre}
+                  onChange={handleChangeForm}
+                  required
+                />
+                <TextField
+                  label="Apellido"
+                  name="apellido"
+                  value={form.apellido}
+                  onChange={handleChangeForm}
+                  required
+                />
+              </div>
+
+              <div className="perfil-campo">
+                <TextField
+                  label="Fecha de Nacimiento"
+                  type="date"
+                  name="fechaNacimiento"
+                  value={form.fechaNacimiento}
+                  onChange={handleChangeForm}
+                />
+                <div className="ui-field">
+                  <label className="ui-field-label" htmlFor="posicion">
+                    Posición
+                  </label>
+                  <div className="ui-field-control">
+                    <select
+                      id="posicion"
+                      name="posicion"
+                      className="ui-field-input"
+                      value={form.posicion}
+                      onChange={handleChangeForm}
+                    >
+                      <option value="">Seleccionar...</option>
+                      <option value="Arquero">Arquero</option>
+                      <option value="Defensor">Defensor</option>
+                      <option value="Mediocampista">Mediocampista</option>
+                      <option value="Delantero">Delantero</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
               <div className="perfil-campo">
-                <div className="input-grupo">
-                  <label>Fecha de Nacimiento</label>
-                  <input
-                    type="date"
-                    name="fechaNacimiento"
-                    value={form.fechaNacimiento}
-                    onChange={handleChangeForm}
-                  />
-                </div>
-                <div className="input-grupo">
-                  <label>Posición</label>
-                  <select name="posicion" value={form.posicion} onChange={handleChangeForm}>
-                    <option value="">Seleccionar...</option>
-                    <option value="Arquero">Arquero</option>
-                    <option value="Defensor">Defensor</option>
-                    <option value="Mediocampista">Mediocampista</option>
-                    <option value="Delantero">Delantero</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="perfil-campo">
-                <div className="input-grupo">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChangeForm}
-                    required
-                  />
-                </div>
+                <TextField
+                  label="Email"
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChangeForm}
+                  required
+                />
               </div>
 
               <div className="perfil-campo">
@@ -287,30 +280,28 @@ function MiPerfil() {
               </div>
 
               <div className="botones-edicion">
-                <button
+                <Button
                   type="button"
-                  className="boton-cancelar"
+                  variant="secondary"
                   onClick={handleCancelarEdicion}
                   disabled={guardando}
                 >
                   Cancelar
-                </button>
-                <button type="submit" className="boton-guardar" disabled={guardando}>
+                </Button>
+                <Button type="submit" disabled={guardando}>
                   {guardando ? "Guardando..." : "Guardar cambios"}
-                </button>
+                </Button>
               </div>
             </>
           )}
 
+          {salirFeedback && <Alert variant={salirFeedback.variant}>{salirFeedback.text}</Alert>}
+
           {jugador.equipo && !editando && (
             <div className="boton-salir-container">
-              <button
-                type="button"
-                className="boton-salir-equipo"
-                onClick={handleSalirEquipo}
-              >
-                🚪 Salir del equipo
-              </button>
+              <Button variant="danger" icon={<FiLogOut />} onClick={handleSalirEquipo}>
+                Salir del equipo
+              </Button>
             </div>
           )}
         </form>

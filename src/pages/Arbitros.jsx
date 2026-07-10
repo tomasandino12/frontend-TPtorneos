@@ -3,8 +3,10 @@ import "../styles/MenuAdmin.css";
 import "../styles/Arbitros.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiFlag, FiSearch, FiEdit2, FiTrash2 } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
+import { Button, TextField, Card, Alert } from "../components/ui";
 
 const FORM_VACIO = { nombre: "", apellido: "", nro_matricula: "", email: "" };
 
@@ -138,35 +140,31 @@ export default function Arbitros() {
     <div className="layout">
       <AdminHeader admin={admin} onLogout={handleLogout} />
 
-      <main style={{ backgroundColor: "#f9fafb" }}>
-        <section className="ar-hero">
-          <div className="ar-hero-title">
-            <i className="bx bx-whistle ar-whistle-icon"></i>
+      <main>
+        <section className="admin-hero">
+          <div className="admin-hero-title">
+            <FiFlag className="admin-hero-icon" />
             <h1>Árbitros</h1>
           </div>
-          <p className="ar-hero-subtitle">
+          <p className="admin-hero-subtitle">
             Gestioná el padrón de árbitros disponibles para asignar a los partidos.
           </p>
         </section>
 
         <section className="ar-list">
           <div className="ar-controls">
-            <div className="ar-search">
-              <i className="bx bx-search"></i>
-              <input
-                type="text"
-                placeholder="Buscar por nombre, apellido o matrícula..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            <button className="ar-btn-new" onClick={handleAbrirNuevo}>
-              + Nuevo árbitro
-            </button>
+            <TextField
+              icon={<FiSearch />}
+              placeholder="Buscar por nombre, apellido o matrícula..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="ar-search"
+            />
+            <Button onClick={handleAbrirNuevo}>+ Nuevo árbitro</Button>
           </div>
 
-          {loading && <p style={{ padding: "2rem", textAlign: "center", color: "#6b7280" }}>Cargando árbitros...</p>}
-          {error && <p style={{ padding: "2rem", textAlign: "center", color: "#dc2626" }}>{error}</p>}
+          {loading && <Card className="ar-status-card">Cargando árbitros...</Card>}
+          {error && <Card className="ar-status-card ar-status-error">{error}</Card>}
 
           {!loading && !error && (
             <div className="ar-table-wrap">
@@ -189,10 +187,10 @@ export default function Arbitros() {
                       <td>{arbitro.email}</td>
                       <td className="ar-table-acciones">
                         <button className="ar-btn-icon" onClick={() => handleAbrirEditar(arbitro)}>
-                          <i className="bx bx-edit"></i>
+                          <FiEdit2 />
                         </button>
                         <button className="ar-btn-icon ar-btn-icon-danger" onClick={() => handleEliminar(arbitro)}>
-                          <i className="bx bx-trash"></i>
+                          <FiTrash2 />
                         </button>
                       </td>
                     </tr>
@@ -216,27 +214,45 @@ export default function Arbitros() {
           <form className="ar-modal" onSubmit={handleGuardar}>
             <h3>{arbitroEditando ? "Editar árbitro" : "Nuevo árbitro"}</h3>
 
-            {errorForm && <p className="ar-modal-error">{errorForm}</p>}
+            {errorForm && <Alert variant="error">{errorForm}</Alert>}
 
-            <label>Nombre</label>
-            <input type="text" name="nombre" value={form.nombre} onChange={handleChangeForm} required />
-
-            <label>Apellido</label>
-            <input type="text" name="apellido" value={form.apellido} onChange={handleChangeForm} required />
-
-            <label>Nº de matrícula</label>
-            <input type="text" name="nro_matricula" value={form.nro_matricula} onChange={handleChangeForm} required />
-
-            <label>Email</label>
-            <input type="email" name="email" value={form.email} onChange={handleChangeForm} required />
+            <TextField
+              label="Nombre"
+              name="nombre"
+              value={form.nombre}
+              onChange={handleChangeForm}
+              required
+            />
+            <TextField
+              label="Apellido"
+              name="apellido"
+              value={form.apellido}
+              onChange={handleChangeForm}
+              required
+            />
+            <TextField
+              label="Nº de matrícula"
+              name="nro_matricula"
+              value={form.nro_matricula}
+              onChange={handleChangeForm}
+              required
+            />
+            <TextField
+              label="Email"
+              type="email"
+              name="email"
+              value={form.email}
+              onChange={handleChangeForm}
+              required
+            />
 
             <div className="ar-modal-botones">
-              <button type="button" onClick={handleCerrarFormulario} disabled={guardando}>
+              <Button type="button" variant="secondary" onClick={handleCerrarFormulario} disabled={guardando}>
                 Cancelar
-              </button>
-              <button type="submit" disabled={guardando}>
+              </Button>
+              <Button type="submit" disabled={guardando}>
                 {guardando ? "Guardando..." : "Guardar"}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

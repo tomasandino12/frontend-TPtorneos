@@ -1,20 +1,16 @@
-import "../styles/InicioSesionAdmin.css";
+import "../styles/InicioSesion.css";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { FiMail, FiLock } from "react-icons/fi";
+import { Button, TextField, Card, Alert } from "../components/ui";
 
-function MenuAdmin() {
+function InicioSesionAdmin() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [contrasena, setContrasena] = useState("");
-  const [mostrarPass, setMostrarPass] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    document.body.classList.add("bg-login");
-    return () => document.body.classList.remove("bg-login");
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,76 +47,54 @@ function MenuAdmin() {
   };
 
   return (
-    <div className="login-wrap">
-      <div className="login-card">
-        
-        <div className="login-header">
-          <h1 className="login-brand">
+    <div className="auth-page">
+      <Card className="auth-card">
+        <div className="auth-header">
+          <span className="auth-badge">Acceso Administrador</span>
+          <h1 className="auth-brand">
             Gestor<span>Torneos</span>
           </h1>
-          <h2 className="login-title">Ingreso como Administrador</h2>
-          <p className="login-subtitle">
-            Accedé al panel de gestión de torneos
-          </p>
+          <h2 className="auth-title">Ingreso como Administrador</h2>
+          <p className="auth-subtitle">Accedé al panel de gestión de torneos</p>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          
-          <div className="field">
-            <label className="field-label">Email</label>
-            <div className="field-control">
-              <span className="field-icon">📧</span>
-              <input
-                type="email"
-                placeholder="admin@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-          </div>
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <TextField
+            label="Email"
+            type="email"
+            icon={<FiMail />}
+            placeholder="admin@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-          <div className="field">
-            <label className="field-label">Contraseña</label>
-            <div className="field-control">
-              <span className="field-icon">🔒</span>
-              <input
-                type={mostrarPass ? "text" : "password"}
-                placeholder="********"
-                value={contrasena}
-                onChange={(e) => setContrasena(e.target.value)}
-                style={{ textAlign: "left" }}
-                required
-              />
-              <button
-                type="button"
-                className="field-action"
-                onClick={() => setMostrarPass(!mostrarPass)}
-              >
-                👁
-              </button>
-            </div>
-          </div>
+          <TextField
+            label="Contraseña"
+            type="password"
+            icon={<FiLock />}
+            placeholder="********"
+            value={contrasena}
+            onChange={(e) => setContrasena(e.target.value)}
+            required
+          />
 
-          {error && <p className="login-error">{error}</p>}
+          {error && <Alert variant="error">{error}</Alert>}
 
-          <button className="btn-primary" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading}>
             {isLoading ? "Ingresando..." : "Entrar como Admin"}
-          </button>
+          </Button>
 
-          <p className="bottom-text">
-            Volver al inicio{" "}
-            <span
-              className="link-green"
-              onClick={() => navigate("/")}
-            >
+          <p className="auth-bottom-text">
+            Volver al inicio como{" "}
+            <button type="button" className="auth-link" onClick={() => navigate("/")}>
               Usuario
-            </span>
+            </button>
           </p>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }
 
-export default MenuAdmin;
+export default InicioSesionAdmin;

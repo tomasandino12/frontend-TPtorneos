@@ -1,9 +1,19 @@
 /* ── InscribirEquipos ────────────────────────────────────────────── */
 
+.ie-page-status {
+  padding: 3rem;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+.ie-page-status-error {
+  color: var(--color-alert);
+}
+
 .ie-hero {
   padding: 2rem 2.5rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
 }
 .ie-hero-title {
   display: flex;
@@ -14,15 +24,15 @@
 .ie-hero-title h1 {
   font-size: 1.6rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-ink);
   margin: 0;
 }
 .ie-hero-icon {
   font-size: 1.8rem;
-  color: #16a34a;
+  color: var(--color-pitch);
 }
 .ie-hero-subtitle {
-  color: #6b7280;
+  color: var(--color-muted);
   font-size: 0.95rem;
   margin: 0;
 }
@@ -33,15 +43,15 @@
   flex-wrap: wrap;
 }
 .ie-meta-chip {
-  background: #f3f4f6;
+  background: var(--color-surface-muted);
   border-radius: 20px;
   padding: 0.3rem 0.85rem;
   font-size: 0.85rem;
-  color: #374151;
+  color: var(--color-ink);
   font-weight: 500;
 }
 .ie-meta-chip span {
-  color: #16a34a;
+  color: var(--color-pitch);
   font-weight: 700;
 }
 
@@ -52,18 +62,20 @@
   gap: 1.5rem;
   padding: 1.5rem 2.5rem 2rem;
   max-width: 1100px;
+  margin: 0 auto;
 }
 
 /* ── Panel equipos ───────────────────────────────────────────────── */
 .ie-panel {
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  overflow: hidden;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 .ie-panel-header {
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #f3f4f6;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -71,59 +83,51 @@
 .ie-panel-header h2 {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-ink);
   margin: 0;
 }
 .ie-panel-header p {
-  color: #6b7280;
+  color: var(--color-muted);
   font-size: 0.85rem;
   margin: 0.2rem 0 0;
 }
 .ie-badge-count {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--color-success-bg);
+  color: var(--color-pitch);
   border-radius: 20px;
   padding: 0.25rem 0.75rem;
   font-size: 0.8rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
-.ie-search {
-  padding: 0.75rem 1.5rem;
-  border-bottom: 1px solid #f3f4f6;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.ie-search i { color: #9ca3af; font-size: 1.1rem; }
-.ie-search input {
-  border: none;
-  outline: none;
-  width: 100%;
-  font-size: 0.9rem;
-  color: #111827;
-  font-family: inherit;
+.ie-list-empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-muted);
 }
 
 .ie-list {
   max-height: 420px;
   overflow-y: auto;
+  border-top: 1px solid var(--color-surface-muted);
+  margin: 0 -1.5rem;
 }
 .ie-equipo-row {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.9rem 1.5rem;
-  border-bottom: 1px solid #f9fafb;
+  border-bottom: 1px solid var(--color-surface-muted);
   cursor: pointer;
   transition: background 0.15s;
 }
-.ie-equipo-row:hover { background: #f9fafb; }
+.ie-equipo-row:hover { background: var(--color-surface-muted); }
 .ie-equipo-row.inscripto { opacity: 0.55; cursor: default; }
 .ie-equipo-row input[type="checkbox"] {
   width: 17px;
   height: 17px;
-  accent-color: #16a34a;
+  accent-color: var(--color-turf);
   flex-shrink: 0;
   cursor: pointer;
 }
@@ -133,24 +137,27 @@
   height: 28px;
   border-radius: 50%;
   flex-shrink: 0;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--color-border);
 }
 .ie-equipo-info { flex: 1; min-width: 0; }
 .ie-equipo-nombre {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--color-ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .ie-equipo-sub {
   font-size: 0.8rem;
-  color: #6b7280;
+  color: var(--color-muted);
 }
 .ie-tag-inscripto {
-  background: #dcfce7;
-  color: #166534;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--color-success-bg);
+  color: var(--color-pitch);
   border-radius: 20px;
   padding: 0.2rem 0.6rem;
   font-size: 0.75rem;
@@ -165,15 +172,15 @@
   gap: 1rem;
 }
 .ie-summary-card {
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
   padding: 1.25rem 1.5rem;
 }
 .ie-summary-card h3 {
   font-size: 1rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-ink);
   margin: 0 0 1rem;
 }
 .ie-summary-rows { display: flex; flex-direction: column; gap: 0.6rem; }
@@ -182,74 +189,50 @@
   justify-content: space-between;
   font-size: 0.88rem;
 }
-.ie-summary-label { color: #6b7280; }
-.ie-summary-value { color: #111827; font-weight: 600; }
+.ie-summary-label { color: var(--color-muted); }
+.ie-summary-value { color: var(--color-ink); font-weight: 600; }
 
-.ie-btn-inscribir {
+.ie-btn-block {
   width: 100%;
-  padding: 0.85rem;
-  background: #16a34a;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
+  margin-top: 0.75rem;
 }
-.ie-btn-inscribir:hover:not(:disabled) { background: #15803d; }
-.ie-btn-inscribir:disabled { background: #9ca3af; cursor: default; }
 
-.ie-btn-outline {
-  width: 100%;
-  padding: 0.75rem;
-  background: transparent;
-  color: #374151;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
+.ie-alert {
+  margin-top: 0.75rem;
 }
-.ie-btn-outline:hover { background: #f9fafb; }
 
 /* ── Fixture card ────────────────────────────────────────────────── */
 .ie-fixture-card {
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
   padding: 1.25rem 1.5rem;
 }
 .ie-fixture-card h3 {
   font-size: 1rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-ink);
   margin: 0 0 0.75rem;
 }
+
+/*
+  Mismo tratamiento de scroll que .ie-list: antes esta columna podía crecer
+  indefinidamente con muchas canchas/árbitros mientras la de equipos sí tenía
+  tope + scroll propio, una asimetría entre las dos columnas del layout.
+*/
+.ie-fixture-scroll {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
 .ie-fixture-field { margin-bottom: 0.85rem; }
 .ie-fixture-field label {
   display: block;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--color-ink);
   margin-bottom: 0.35rem;
-}
-.ie-fixture-field input,
-.ie-fixture-field select {
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.88rem;
-  font-family: inherit;
-  color: #111827;
-  box-sizing: border-box;
-}
-.ie-fixture-field input:focus,
-.ie-fixture-field select:focus {
-  outline: none;
-  border-color: #16a34a;
 }
 .ie-check-list { display: flex; flex-direction: column; gap: 0.4rem; }
 .ie-check-item {
@@ -257,44 +240,10 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
-  color: #374151;
+  color: var(--color-ink);
   cursor: pointer;
 }
-.ie-check-item input[type="checkbox"] { accent-color: #16a34a; }
-
-.ie-btn-fixture {
-  width: 100%;
-  padding: 0.85rem;
-  background: #1d4ed8;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-  margin-top: 0.5rem;
-}
-.ie-btn-fixture:hover:not(:disabled) { background: #1e40af; }
-.ie-btn-fixture:disabled { background: #9ca3af; cursor: default; }
-
-.ie-msg-ok {
-  background: #dcfce7;
-  color: #166534;
-  border-radius: 8px;
-  padding: 0.65rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  margin-top: 0.5rem;
-}
-.ie-msg-err {
-  background: #fef2f2;
-  color: #dc2626;
-  border-radius: 8px;
-  padding: 0.65rem 1rem;
-  font-size: 0.85rem;
-  margin-top: 0.5rem;
-}
+.ie-check-item input[type="checkbox"] { accent-color: var(--color-turf); }
 
 @media (max-width: 768px) {
   .ie-main { grid-template-columns: 1fr; padding: 1rem; }

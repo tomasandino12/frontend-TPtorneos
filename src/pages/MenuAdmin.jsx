@@ -2,7 +2,16 @@ import "../styles/IndexStyle.css";
 import "../styles/MenuAdmin.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiAward, FiFlag, FiMapPin, FiUsers } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
+import { Card } from "../components/ui";
+
+const ADMIN_CARDS = [
+  { label: "Mis Torneos", icon: FiAward, path: "/admin/torneos" },
+  { label: "Arbitraje", icon: FiFlag, path: "/admin/arbitros" },
+  { label: "Canchas", icon: FiMapPin, path: null },
+  { label: "Jugadores", icon: FiUsers, path: null },
+];
 
 function MenuAdmin() {
   const navigate = useNavigate();
@@ -36,7 +45,7 @@ function MenuAdmin() {
       {/* ── Contenido ───────────────────────────────────────────────────── */}
       <main className="admin-main-content">
 
-        <div className="admin-welcome">
+        <Card className="admin-welcome">
           <h1>
             Bienvenido,{" "}
             <span className="admin-welcome-name">
@@ -44,28 +53,25 @@ function MenuAdmin() {
             </span>
           </h1>
           <p>Panel de administración · {admin.email}</p>
-        </div>
+        </Card>
 
         <div className="admin-grid">
-          {[
-            { label: "Mis Torneos",  icon: "bx-trophy",   path: "/admin/torneos" },
-            { label: "Arbitraje",    icon: "bx-whistle",  path: "/admin/arbitros" },
-            { label: "Canchas",      icon: "bx-football", path: null },
-            { label: "Jugadores",    icon: "bx-group",    path: null },
-          ].map(({ label, icon, path }) => (
-            <div
-              key={label}
-              className="admin-card"
-              onClick={() => path && navigate(path)}
-              style={path ? { cursor: "pointer" } : { cursor: "default", opacity: 0.6 }}
-            >
-              <div className="admin-card-icon">
-                <i className={`bx ${icon}`}></i>
-              </div>
-              <h3>{label}</h3>
-              <p>Gestionar {label.toLowerCase()}</p>
-            </div>
-          ))}
+          {ADMIN_CARDS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Card
+                key={item.label}
+                className={`admin-card${!item.path ? " admin-card-disabled" : ""}`}
+                onClick={() => item.path && navigate(item.path)}
+              >
+                <div className="admin-card-icon">
+                  <Icon />
+                </div>
+                <h3>{item.label}</h3>
+                <p>Gestionar {item.label.toLowerCase()}</p>
+              </Card>
+            );
+          })}
         </div>
 
       </main>
