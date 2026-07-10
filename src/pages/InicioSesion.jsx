@@ -144,7 +144,11 @@ function InicioSesion() {
               <span>Recordar</span>
             </label>
 
-            <button type="button" className="link-green">
+            <button
+              type="button"
+              className="link-green"
+              onClick={() => navigate("/olvide-password")}
+            >
               Olvidé mi contraseña
             </button>
           </div>

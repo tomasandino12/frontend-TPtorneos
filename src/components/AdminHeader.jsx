@@ -5,9 +5,9 @@ import "../styles/IndexStyle.css";
 import "../styles/MenuAdmin.css";
 
 const OTHER_NAV = [
-  { label: "Arbitraje", icon: "bx-whistle" },
-  { label: "Canchas",   icon: "bx-football" },
-  { label: "Jugadores", icon: "bx-group" },
+  { label: "Arbitraje", icon: "bx-whistle",  path: "/admin/arbitros" },
+  { label: "Canchas",   icon: "bx-football", path: null },
+  { label: "Jugadores", icon: "bx-group",    path: null },
 ];
 
 export default function AdminHeader({ admin, onLogout }) {
@@ -80,11 +80,11 @@ export default function AdminHeader({ admin, onLogout }) {
             )}
           </li>
 
-          {OTHER_NAV.map(({ label, icon }) => (
+          {OTHER_NAV.map(({ label, icon, path }) => (
             <li key={label}>
               <button
                 className="admin-nav-btn"
-                onClick={() => navigate("/menu-admin")}
+                onClick={() => navigate(path ?? "/menu-admin")}
               >
                 <i className={`bx ${icon}`}></i>
                 {label}

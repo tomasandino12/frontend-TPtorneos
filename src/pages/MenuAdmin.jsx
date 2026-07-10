@@ -49,7 +49,7 @@ function MenuAdmin() {
         <div className="admin-grid">
           {[
             { label: "Mis Torneos",  icon: "bx-trophy",   path: "/admin/torneos" },
-            { label: "Arbitraje",    icon: "bx-whistle",  path: null },
+            { label: "Arbitraje",    icon: "bx-whistle",  path: "/admin/arbitros" },
             { label: "Canchas",      icon: "bx-football", path: null },
             { label: "Jugadores",    icon: "bx-group",    path: null },
           ].map(({ label, icon, path }) => (

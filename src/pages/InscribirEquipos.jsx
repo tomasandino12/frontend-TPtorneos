@@ -4,7 +4,7 @@ import "../styles/InscribirEquipos.css";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AdminHeader from "../components/AdminHeader.jsx";
-import { adminApiFetch } from "../utils/api.js";
+import { adminApiFetch, ASSETS_URL } from "../utils/api.js";
 
 const LABEL_CATEGORIA = {
   sub15:     "Sub-15",
@@ -305,10 +305,19 @@ export default function InscribirEquipos() {
                       checked={yaInscripto || seleccionado}
                       disabled={yaInscripto}
                     />
-                    <div
-                      className="ie-color-dot"
-                      style={{ backgroundColor: equipo.colorPrimario || "#e5e7eb" }}
-                    />
+                    {equipo.escudoUrl ? (
+                      <img
+                        src={`${ASSETS_URL}${equipo.escudoUrl}`}
+                        alt={`Escudo de ${equipo.nombreEquipo}`}
+                        className="ie-color-dot"
+                        style={{ objectFit: "cover" }}
+                      />
+                    ) : (
+                      <div
+                        className="ie-color-dot"
+                        style={{ backgroundColor: equipo.colorPrimario || "#e5e7eb" }}
+                      />
+                    )}
                     <div className="ie-equipo-info">
                       <div className="ie-equipo-nombre">{equipo.nombreEquipo}</div>
                       <div className="ie-equipo-sub">
