@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiEdit2, FiUpload, FiBarChart2, FiSearch, FiPlus, FiLogOut } from "react-icons/fi";
+import { FiArrowLeft, FiEdit2, FiUpload, FiBarChart2, FiSearch, FiSend, FiLogOut, FiX, FiRepeat } from "react-icons/fi";
 import { apiFetch, apiFetchFormData, ASSETS_URL } from "../utils/api.js";
 import { Button, TextField, Alert } from "./ui";
 
 /**
  * Contenido de "detalle de un equipo" (header con escudo, descripción,
- * plantel + reclutamiento, historial de partidos). Reutilizado por:
+ * plantel + reclutamiento). Reutilizado por:
  * - EquipoDetalle.jsx (ruta /equipo/:id, para ver CUALQUIER equipo —
  *   ej. desde un click en Tabla de Posiciones — de solo lectura si no sos
  *   el capitán de ese equipo).
@@ -26,6 +26,7 @@ const POSICION_LABELS = {
 };
 
 const JUGADORES_SIN_EQUIPO_PAGE_SIZE = 10;
+const MAX_JUGADORES_PLANTEL = 26;
 
 export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }) {
   const navigate = useNavigate();
@@ -45,10 +46,24 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
   const [filtrados, setFiltrados] = useState([]);
   const [agregarFeedback, setAgregarFeedback] = useState(null);
   const [verTodosSinEquipo, setVerTodosSinEquipo] = useState(false);
+  const [invitadosIds, setInvitadosIds] = useState([]);
+
+  // Notificaciones de invitaciones ya resueltas por el jugador (solo capitán)
+  const [notificaciones, setNotificaciones] = useState([]);
 
   // Salir del equipo (cualquier miembro, no solo el capitán)
   const [saliendoEquipo, setSaliendoEquipo] = useState(false);
   const [salirFeedback, setSalirFeedback] = useState(null);
+
+  // Transferencia de capitanía — el mismo modal sirve para dos flujos:
+  // "salirDespuesDeTransferir=true" (paso previo obligatorio antes de salir, si hay más jugadores)
+  // o "false" (el nuevo botón "Asignar capitanía", que transfiere sin salir del equipo).
+  const [mostrarTransferirCapitania, setMostrarTransferirCapitania] = useState(false);
+  const [salirDespuesDeTransferir, setSalirDespuesDeTransferir] = useState(false);
+  const [nuevoCapitanId, setNuevoCapitanId] = useState(null);
+  const [transfiriendo, setTransfiriendo] = useState(false);
+  const [transferFeedback, setTransferFeedback] = useState(null);
+  const [capitaniaFeedback, setCapitaniaFeedback] = useState(null);
 
   const jugadorLogueado = JSON.parse(localStorage.getItem("jugador") || "null");
   const esMiEquipo = jugadorLogueado?.equipo?.id === Number(equipoId);
@@ -85,6 +100,31 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
       .catch((err) => console.error("Error cargando jugadores sin equipo:", err));
   }, [esCapitanDeEsteEquipo]);
 
+  // Invitaciones ya enviadas por este equipo y todavía pendientes (para no
+  // dejar invitar dos veces al mismo jugador desde el buscador)
+  useEffect(() => {
+    if (!esCapitanDeEsteEquipo) return;
+    apiFetch(`/invitaciones/equipo/${equipoId}?estado=pendiente`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data.data)) {
+          setInvitadosIds(data.data.map((inv) => inv.jugador.id));
+        }
+      })
+      .catch((err) => console.error("Error cargando invitaciones pendientes:", err));
+  }, [esCapitanDeEsteEquipo, equipoId]);
+
+  // Invitaciones resueltas (aceptadas o rechazadas) que el capitán todavía no vio
+  useEffect(() => {
+    if (!esCapitanDeEsteEquipo) return;
+    apiFetch(`/invitaciones/equipo/${equipoId}?estado=aceptada,rechazada&vistaPorCapitan=false`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data.data)) setNotificaciones(data.data);
+      })
+      .catch((err) => console.error("Error cargando notificaciones de invitaciones:", err));
+  }, [esCapitanDeEsteEquipo, equipoId]);
+
   useEffect(() => {
     const resultado = jugadoresSinEquipo.filter((j) => {
       const nombreCompleto = `${j.nombre} ${j.apellido}`.toLowerCase();
@@ -94,29 +134,31 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
     setVerTodosSinEquipo(false);
   }, [busqueda, jugadoresSinEquipo]);
 
-  const handleAgregar = async (idJugador) => {
+  const handleInvitar = async (idJugador) => {
     try {
-      const response = await apiFetch(`/jugadores/${idJugador}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          equipo: equipoId,
-          esCapitan: false,
-        }),
+      const response = await apiFetch("/invitaciones", {
+        method: "POST",
+        body: JSON.stringify({ idJugador }),
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Error al agregar jugador");
+      if (!response.ok) throw new Error(data.message || "Error al enviar la invitación");
 
-      setAgregarFeedback({ variant: "success", text: "Jugador agregado con éxito." });
-      setJugadoresSinEquipo((prev) => prev.filter((j) => j.id !== idJugador));
-
-      // Refrescar el equipo para que la lista de jugadores incluya al nuevo
-      const res = await apiFetch(`/equipos/${equipoId}`);
-      const dataEquipo = await res.json();
-      if (res.ok) setEquipo(dataEquipo.data);
+      setAgregarFeedback({ variant: "success", text: "Invitación enviada." });
+      setInvitadosIds((prev) => [...prev, idJugador]);
     } catch (error) {
-      console.error("Error agregando jugador:", error);
-      setAgregarFeedback({ variant: "error", text: "Error al agregar jugador: " + error.message });
+      console.error("Error enviando invitación:", error);
+      setAgregarFeedback({ variant: "error", text: "Error al enviar la invitación: " + error.message });
+    }
+  };
+
+  const handleMarcarVista = async (idInvitacion) => {
+    try {
+      const response = await apiFetch(`/invitaciones/${idInvitacion}/vista`, { method: "PATCH" });
+      if (!response.ok) throw new Error("Error al descartar la notificación");
+      setNotificaciones((prev) => prev.filter((n) => n.id !== idInvitacion));
+    } catch (error) {
+      console.error("Error marcando invitación como vista:", error);
     }
   };
 
@@ -172,12 +214,10 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
     }
   };
 
-  const handleSalirEquipo = async () => {
-    if (!jugadorLogueado?.equipo) return;
-
-    const confirmar = window.confirm("¿Estás seguro de que deseas salir de tu equipo?");
-    if (!confirmar) return;
-
+  // Ejecuta la salida real (PUT equipo:null) — se usa tanto para el jugador
+  // raso como para el capitán, una vez que ya transfirió la cinta (o no hace
+  // falta porque es el único jugador del plantel).
+  const ejecutarSalida = async () => {
     setSaliendoEquipo(true);
     try {
       const response = await apiFetch(`/jugadores/${jugadorLogueado.id}`, {
@@ -213,6 +253,84 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
     }
   };
 
+  const handleSalirEquipo = () => {
+    if (!jugadorLogueado?.equipo) return;
+
+    if (jugadorLogueado.esCapitan) {
+      const companeros = equipo.jugadores.filter((j) => j.id !== jugadorLogueado.id);
+
+      if (companeros.length === 0) {
+        const confirmar = window.confirm(
+          "Sos el único jugador del equipo. Si salís, el equipo quedará sin capitán (y se eliminará). ¿Querés salir igual?"
+        );
+        if (confirmar) ejecutarSalida();
+        return;
+      }
+
+      setNuevoCapitanId(null);
+      setTransferFeedback(null);
+      setSalirDespuesDeTransferir(true);
+      setMostrarTransferirCapitania(true);
+      return;
+    }
+
+    const confirmar = window.confirm("¿Estás seguro de que deseas salir de tu equipo?");
+    if (confirmar) ejecutarSalida();
+  };
+
+  // Abre el mismo modal de transferencia, pero sin salir del equipo después —
+  // botón "Asignar capitanía" disponible en todo momento para el capitán.
+  const handleAbrirAsignarCapitania = () => {
+    setNuevoCapitanId(null);
+    setTransferFeedback(null);
+    setCapitaniaFeedback(null);
+    setSalirDespuesDeTransferir(false);
+    setMostrarTransferirCapitania(true);
+  };
+
+  const handleConfirmarTransferencia = async () => {
+    if (!nuevoCapitanId) {
+      setTransferFeedback({ variant: "error", text: "Elegí un jugador para transferirle la capitanía." });
+      return;
+    }
+
+    setTransfiriendo(true);
+    try {
+      const response = await apiFetch(`/jugadores/${jugadorLogueado.id}/transferir-capitania`, {
+        method: "PATCH",
+        body: JSON.stringify({ idNuevoCapitan: nuevoCapitanId }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Error al transferir la capitanía");
+
+      setMostrarTransferirCapitania(false);
+
+      if (salirDespuesDeTransferir) {
+        await ejecutarSalida();
+        return;
+      }
+
+      // Transferencia sin salir: el jugador logueado deja de ser capitán —
+      // hay que reflejarlo en localStorage y refrescar el equipo para que
+      // los controles de capitán (agregar jugadores, notificaciones, etc.)
+      // desaparezcan sin necesidad de recargar la página.
+      const actualizado = { ...jugadorLogueado, esCapitan: false };
+      localStorage.setItem("jugador", JSON.stringify(actualizado));
+
+      const res = await apiFetch(`/equipos/${equipoId}`);
+      const dataEquipo = await res.json();
+      if (res.ok) setEquipo(dataEquipo.data);
+
+      setCapitaniaFeedback({ variant: "success", text: "Capitanía transferida correctamente." });
+    } catch (error) {
+      console.error("Error al transferir la capitanía:", error);
+      setTransferFeedback({ variant: "error", text: error.message });
+    } finally {
+      setTransfiriendo(false);
+    }
+  };
+
   if (loading) return <p>Cargando...</p>;
   if (error) return <Alert variant="error">{error}</Alert>;
   if (!equipo) return <Alert variant="info">Equipo no encontrado.</Alert>;
@@ -232,25 +350,7 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
     gruposPorPosicionMap.get(posicion).jugadores.push(jugador);
   });
 
-  // Combinar partidos de todas las participaciones, marcando de qué lado jugó
-  // ESTE equipo — el backend solo resuelve el nombre del rival, así que el
-  // lado propio hay que completarlo con equipo.nombreEquipo (ver punto 1).
-  const allPartidos = [];
-  equipo.participaciones.forEach((participacion) => {
-    participacion.partidosLocal.forEach((partido) =>
-      allPartidos.push({ ...partido, esteEquipoEsLocal: true })
-    );
-    participacion.partidosVisitante.forEach((partido) =>
-      allPartidos.push({ ...partido, esteEquipoEsLocal: false })
-    );
-  });
-
-  // Filtrar partidos únicos y finalizados
-  const partidosUnicos = allPartidos.filter(
-    (partido, index, self) =>
-      index === self.findIndex((p) => p.id === partido.id) &&
-      partido.estado_partido === "finalizado"
-  );
+  const plantelCompleto = equipo.jugadores.length >= MAX_JUGADORES_PLANTEL;
 
   return (
     <>
@@ -397,11 +497,49 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
         )}
       </section>
 
+      {/* Asignar capitanía sin salir del equipo — solo el capitán de este equipo */}
+      {esCapitanDeEsteEquipo && (
+        <section className="detalle-seccion">
+          <h2 className="titulo-seccion">Capitanía</h2>
+          {capitaniaFeedback && <Alert variant={capitaniaFeedback.variant}>{capitaniaFeedback.text}</Alert>}
+          <Button variant="secondary" icon={<FiRepeat />} onClick={handleAbrirAsignarCapitania}>
+            Asignar capitanía
+          </Button>
+        </section>
+      )}
+
+      {/* Notificaciones de invitaciones respondidas — solo el capitán de este equipo */}
+      {esCapitanDeEsteEquipo && notificaciones.length > 0 && (
+        <section className="detalle-seccion notificaciones-invitaciones">
+          <h2 className="titulo-seccion">Notificaciones</h2>
+          {notificaciones.map((n) => (
+            <Alert key={n.id} variant={n.estado === "aceptada" ? "success" : "warning"}>
+              <div className="notificacion-invitacion-content">
+                <span>
+                  {n.jugador.nombre} {n.jugador.apellido}{" "}
+                  {n.estado === "aceptada" ? "aceptó" : "rechazó"} tu invitación.
+                </span>
+                <Button variant="ghost" onClick={() => handleMarcarVista(n.id)}>
+                  Descartar
+                </Button>
+              </div>
+            </Alert>
+          ))}
+        </section>
+      )}
+
       {/* Agregar jugadores — solo el capitán de este equipo */}
       {esCapitanDeEsteEquipo && (
         <section className="detalle-seccion agregar-jugadores">
           <h2 className="titulo-seccion">Agregar jugadores</h2>
-          <Alert variant="info">¿Necesitás encontrar jugadores para tu equipo?</Alert>
+          {plantelCompleto ? (
+            <Alert variant="warning">
+              Tu plantel está completo ({MAX_JUGADORES_PLANTEL}/{MAX_JUGADORES_PLANTEL} jugadores). No
+              podés agregar más jugadores hasta que alguno salga del equipo.
+            </Alert>
+          ) : (
+            <Alert variant="info">¿Necesitás encontrar jugadores para tu equipo?</Alert>
+          )}
 
           <TextField
             icon={<FiSearch />}
@@ -425,9 +563,15 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
                 ).map((j) => (
                   <li key={j.id}>
                     {j.nombre} {j.apellido}
-                    <Button icon={<FiPlus />} onClick={() => handleAgregar(j.id)}>
-                      Agregar
-                    </Button>
+                    {invitadosIds.includes(j.id) ? (
+                      <Button variant="secondary" icon={<FiSend />} disabled>
+                        Invitación enviada
+                      </Button>
+                    ) : (
+                      <Button icon={<FiSend />} onClick={() => handleInvitar(j.id)} disabled={plantelCompleto}>
+                        Enviar invitación
+                      </Button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -443,47 +587,6 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
         </section>
       )}
 
-      {/* Historial de Partidos */}
-      <section className="detalle-seccion">
-        <h2 className="titulo-seccion">Historial de Partidos</h2>
-        {partidosUnicos.length > 0 ? (
-          <table className="tabla-partidos">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Local</th>
-                <th>Resultado</th>
-                <th>Visitante</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {partidosUnicos.map((partido) => (
-                <tr key={partido.id}>
-                  <td>{new Date(partido.fecha_partido).toLocaleDateString("es-AR")}</td>
-                  <td>
-                    {partido.esteEquipoEsLocal
-                      ? equipo.nombreEquipo
-                      : partido.local?.equipo?.nombreEquipo || "N/A"}
-                  </td>
-                  <td className="stat-numeral">
-                    {partido.goles_local} - {partido.goles_visitante}
-                  </td>
-                  <td>
-                    {partido.esteEquipoEsLocal
-                      ? partido.visitante?.equipo?.nombreEquipo || "N/A"
-                      : equipo.nombreEquipo}
-                  </td>
-                  <td>{partido.estado_partido}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <Alert variant="info">No hay partidos finalizados.</Alert>
-        )}
-      </section>
-
       {/* Salir del equipo — cualquier miembro, no solo el capitán */}
       {esMiEquipo && (
         <section className="detalle-seccion salir-equipo-seccion">
@@ -497,6 +600,70 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
             {saliendoEquipo ? "Saliendo..." : "Salir del equipo"}
           </Button>
         </section>
+      )}
+
+      {/* Transferencia de capitanía — paso obligatorio antes de que el capitán salga, si hay más jugadores */}
+      {mostrarTransferirCapitania && (
+        <div className="transferir-capitania-overlay">
+          <div className="transferir-capitania-modal">
+            <button
+              type="button"
+              className="transferir-capitania-cerrar"
+              onClick={() => setMostrarTransferirCapitania(false)}
+              aria-label="Cerrar"
+            >
+              <FiX />
+            </button>
+
+            <h3 className="transferir-capitania-titulo">
+              {salirDespuesDeTransferir ? "Asigná un capitán para el equipo" : "Asigná un nuevo capitán"}
+            </h3>
+            <p className="transferir-capitania-subtitulo">
+              {salirDespuesDeTransferir
+                ? "Sos el capitán del equipo. Antes de irte, elegí quién va a tomar la capitanía."
+                : "Vas a dejar de ser capitán — el jugador que elijas pasará a serlo."}
+            </p>
+
+            <ul className="transferir-capitania-lista">
+              {equipo.jugadores
+                .filter((j) => j.id !== jugadorLogueado.id)
+                .map((j) => {
+                  const seleccionado = nuevoCapitanId === j.id;
+                  return (
+                    <li key={j.id}>
+                      <label
+                        className={`transferir-capitania-card${seleccionado ? " seleccionado" : ""}`}
+                      >
+                        <input
+                          type="radio"
+                          name="nuevo-capitan"
+                          value={j.id}
+                          checked={seleccionado}
+                          onChange={() => setNuevoCapitanId(j.id)}
+                        />
+                        {j.nombre} {j.apellido}
+                      </label>
+                    </li>
+                  );
+                })}
+            </ul>
+
+            {transferFeedback && <Alert variant={transferFeedback.variant}>{transferFeedback.text}</Alert>}
+
+            <Button
+              type="button"
+              className="transferir-capitania-confirmar"
+              onClick={handleConfirmarTransferencia}
+              disabled={transfiriendo || !nuevoCapitanId}
+            >
+              {transfiriendo
+                ? "Confirmando..."
+                : salirDespuesDeTransferir
+                ? "Confirmar y salir del equipo"
+                : "Confirmar"}
+            </Button>
+          </div>
+        </div>
       )}
     </>
   );
