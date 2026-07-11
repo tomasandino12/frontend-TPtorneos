@@ -1,7 +1,7 @@
 import "../styles/IndexStyle.css";
 import "../styles/Equipos.css";
 import { useState, useEffect } from "react";
-import { FiUsers, FiPlus } from "react-icons/fi";
+import { FiUsers, FiPlus, FiMail, FiCheck, FiX } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert } from "../components/ui";
 import EquipoInfo from "../components/EquipoInfo.jsx";
@@ -15,6 +15,8 @@ function Equipos() {
   const [descripcion, setDescripcion] = useState("");
   const [crearFeedback, setCrearFeedback] = useState(null);
   const [salirFeedback, setSalirFeedback] = useState(null);
+  const [invitaciones, setInvitaciones] = useState([]);
+  const [invitacionesFeedback, setInvitacionesFeedback] = useState(null);
 
   // === Cargar jugador logueado ===
   useEffect(() => {
@@ -28,6 +30,42 @@ function Equipos() {
       setJugador(null);
     }
   }, []);
+
+  // === Invitaciones pendientes (solo si el jugador todavía no tiene equipo) ===
+  useEffect(() => {
+    if (!jugador?.id || jugador.equipo?.id) return;
+    apiFetch(`/invitaciones/jugador/${jugador.id}?estado=pendiente`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data.data)) setInvitaciones(data.data);
+      })
+      .catch((error) => console.error("Error al cargar invitaciones:", error));
+  }, [jugador]);
+
+  const handleResponderInvitacion = async (idInvitacion, estado) => {
+    try {
+      const response = await apiFetch(`/invitaciones/${idInvitacion}`, {
+        method: "PUT",
+        body: JSON.stringify({ estado }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Error al responder la invitación");
+
+      setInvitaciones((prev) => prev.filter((inv) => inv.id !== idInvitacion));
+
+      if (estado === "aceptada") {
+        const jugadorActualizado = { ...jugador, equipo: data.data.equipo, esCapitan: false };
+        localStorage.setItem("jugador", JSON.stringify(jugadorActualizado));
+        setJugador(jugadorActualizado);
+      } else {
+        setInvitacionesFeedback({ variant: "info", text: "Invitación rechazada." });
+      }
+    } catch (error) {
+      console.error("Error al responder invitación:", error);
+      setInvitacionesFeedback({ variant: "error", text: "Error al responder la invitación: " + error.message });
+    }
+  };
 
   const handleSubmitEquipo = async (e) => {
     e.preventDefault();
@@ -129,6 +167,40 @@ function Equipos() {
         <div className="feedback-box">
           <Alert variant={salirFeedback.variant}>{salirFeedback.text}</Alert>
         </div>
+      )}
+
+      {invitacionesFeedback && (
+        <div className="feedback-box">
+          <Alert variant={invitacionesFeedback.variant}>{invitacionesFeedback.text}</Alert>
+        </div>
+      )}
+
+      {invitaciones.length > 0 && (
+        <section className="invitaciones-pendientes">
+          <h2>
+            <FiMail /> Invitaciones pendientes
+          </h2>
+          {invitaciones.map((inv) => (
+            <Card key={inv.id} className="invitacion-card">
+              <p>
+                <strong>{inv.equipo.nombreEquipo}</strong> te invitó a sumarte, enviada por{" "}
+                {inv.capitanEmisor.nombre} {inv.capitanEmisor.apellido}.
+              </p>
+              <div className="invitacion-botones">
+                <Button icon={<FiCheck />} onClick={() => handleResponderInvitacion(inv.id, "aceptada")}>
+                  Aceptar
+                </Button>
+                <Button
+                  variant="danger"
+                  icon={<FiX />}
+                  onClick={() => handleResponderInvitacion(inv.id, "rechazada")}
+                >
+                  Rechazar
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </section>
       )}
 
       <Card as="section" className="crear-equipo-card">
