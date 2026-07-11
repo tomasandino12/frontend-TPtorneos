@@ -3,7 +3,7 @@ import "../styles/MiPerfil.css";
 import { useEffect, useState } from "react";
 import { FiUser, FiEdit2 } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
-import { Button, TextField, Alert } from "../components/ui";
+import { Button, TextField, Alert, PageShell, PageHero } from "../components/ui";
 
 function MiPerfil() {
   const [jugador, setJugador] = useState(null);
@@ -109,14 +109,10 @@ function MiPerfil() {
   }
 
   return (
-    <div className="MiPerfil">
-      <main className="mi-perfil-container">
-        <h1 className="mi-perfil-titulo">
-          <FiUser /> Mi Perfil
-        </h1>
-        <p className="mi-perfil-subtitulo">Gestiona tu información y estadísticas</p>
+    <PageShell>
+      <PageHero icon={<FiUser />} title="Mi Perfil" subtitle="Gestiona tu información y estadísticas" />
 
-        <form className="perfil-seccion" onSubmit={handleGuardar}>
+      <form className="perfil-seccion" onSubmit={handleGuardar}>
           <div className="perfil-seccion-header">
             <div>
               <h2>Información Personal</h2>
@@ -255,8 +251,7 @@ function MiPerfil() {
             </>
           )}
         </form>
-      </main>
-    </div>
+    </PageShell>
   );
 }
 

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { FiFlag, FiSearch, FiEdit2, FiTrash2 } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
-import { Button, TextField, Card, Alert } from "../components/ui";
+import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
 
 const FORM_VACIO = { nombre: "", apellido: "", nro_matricula: "", email: "" };
 
@@ -140,16 +140,13 @@ export default function Arbitros() {
     <div className="layout">
       <AdminHeader admin={admin} onLogout={handleLogout} />
 
-      <main>
-        <section className="admin-hero">
-          <div className="admin-hero-title">
-            <FiFlag className="admin-hero-icon" />
-            <h1>Árbitros</h1>
-          </div>
-          <p className="admin-hero-subtitle">
-            Gestioná el padrón de árbitros disponibles para asignar a los partidos.
-          </p>
-        </section>
+      <PageShell bare>
+        <PageHero
+          layout="left"
+          icon={<FiFlag />}
+          title="Árbitros"
+          subtitle="Gestioná el padrón de árbitros disponibles para asignar a los partidos."
+        />
 
         <section className="ar-list">
           <div className="ar-controls">
@@ -207,7 +204,7 @@ export default function Arbitros() {
             </div>
           )}
         </section>
-      </main>
+      </PageShell>
 
       {mostrarFormulario && (
         <div className="ar-modal-overlay">

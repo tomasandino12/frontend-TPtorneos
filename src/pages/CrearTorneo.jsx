@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { FiAward, FiTag } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
-import { Button, TextField, Card, Alert } from "../components/ui";
+import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
 
 const FORMATOS = ["Solo ida", "Ida y vuelta"];
 
@@ -115,17 +115,14 @@ export default function CrearTorneo() {
     <div className="layout">
       <AdminHeader admin={admin} onLogout={handleLogout} />
 
-      <main>
+      <PageShell bare>
         {/* Hero */}
-        <section className="admin-hero">
-          <div className="admin-hero-title">
-            <FiAward className="admin-hero-icon" />
-            <h1>Crear Torneo</h1>
-          </div>
-          <p className="admin-hero-subtitle">
-            Configurá el nuevo certamen y armá el fixture en minutos.
-          </p>
-        </section>
+        <PageHero
+          layout="left"
+          icon={<FiAward />}
+          title="Crear Torneo"
+          subtitle="Configurá el nuevo certamen y armá el fixture en minutos."
+        />
 
         <section className="ct-main">
           {/* ── Formulario ──────────────────────────────────────────────── */}
@@ -285,7 +282,7 @@ export default function CrearTorneo() {
             </Alert>
           </Card>
         </section>
-      </main>
+      </PageShell>
 
       <footer className="footer">
         <h5>

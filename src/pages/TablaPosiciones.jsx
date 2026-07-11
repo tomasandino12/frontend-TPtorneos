@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiAward } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
-import { Alert } from "../components/ui";
+import { Alert, PageShell } from "../components/ui";
 
 function TablaPosiciones() {
   const [estadisticas, setEstadisticas] = useState([]);
@@ -88,7 +88,7 @@ useEffect(() => {
     );
 
   return (
-    <div className="tabla-wrapper">
+    <PageShell bare className="tabla-shell">
       <div className="tabla-container">
         <h2 className="tabla-titulo">
           <FiAward /> Tabla de Posiciones
@@ -128,7 +128,7 @@ useEffect(() => {
           </table>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }
 

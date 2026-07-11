@@ -1,6 +1,6 @@
 /*
-  El hero (antes .ar-hero) ahora es el bloque compartido .admin-hero de
-  MenuAdmin.css.
+  El hero (antes .ar-hero, luego .admin-hero) ahora es PageHero con
+  layout="left" (src/components/ui/).
 */
 
 /* ── List section ────────────────────────────────────────────────────────── */

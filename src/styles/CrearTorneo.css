@@ -1,7 +1,7 @@
 /*
-  El hero (antes .ct-hero) ahora es el bloque compartido .admin-hero de
-  MenuAdmin.css (junto con MisTorneos/Arbitros, que lo triplicaban byte a
-  byte). Acá solo queda lo específico de esta pantalla.
+  El hero (antes .ct-hero, luego .admin-hero) ahora es PageHero con
+  layout="left" (src/components/ui/), junto con MisTorneos/Arbitros. Acá solo
+  queda lo específico de esta pantalla.
 */
 
 /* ── Main two-column layout ─────────────────────────────────────────────── */

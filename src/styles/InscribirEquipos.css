@@ -10,32 +10,13 @@
   color: var(--color-alert);
 }
 
-.ie-hero {
-  padding: 2rem 2.5rem 1.5rem;
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
-}
-.ie-hero-title {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.4rem;
-}
-.ie-hero-title h1 {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--color-ink);
-  margin: 0;
-}
-.ie-hero-icon {
-  font-size: 1.8rem;
-  color: var(--color-pitch);
-}
-.ie-hero-subtitle {
-  color: var(--color-muted);
-  font-size: 0.95rem;
-  margin: 0;
-}
+/*
+  El hero (antes .ie-hero/.ie-hero-title/.ie-hero-icon/.ie-hero-subtitle)
+  ahora es PageHero con layout="left", background="surface" y flush (banner
+  pegado arriba, no una card flotante — ver docs/frontend/sistema-de-diseno.md).
+  .ie-hero-meta/.ie-meta-chip siguen acá porque son específicos de esta
+  pantalla — se pasan como children de PageHero.
+*/
 .ie-hero-meta {
   display: flex;
   gap: 1.5rem;

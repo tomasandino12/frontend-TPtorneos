@@ -3,7 +3,7 @@ import "../styles/FixtureTorneo.css";
 import "../styles/IndexStyle.css";
 import { FiCalendar, FiClock, FiMapPin } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
-import { Alert } from "../components/ui";
+import { Alert, PageShell, PageHero } from "../components/ui";
 
 function FixtureTorneo() {
   const [partidos, setPartidos] = useState([]);
@@ -114,13 +114,8 @@ function FixtureTorneo() {
   );
 
   return (
-    <main className="subpagina-container">
-      <section className="page-header">
-        <h1>
-          <FiCalendar /> Fixture del Torneo
-        </h1>
-        <p>Próximos partidos a disputarse en el torneo</p>
-      </section>
+    <PageShell>
+      <PageHero icon={<FiCalendar />} title="Fixture del Torneo" subtitle="Próximos partidos a disputarse en el torneo" />
 
       <section className="fixture-lista">
         <h2>Próximos Partidos</h2>
@@ -198,7 +193,7 @@ function FixtureTorneo() {
             </div>
           ))}
       </section>
-    </main>
+    </PageShell>
   );
 }
 

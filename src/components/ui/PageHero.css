@@ -1,0 +1,135 @@
+.ui-page-hero {
+  text-align: center;
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 2rem;
+}
+
+.ui-page-hero-bg-grass { background-color: var(--color-grass); }
+.ui-page-hero-bg-paper { background-color: var(--color-paper); }
+.ui-page-hero-bg-surface { background-color: var(--color-surface); }
+
+.ui-page-hero-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ui-page-hero-titleblock {
+  min-width: 0;
+}
+
+.ui-page-hero-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--color-pitch);
+  font-size: 2.2rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.ui-page-hero-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ui-page-hero-subtitle {
+  color: var(--color-muted);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.ui-page-hero-actions {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+/* ── layout: split (EquipoInfo) — título a la izquierda, acciones a la derecha ── */
+.ui-page-hero-split {
+  text-align: left;
+}
+
+.ui-page-hero-split .ui-page-hero-top {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ui-page-hero-split .ui-page-hero-titleblock {
+  text-align: left;
+}
+
+.ui-page-hero-split .ui-page-hero-title {
+  justify-content: flex-start;
+  font-size: 2rem;
+  gap: 0.6rem;
+  margin-bottom: 0;
+}
+
+.ui-page-hero-split .ui-page-hero-actions {
+  margin-top: 0;
+  justify-content: flex-start;
+}
+
+/* ── layout: left (panel admin / Inscribir Equipos) — apilado, alineado a la izquierda ── */
+.ui-page-hero-left {
+  text-align: left;
+  width: calc(100% - 3rem);
+  max-width: 1100px;
+  margin: 1.5rem auto 0;
+}
+
+.ui-page-hero-left .ui-page-hero-top {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.ui-page-hero-left .ui-page-hero-titleblock {
+  text-align: left;
+}
+
+.ui-page-hero-left .ui-page-hero-title {
+  justify-content: flex-start;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-ink);
+  gap: 0.75rem;
+  margin-bottom: 0.375rem;
+}
+
+.ui-page-hero-left .ui-page-hero-icon {
+  font-size: 2.375rem;
+  color: var(--color-pitch);
+}
+
+.ui-page-hero-left .ui-page-hero-subtitle {
+  font-size: 0.9375rem;
+}
+
+/* ── flush (Inscribir Equipos) — banner a todo el ancho, sin recuadro flotante ── */
+.ui-page-hero.ui-page-hero-flush {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--color-border);
+  padding: 2rem 2.5rem 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .ui-page-hero-left {
+    width: calc(100% - 1.5rem);
+    margin-top: 0.75rem;
+  }
+
+  .ui-page-hero.ui-page-hero-flush {
+    padding: 1.25rem;
+  }
+}

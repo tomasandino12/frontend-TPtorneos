@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { FiUsers, FiSearch, FiArrowLeft, FiZap, FiCheck } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch, ASSETS_URL } from "../utils/api.js";
-import { Button, TextField, Alert } from "../components/ui";
+import { Button, TextField, Alert, PageShell, PageHero } from "../components/ui";
 
 const LABEL_CATEGORIA = {
   sub15:     "Sub-15",
@@ -245,24 +245,28 @@ export default function InscribirEquipos() {
         onLogout={() => { localStorage.removeItem("admin"); localStorage.removeItem("adminToken"); navigate("/admin"); }}
       />
 
-      <main>
+      <PageShell bare>
         {/* Hero */}
-        <section className="ie-hero">
-          <div className="ie-hero-title">
-            <FiUsers className="ie-hero-icon" />
-            <h1>Inscribir Equipos</h1>
-          </div>
-          <p className="ie-hero-subtitle">
-            {torneo?.nombreTorneo} — solo se muestran equipos de la categoría{" "}
-            <strong>{categoriaLabel}</strong>.
-          </p>
+        <PageHero
+          layout="left"
+          background="surface"
+          flush
+          icon={<FiUsers />}
+          title="Inscribir Equipos"
+          subtitle={
+            <>
+              {torneo?.nombreTorneo} — solo se muestran equipos de la categoría{" "}
+              <strong>{categoriaLabel}</strong>.
+            </>
+          }
+        >
           <div className="ie-hero-meta">
             <div className="ie-meta-chip">Categoría: <span>{categoriaLabel}</span></div>
             <div className="ie-meta-chip">Formato: <span>{torneo?.formato === "idayvuelta" ? "Ida y vuelta" : "Solo ida"}</span></div>
             <div className="ie-meta-chip">Inscriptos: <span>{totalInscriptos}/{torneo?.cantidadEquipos ?? "—"}</span></div>
             <div className="ie-meta-chip">Estado: <span>{torneo?.estado}</span></div>
           </div>
-        </section>
+        </PageHero>
 
         <section className="ie-main">
           {/* ── Panel equipos ──────────────────────────────────────────── */}
@@ -467,7 +471,7 @@ export default function InscribirEquipos() {
             </div>
           </div>
         </section>
-      </main>
+      </PageShell>
 
       <footer className="footer">
         <h5>

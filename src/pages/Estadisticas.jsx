@@ -4,7 +4,7 @@ import "../styles/Estadisticas.css";
 import { useNavigate } from "react-router-dom";
 import { FiCalendar, FiClock, FiSettings } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
-import { Button, Alert } from "../components/ui";
+import { Button, Alert, PageShell, PageHero } from "../components/ui";
 
 function Estadisticas() {
   const navigate = useNavigate();
@@ -135,12 +135,12 @@ function Estadisticas() {
     .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
   return (
-    <main className="subpagina-container">
-      <header className="page-header">
-        <h1>{equipo.nombreEquipo}</h1>
-        <p>Estadísticas y resultados de partidos del equipo</p>
-        {jugadorLogueado?.equipo?.id && (
-          <div className="equipo-cross-link">
+    <PageShell>
+      <PageHero
+        title={equipo.nombreEquipo}
+        subtitle="Estadísticas y resultados de partidos del equipo"
+        actions={
+          jugadorLogueado?.equipo?.id && (
             <Button
               variant="secondary"
               icon={<FiSettings />}
@@ -148,9 +148,9 @@ function Estadisticas() {
             >
               {jugadorLogueado?.esCapitan ? "Gestionar mi equipo" : "Ver mi equipo"}
             </Button>
-          </div>
-        )}
-      </header>
+          )
+        }
+      />
 
       {/* === RESUMEN === */}
       <section className="resumen-boxes">
@@ -229,7 +229,7 @@ function Estadisticas() {
           )}
         </section>
       </div>
-    </main>
+    </PageShell>
   );
 }
 

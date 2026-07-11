@@ -3,6 +3,7 @@ import "../styles/Equipos.css";
 import { useParams } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import EquipoInfo from "../components/EquipoInfo.jsx";
+import { PageShell } from "../components/ui";
 
 // Ruta standalone /equipo/:id: se usa para ver CUALQUIER equipo (ej. desde un
 // click en una fila de Tabla de Posiciones), no solo el propio — por eso
@@ -16,9 +17,9 @@ function EquipoDetalle() {
     <div className="layout">
       <Navbar />
       <main className="content">
-        <main className="subpagina-container">
+        <PageShell>
           <EquipoInfo equipoId={Number(id)} />
-        </main>
+        </PageShell>
       </main>
       <footer className="footer">
         <h5>© 2025 - Gestor de Torneos -Para mas información o problemas con la página contactate a: 341 6173297 o a nuestra cuenta de instagram @todotorneos</h5>

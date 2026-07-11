@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiAward, FiFlag, FiMapPin, FiUsers } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
-import { Card } from "../components/ui";
+import { Card, PageShell } from "../components/ui";
 
 const ADMIN_CARDS = [
   { label: "Mis Torneos", icon: FiAward, path: "/admin/torneos" },
@@ -43,7 +43,7 @@ function MenuAdmin() {
       <AdminHeader admin={admin} onLogout={handleLogout} />
 
       {/* ── Contenido ───────────────────────────────────────────────────── */}
-      <main className="admin-main-content">
+      <PageShell bare>
 
         <Card className="admin-welcome">
           <h1>
@@ -74,7 +74,7 @@ function MenuAdmin() {
           })}
         </div>
 
-      </main>
+      </PageShell>
     </div>
   );
 }

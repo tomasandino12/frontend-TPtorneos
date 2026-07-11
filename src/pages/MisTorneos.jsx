@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { FiAward, FiEdit2, FiCheckCircle, FiUsers, FiSearch, FiPlus, FiTrash2 } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
-import { Button, TextField, Card } from "../components/ui";
+import { Button, TextField, Card, PageShell, PageHero } from "../components/ui";
 
 // estado backend → etiqueta UI
 const ESTADO_LABEL = {
@@ -134,16 +134,14 @@ export default function MisTorneos() {
     <div className="layout">
       <AdminHeader admin={admin} onLogout={handleLogout} />
 
-      <main>
+      <PageShell bare>
         {/* ── Hero ────────────────────────────────────────────────────────── */}
-        <section className="admin-hero">
-          <div className="admin-hero-title">
-            <FiAward className="admin-hero-icon" />
-            <h1>Mis Torneos</h1>
-          </div>
-          <p className="admin-hero-subtitle">
-            Todos los torneos que creaste · editá, sumá equipos o eliminá los que ya no necesités.
-          </p>
+        <PageHero
+          layout="left"
+          icon={<FiAward />}
+          title="Mis Torneos"
+          subtitle="Todos los torneos que creaste · editá, sumá equipos o eliminá los que ya no necesités."
+        >
           <div className="mt-metrics">
             <div className="mt-metric-card">
               <FiAward />
@@ -167,7 +165,7 @@ export default function MisTorneos() {
               </div>
             </div>
           </div>
-        </section>
+        </PageHero>
 
         {/* ── Lista ───────────────────────────────────────────────────────── */}
         <section className="mt-list">
@@ -306,7 +304,7 @@ export default function MisTorneos() {
             </div>
           )}
         </section>
-      </main>
+      </PageShell>
 
       <footer className="footer">
         <h5>

@@ -1,6 +1,6 @@
 /*
-  El encabezado de página (antes .equipos-header) ahora es la clase compartida
-  .page-header en IndexStyle.css — no se redefine acá.
+  El encabezado de página (antes .equipos-header, luego .page-header) ahora
+  es PageHero (src/components/ui/) — no se redefine acá.
 */
 
 .crear-equipo-card {
@@ -141,25 +141,12 @@
   box-shadow: var(--shadow-md);
 }
 
-/* === Detalle de Equipo === */
-
-.equipo-detalle-header {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  text-align: left;
-}
-
-.equipo-detalle-titulo {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 2rem;
-  color: var(--color-pitch);
-  margin: 0;
-}
+/*
+  === Detalle de Equipo ===
+  El hero del título (antes .equipo-detalle-header/.equipo-detalle-titulo,
+  con las acciones en .detalle-seccion-header) ahora es PageHero con
+  layout="split" — ver docs/frontend/sistema-de-diseno.md.
+*/
 
 /* Secciones del detalle */
 .detalle-seccion {
@@ -170,15 +157,6 @@
   color: var(--color-pitch);
   font-weight: 700;
   font-size: 1.4rem;
-  margin-bottom: 1rem;
-}
-
-.detalle-seccion-header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
   margin-bottom: 1rem;
 }
 
@@ -330,10 +308,6 @@
   flex-shrink: 0;
 }
 
-.equipo-cross-link {
-  margin-top: 0.75rem;
-}
-
 .salir-equipo-seccion {
   text-align: right;
 }
@@ -453,16 +427,29 @@
   color: var(--color-ink);
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.15s ease;
 }
 
 .transferir-capitania-card:hover {
   border-color: var(--color-turf);
 }
 
+/*
+  El estado seleccionado NO se distingue solo por un matiz de verde (antes
+  --color-grass vs. --color-success-bg, casi indistinguibles a simple vista
+  — la misma confusión encontrada en la auditoría de colores de fondo/hero).
+  Acá el fondo se mantiene fijo y la distinción es el borde marcado + el
+  ícono de check, dos señales que sí se notan.
+*/
 .transferir-capitania-card.seleccionado {
   border-color: var(--color-pitch);
-  background-color: var(--color-success-bg);
+}
+
+.transferir-capitania-check {
+  margin-left: auto;
+  color: var(--color-pitch);
+  font-size: 1.2rem;
+  flex-shrink: 0;
 }
 
 .transferir-capitania-card input[type="radio"] {

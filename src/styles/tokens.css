@@ -16,8 +16,8 @@
   --color-whistle: #D98E04;  /* ámbar "silbato" — único color de advertencia/pendiente/borrador */
   --color-alert: #B3261E;    /* rojo único — reemplaza las 3 paletas de error que conviven hoy */
   --color-alert-dark: #8F1611; /* derivado de alert, hover de botones destructivos */
-  --color-paper: #F5F1E6;    /* marfil cálido — fondo de PÁGINA (el área exterior, detrás de todo: main/.content, .subpagina-container, etc.) */
-  --color-grass: #EAF6EC;    /* verde pálido — fondo de los recuadros "hero"/header de cada pantalla (ícono + título + subtítulo, ej. .page-header). NO usarlo como fondo de página: son roles distintos a propósito, para que el recuadro se distinga del fondo */
+  --color-paper: #F5F1E6;    /* marfil cálido — fondo de PÁGINA (el área exterior, detrás de todo: main/.content, PageShell) */
+  --color-grass: #DCEEDD;    /* verde pálido — fondo del componente PageHero (ícono + título + subtítulo de cada pantalla). Antes #EAF6EC: se oscureció un poco para que contraste mejor contra --color-paper (Opción A, elegida en vivo). NO usarlo como fondo de página: son roles distintos a propósito, para que el recuadro se distinga del fondo */
   --color-ink: #16241B;      /* texto principal, negro con base verde */
 
   /* ---- Neutros derivados ---- */

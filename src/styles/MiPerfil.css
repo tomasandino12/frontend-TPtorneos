@@ -1,44 +1,8 @@
-/* === Fondo general de la página === */
-.MiPerfil {
-  background-color: var(--color-paper);
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  padding-top: 40px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* === Contenedor principal (hace de recuadro "hero" para el título) === */
-.mi-perfil-container {
-  width: 95%;
-  max-width: 1000px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: var(--color-grass);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-}
-
-/* === Título principal === */
-.mi-perfil-titulo {
-  font-size: 2rem;
-  font-weight: bold;
-  color: var(--color-pitch);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 0.5rem;
-}
-
-/* === Subtítulo === */
-.mi-perfil-subtitulo {
-  text-align: center;
-  color: var(--color-muted);
-  margin-bottom: 2rem;
-  font-size: 1rem;
-}
+/*
+  El fondo de página y el recuadro hero del título (antes .MiPerfil /
+  .mi-perfil-container / .mi-perfil-titulo / .mi-perfil-subtitulo) ahora son
+  PageShell/PageHero de src/components/ui/ — ver docs/frontend/sistema-de-diseno.md.
+*/
 
 /* === Sección (tarjeta) === */
 .perfil-seccion {
@@ -134,10 +98,6 @@
   .perfil-campo {
     flex-direction: column;
     gap: 0.75rem;
-  }
-
-  .mi-perfil-container {
-    padding: 1.5rem;
   }
 
   .perfil-seccion-header {

@@ -1,0 +1,29 @@
+/*
+  Look por defecto: card centrada, flotante, con sombra (antes
+  .subpagina-container en IndexStyle.css) — lo usan todas las pantallas del
+  lado jugador.
+*/
+.ui-page-shell {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.ui-page-shell-bg-paper { background-color: var(--color-paper); }
+.ui-page-shell-bg-grass { background-color: var(--color-grass); }
+
+/*
+  bare: a todo lo ancho, sin card/sombra — lo usa el panel admin (antes
+  .admin-main-content) y Tabla de Posiciones (antes .tabla-wrapper), que ya
+  tienen su propia card de contenido puertas adentro.
+*/
+.ui-page-shell.ui-page-shell-bare {
+  max-width: none;
+  margin: 0;
+  padding: 2rem 2.5rem;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 100vh;
+}

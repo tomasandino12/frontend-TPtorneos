@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiEdit2, FiUpload, FiBarChart2, FiSearch, FiSend, FiLogOut, FiX, FiRepeat } from "react-icons/fi";
+import { FiArrowLeft, FiEdit2, FiUpload, FiBarChart2, FiSearch, FiSend, FiLogOut, FiX, FiRepeat, FiCheckCircle } from "react-icons/fi";
 import { apiFetch, apiFetchFormData, ASSETS_URL } from "../utils/api.js";
-import { Button, TextField, Alert } from "./ui";
+import { Button, TextField, Alert, PageHero } from "./ui";
 
 /**
  * Contenido de "detalle de un equipo" (header con escudo, descripción,
@@ -354,44 +354,43 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
 
   return (
     <>
-      <section className="page-header equipo-detalle-header">
-        <div>
-          <h1 className="equipo-detalle-titulo">
-            {equipo.escudoUrl ? (
-              <img
-                src={`${ASSETS_URL}${equipo.escudoUrl}`}
-                alt={`Escudo de ${equipo.nombreEquipo}`}
-                className="escudo-preview"
-              />
-            ) : (
-              <span
-                className="escudo-preview escudo-preview-empty"
-                style={{ backgroundColor: equipo.colorPrimario || "#e5e7eb" }}
-              />
+      <PageHero
+        layout="split"
+        icon={
+          equipo.escudoUrl ? (
+            <img
+              src={`${ASSETS_URL}${equipo.escudoUrl}`}
+              alt={`Escudo de ${equipo.nombreEquipo}`}
+              className="escudo-preview"
+            />
+          ) : (
+            <span
+              className="escudo-preview escudo-preview-empty"
+              style={{ backgroundColor: equipo.colorPrimario || "#e5e7eb" }}
+            />
+          )
+        }
+        title={equipo.nombreEquipo}
+        subtitle="Gestión del equipo"
+        actions={
+          <>
+            {esMiEquipo && (
+              <Button
+                variant="secondary"
+                icon={<FiBarChart2 />}
+                onClick={() => navigate("/gestorTorneos/estadisticas")}
+              >
+                Ver estadísticas del equipo
+              </Button>
             )}
-            {equipo.nombreEquipo}
-          </h1>
-          <p>Gestión del equipo</p>
-        </div>
-
-        <div className="detalle-seccion-header">
-          {esMiEquipo && (
-            <Button
-              variant="secondary"
-              icon={<FiBarChart2 />}
-              onClick={() => navigate("/gestorTorneos/estadisticas")}
-              className="equipo-cross-link"
-            >
-              Ver estadísticas del equipo
-            </Button>
-          )}
-          {showVolver && (
-            <Button variant="ghost" icon={<FiArrowLeft />} onClick={() => navigate("/gestorTorneos")}>
-              Volver al menú
-            </Button>
-          )}
-        </div>
-
+            {showVolver && (
+              <Button variant="ghost" icon={<FiArrowLeft />} onClick={() => navigate("/gestorTorneos")}>
+                Volver al menú
+              </Button>
+            )}
+          </>
+        }
+      >
         {esCapitanDeEsteEquipo && (
           <div className="escudo-upload">
             <input
@@ -409,7 +408,7 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
           </div>
         )}
         {escudoFeedback && <Alert variant={escudoFeedback.variant}>{escudoFeedback.text}</Alert>}
-      </section>
+      </PageHero>
 
       {/* Sobre el equipo */}
       <section className="detalle-seccion">
@@ -642,6 +641,7 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
                           onChange={() => setNuevoCapitanId(j.id)}
                         />
                         {j.nombre} {j.apellido}
+                        {seleccionado && <FiCheckCircle className="transferir-capitania-check" />}
                       </label>
                     </li>
                   );

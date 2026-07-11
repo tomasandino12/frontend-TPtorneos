@@ -3,7 +3,7 @@ import "../styles/Equipos.css";
 import { useState, useEffect } from "react";
 import { FiUsers, FiPlus, FiMail, FiCheck, FiX } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
-import { Button, TextField, Card, Alert } from "../components/ui";
+import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
 import EquipoInfo from "../components/EquipoInfo.jsx";
 
 function Equipos() {
@@ -129,9 +129,9 @@ function Equipos() {
   // === Seguridad adicional: render condicional si no hay jugador cargado ===
   if (!jugador) {
     return (
-      <main className="subpagina-container">
+      <PageShell>
         <Alert variant="info">No se encontró información del jugador. Iniciá sesión nuevamente.</Alert>
-      </main>
+      </PageShell>
     );
   }
 
@@ -140,13 +140,13 @@ function Equipos() {
   // de la página pasa a ser el nombre del equipo (lo resuelve EquipoInfo).
   if (jugador.equipo?.id) {
     return (
-      <main className="subpagina-container">
+      <PageShell>
         <EquipoInfo
           equipoId={jugador.equipo.id}
           showVolver={false}
           onEquipoLeft={handleEquipoLeft}
         />
-      </main>
+      </PageShell>
     );
   }
 
@@ -155,13 +155,8 @@ function Equipos() {
   // única forma de sumarse a un equipo es que un capitán te agregue desde su
   // propio buscador de reclutamiento (dentro de EquipoInfo).
   return (
-    <main className="subpagina-container">
-      <section className="page-header">
-        <h1>
-          <FiUsers /> Gestión de Equipos
-        </h1>
-        <p>Creá tu equipo para empezar a jugar</p>
-      </section>
+    <PageShell>
+      <PageHero icon={<FiUsers />} title="Gestión de Equipos" subtitle="Creá tu equipo para empezar a jugar" />
 
       {salirFeedback && (
         <div className="feedback-box">
@@ -273,7 +268,7 @@ function Equipos() {
           </div>
         )}
       </Card>
-    </main>
+    </PageShell>
   );
 }
 

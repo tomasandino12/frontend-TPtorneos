@@ -1,7 +1,8 @@
 /*
-  El hero (antes .mt-hero) ahora es el bloque compartido .admin-hero de
-  MenuAdmin.css. .mt-metrics sigue acá porque es específico de esta pantalla
-  (ninguna otra pantalla del panel muestra métricas en el hero).
+  El hero (antes .mt-hero, luego .admin-hero) ahora es PageHero con
+  layout="left" (src/components/ui/). .mt-metrics sigue acá porque es
+  específico de esta pantalla (ninguna otra pantalla del panel muestra
+  métricas en el hero) — se pasa como children de PageHero.
 */
 
 .mt-metrics {

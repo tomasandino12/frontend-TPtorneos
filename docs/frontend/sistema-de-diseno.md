@@ -21,11 +21,11 @@ Son 7 colores con un significado fijo — no son "verde 1", "verde 2", son roles
 | `--color-turf` | `#3F8452` | Verde cancha medio — estados de hover, acentos secundarios, y el color "éxito" de `Alert` | Es un color de *interacción/estado*, no el color de marca principal (ese es `--color-pitch`) |
 | `--color-whistle` | `#D98E04` | Ámbar "silbato" — **el único** color de advertencia, pendiente o borrador de toda la app | No es un acento decorativo. Si algo no es realmente "atención/pendiente", no debería llevar este color — este fue justamente uno de los bugs que corrigió la migración: el estado "Borrador" de un torneo usaba este color como si estar en borrador fuera una alerta, cuando en realidad es un estado neutral (ver `decisiones.md`, Fase 4) |
 | `--color-alert` | `#B3261E` | Rojo único de error — reemplaza 3 paletas de rojo distintas que convivían antes (una por pantalla) | No usarlo para "esto es importante" si no es un error real. La única excepción documentada es el badge "EN VIVO" de Inicio (ver `glosario.md` y `decisiones.md`) |
-| `--color-paper` | `#F5F1E6` | Marfil cálido — fondo de **página**: el área exterior detrás de todo (`main`/`.content`, `.subpagina-container`, `.MiPerfil`, `.auth-page`, `.admin-main-content`) | No usarlo en el recuadro "hero"/header de una pantalla (ícono + título + subtítulo) — ese rol es de `--color-grass`. Si ambos quedan iguales, el recuadro se pierde contra el fondo (bug real, ya pasó dos veces) |
-| `--color-grass` | `#EAF6EC` | Verde pálido — fondo de los recuadros "hero"/header con ícono + título + subtítulo de cada pantalla (`.page-header`, `.mi-perfil-container`). Reemplazó al marfil que tenía este mismo rol en la Fase 1, tras verlo en vivo contra datos reales: preferencia visual confirmada, no un bug de las fases anteriores | No usarlo como fondo de página — ese rol es de `--color-paper`. Son roles separados a propósito, aunque ambos sean tonos de verde/marfil muy claros: la única forma de que el recuadro hero se note es que su color sea *distinto* al del fondo que lo rodea |
+| `--color-paper` | `#F5F1E6` | Marfil cálido — fondo de **página**: lo aplica el componente `PageShell` (ver más abajo), y también `main`/`.content` (el layout compartido de `GestorTorneos.jsx`) y `.auth-page` | No usarlo en el recuadro "hero" de una pantalla (ícono + título + subtítulo) — ese rol es de `--color-grass`. Si ambos quedan iguales, el recuadro se pierde contra el fondo (bug real, pasó 3 veces con implementaciones sueltas por pantalla — ver la sección de `PageHero`) |
+| `--color-grass` | `#DCEEDD` | Verde pálido — fondo del recuadro "hero" (ícono + título + subtítulo) de cada pantalla, lo aplica el componente `PageHero`. Valor ajustado en la 4ª ronda de este ajuste (antes `#EAF6EC`, y antes de eso marfil): más contraste contra `--color-paper`, elegido en vivo | No usarlo como fondo de página — ese rol es de `--color-paper`. Son roles separados a propósito: la única forma de que el recuadro hero se note es que su color sea *distinto* al del fondo que lo rodea |
 | `--color-ink` | `#16241B` | Texto principal — negro con base verde, no un gris neutro | — |
 
-Excepción puntual: Tabla de Posiciones (`TablaPosiciones.css`) usa `--color-grass` como fondo de su wrapper de página (`.tabla-wrapper`) en vez de `--color-paper` — quedó así deliberadamente porque el usuario confirmó en vivo que esa pantalla ya se ve bien tal cual está, y no forma parte del alcance de este ajuste.
+Excepción puntual: Tabla de Posiciones (`TablaPosiciones.jsx`) usa `PageShell` para el fondo (unificado en `--color-paper` como el resto), pero **no** usa `PageHero` — su título vive directamente dentro de la card blanca de contenido (`.tabla-container`), no hay un recuadro hero separado en esa pantalla. Es una decisión visible en el código (`PageHero` simplemente no se importa ahí), no una implementación paralela.
 
 Además hay variantes derivadas para estados de interacción: `--color-pitch-dark` (botón primario presionado), `--color-alert-dark` (botón destructivo en hover).
 
@@ -55,11 +55,11 @@ Cada variante de `Alert` tiene su propio par fondo/texto, derivado de la paleta 
 
 Nota tal cual está en el código fuente sobre por qué "info" es distinto a los otros tres: la paleta de marca no tiene un azul/hue propio, así que en vez de inventar un séptimo color, la variante "info" de `Alert` se apoya en los neutros ya derivados (queda gris, no colorido). Esta fue una decisión deliberada de la Fase 1: no agregar un color nuevo solo para tener un "info azul" cuando el dominio (cancha de fútbol) no lo pedía.
 
-**`--color-success-bg` (`#E1F1E4`) vs. `--color-grass` (`#EAF6EC`) — no son el mismo token, aunque el hex se parezca mucho a simple vista.** Son roles completamente distintos que casualmente cayeron en el mismo verde clarísimo:
-- `--color-success-bg` es semántico: significa "estado positivo/éxito" — lo usan `Alert variant="success"`, el link activo del navbar (`.gt-navlinks a.active` / `.navdiv ul a.active`), la tarjeta "partido ganado" de `Estadisticas.css`, badges de estado "En curso" en `MisTorneos.jsx`, y varias superficies del panel admin (`MenuAdmin.css`, `Arbitros.css`, `InscribirEquipos.css`). Se usa en decenas de lugares chicos y puntuales, nunca como fondo de una sección grande.
-- `--color-grass` es estructural: significa "soy el recuadro hero de esta pantalla" — lo usa únicamente `.page-header` y `.mi-perfil-container`, siempre como fondo de una sección grande junto al fondo `--color-paper` de la página.
+**`--color-success-bg` (`#E1F1E4`) vs. `--color-grass` (`#DCEEDD`) — no son el mismo token, aunque el hex se pareciera mucho a simple vista con el valor anterior de `--color-grass`.** Son roles completamente distintos que casualmente cayeron cerca en la paleta:
+- `--color-success-bg` es semántico: significa "estado positivo/éxito" — lo usan `Alert variant="success"`, el link activo del navbar (`.gt-navlinks a.active` / `.navdiv ul a.active`), la tarjeta "partido ganado" de `Estadisticas.css`, badges de estado "En curso" en `MisTorneos.jsx`, y varias superficies del panel admin. Se usa en decenas de lugares chicos y puntuales, nunca como fondo de una sección grande.
+- `--color-grass` es estructural: significa "soy el fondo del componente `PageHero`" — es el **único** lugar del código que lo referencia (`PageHero.css`). Ninguna otra pantalla puede reimplementarlo por su cuenta con el token equivocado, porque no hay otra forma de pintar un recuadro hero salvo usar el componente.
 
-Esta confusión ya causó un bug real: en una fase anterior, `.page-header` usaba `--color-success-bg` en vez de `--color-grass` "porque quedaba prácticamente igual visualmente" — y por eso, cuando el fondo de página todavía era del mismo verde, el recuadro hero desaparecía contra el fondo (los dos verdes clarísimos, casi indistinguibles a simple vista, sumado a que encima estaban mal separados). No se consolidan en un solo token porque `--color-success-bg` tiene que poder seguir usándose en Alerts/badges sin arrastrar involuntariamente el fondo de ningún hero, y viceversa.
+Esta confusión ya causó un bug real, dos veces, con implementaciones sueltas por pantalla: el hero del lado jugador (antes `.page-header`) usaba en algún momento `--color-success-bg` en vez de `--color-grass`, y el hero del panel admin (antes `.admin-hero`, en `MenuAdmin.css`) tenía el mismo error — nadie lo había notado porque el panel admin quedó fuera del alcance de los primeros intentos de arreglo. Migrar ambos a `PageHero` resuelve el bug de raíz: el color correcto está hardcodeado en un solo componente, así que no hay una segunda copia que pueda quedar con el token viejo. Los dos tokens siguen sin consolidarse en uno solo porque `--color-success-bg` tiene que poder seguir usándose en Alerts/badges sin arrastrar involuntariamente el fondo del hero, y viceversa — son tokens con roles distintos que conviven, no un error a "corregir" fusionándolos.
 
 ### Tipografía
 
@@ -68,7 +68,7 @@ Esta confusión ya causó un bug real: en una fase anterior, `.page-header` usab
 --font-body: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
 ```
 
-- **`--font-display`** (Bebas Neue): tipografía condensada en mayúsculas, pensada para títulos y cifras destacadas — el "look" de tablero/marcador deportivo. Se usa en los `<h1>` de los hero de pantalla (ej. `.admin-hero-title h1` en `MenuAdmin.css`, `.auth-brand` en las pantallas de login) y en `.stat-numeral` (ver abajo). **Nunca en párrafos ni formularios** — es puramente decorativa a tamaños chicos y sería difícil de leer.
+- **`--font-display`** (Bebas Neue): tipografía condensada en mayúsculas, pensada para títulos y cifras destacadas — el "look" de tablero/marcador deportivo. Se usa en `.auth-brand` (pantallas de login) y en `.stat-numeral` (ver abajo). **Nunca en párrafos ni formularios** — es puramente decorativa a tamaños chicos y sería difícil de leer.
 - **`--font-body`** (Inter): todo lo demás — texto de UI, formularios, tablas, botones. Es la tipografía "de trabajo" del proyecto.
 
 Las dos se cargan por `<link>` de Google Fonts en `index.html`, no como paquete npm.
@@ -104,10 +104,10 @@ Se usa hoy en `TablaPosiciones.jsx` (columnas PJ/PG/PE/PP/DG/Pts) y en `Estadist
 
 ## Los componentes (`src/components/ui/`)
 
-Los 4 se importan así, desde el archivo "barrel" `src/components/ui/index.js` (ver `glosario.md`):
+Los 6 se importan así, desde el archivo "barrel" `src/components/ui/index.js` (ver `glosario.md`):
 
 ```js
-import { Button, TextField, Card, Alert } from "../components/ui";
+import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
 ```
 
 ### `Button`
@@ -243,3 +243,96 @@ Ejemplo simple (`EquipoInfo.jsx`):
   <p>Uníte o creá un equipo, o participá de un torneo activo...</p>
 </Alert>
 ```
+
+### `PageShell` y `PageHero`
+
+**Este es el único mecanismo soportado para "fondo de página" y "recuadro hero".** Antes de que existieran, cada pantalla reimplementaba el mismo patrón visual con su propia clase CSS (`.subpagina-container`, `.MiPerfil`/`.mi-perfil-container`, `.admin-main-content`, `.tabla-wrapper`, `.page-header`, `.equipo-detalle-header`, `.admin-hero`, `.ie-hero`...) y, sin una garantía estructural, esas copias driftearon 3 veces seguidas — la última vez en código nuevo (el modal de transferencia de capitanía de `Equipos.css`) escrito sin relación a los intentos anteriores de arreglo. **Si reintroducís una clase CSS que reimplemente este patrón en vez de usar `PageShell`/`PageHero`, es un bug** — no una alternativa válida, aunque compile y se vea bien en el momento: es exactamente el mismo error que ya pasó 3 veces.
+
+#### `PageShell` — fondo de página
+
+```jsx
+export default function PageShell({
+  background = "paper",  // "paper" | "grass"
+  bare = false,           // true = a todo el ancho, sin card/sombra flotante
+  className = "",
+  children,
+  as: Tag = "main",
+  ...rest
+})
+```
+
+- **Modo card (default, `bare` sin pasar)**: card centrada, `max-width: 1000px`, con sombra y radio — la usan todas las pantallas del lado jugador (Equipos, Estadísticas, Fixture, Mi Perfil, `EquipoDetalle`).
+- **Modo `bare`**: a todo el ancho, sin card ni sombra — la usa el panel admin (ya tiene su propia card de contenido puertas adentro) y Tabla de Posiciones.
+
+Ejemplo real (`Estadisticas.jsx`):
+
+```jsx
+<PageShell>
+  <PageHero ... />
+  <section className="resumen-boxes">...</section>
+</PageShell>
+```
+
+Ejemplo con `bare` (`Arbitros.jsx`):
+
+```jsx
+<PageShell bare>
+  <PageHero layout="left" ... />
+  <section className="ar-list">...</section>
+</PageShell>
+```
+
+#### `PageHero` — recuadro con ícono + título + subtítulo + acciones
+
+```jsx
+export default function PageHero({
+  icon, title, subtitle, actions,  // todos opcionales salvo que al menos uno tenga sentido
+  layout = "center",   // "center" | "split" | "left"
+  background = "grass", // "grass" | "paper" | "surface"
+  flush = false,         // true = banner a todo el ancho, sin card flotante (borde inferior en vez de sombra)
+  className = "",
+  children,               // contenido extra dentro del recuadro, debajo del título/subtítulo
+  as: Tag = "section",
+  ...rest
+})
+```
+
+Tres layouts, cada uno mapeado a un patrón visual que ya existía en la app (no son un diseño nuevo, son la consolidación de los 3 que ya convivían):
+- **`"center"`** (default): ícono + título centrados, subtítulo debajo, acciones debajo de eso. Lo usan Equipos, Estadísticas, Fixture y Mi Perfil.
+- **`"split"`**: título a la izquierda, acciones a la derecha, en una fila que rompe en mobile. Lo usa `EquipoInfo` (el título lleva el escudo del equipo como `icon`, y las acciones son "Ver estadísticas"/"Volver al menú").
+- **`"left"`**: ícono + título alineados a la izquierda, apilados, con un ancho acotado (`max-width: 1100px`). Lo usa el panel admin (Mis Torneos, Crear Torneo, Árbitros, Inscribir Equipos).
+
+`children` es para contenido que no encaja en título/subtítulo/acciones pero sigue siendo parte del recuadro — por ejemplo las métricas de `MisTorneos.jsx` (`.mt-metrics`) o el control de subir escudo de `EquipoInfo.jsx` (`.escudo-upload`), que van dentro del hero, no como una sección aparte.
+
+`background`/`flush` son las dos props pensadas para cuando una pantalla puntual necesita verse distinta — la diferencia queda visible ahí mismo, en el JSX de esa pantalla, no escondida en un archivo CSS que nadie más lee. El único caso real hoy es Inscribir Equipos, que tiene un hero "banner" blanco pegado arriba (no una card flotante verde):
+
+```jsx
+<PageHero
+  layout="left"
+  background="surface"
+  flush
+  icon={<FiUsers />}
+  title="Inscribir Equipos"
+  subtitle={<>...</>}
+>
+  <div className="ie-hero-meta">...</div>
+</PageHero>
+```
+
+Ejemplo real con `actions` (`Estadisticas.jsx`):
+
+```jsx
+<PageHero
+  title={equipo.nombreEquipo}
+  subtitle="Estadísticas y resultados de partidos del equipo"
+  actions={
+    jugadorLogueado?.equipo?.id && (
+      <Button variant="secondary" icon={<FiSettings />} onClick={...}>
+        {jugadorLogueado?.esCapitan ? "Gestionar mi equipo" : "Ver mi equipo"}
+      </Button>
+    )
+  }
+/>
+```
+
+**Tabla de Posiciones es la única pantalla del patrón "hero" que no usa `PageHero`** — su título vive directamente dentro de la card blanca de contenido, nunca tuvo un recuadro hero separado. Es una decisión visible: el componente simplemente no se importa en `TablaPosiciones.jsx`, no hay una reimplementación alternativa.

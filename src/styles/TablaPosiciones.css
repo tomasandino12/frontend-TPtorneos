@@ -1,6 +1,5 @@
-.tabla-wrapper {
-  background-color: var(--color-grass);
-  min-height: 100vh;
+/* Ajuste puntual de padding sobre PageShell (bare usa 2rem 2.5rem por defecto) */
+.tabla-shell {
   padding: 2rem 1rem;
 }
 

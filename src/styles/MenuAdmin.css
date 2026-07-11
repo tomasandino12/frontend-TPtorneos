@@ -242,15 +242,10 @@
   margin-top: 2px;
 }
 
-/* ── Contenido principal ─────────────────────────────────────────────── */
-
-.admin-main-content {
-  flex: 1;
-  background-color: var(--color-paper);
-  padding: 2rem 2.5rem;
-  width: 100%;
-  box-sizing: border-box;
-}
+/*
+  El fondo de página (antes .admin-main-content) ahora es PageShell con
+  `bare` — ver docs/frontend/sistema-de-diseno.md.
+*/
 
 /* ── Welcome card (contenedor de superficie viene de <Card>) ──────────── */
 
@@ -340,52 +335,8 @@
 }
 
 /*
-  ── Hero compartido del panel de torneos (CrearTorneo, MisTorneos, Arbitros) ──
-  Antes .ct-hero/.mt-hero/.ar-hero triplicaban el mismo bloque byte a byte en
-  3 archivos distintos. Ahora es una sola clase acá (MenuAdmin.css ya se
-  importa en las 4 pantallas del panel de torneos) con unidades en rem, igual
-  que el resto del panel. Cada página solo mantiene lo que le es propio
-  (ej. .mt-metrics en MisTorneos).
+  El hero compartido del panel de torneos (antes .admin-hero, usado por
+  CrearTorneo/MisTorneos/Arbitros — bug confirmado en la auditoría: usaba
+  --color-success-bg en vez de --color-grass) ahora es PageHero con
+  layout="left" — ver docs/frontend/sistema-de-diseno.md.
 */
-.admin-hero {
-  background: var(--color-success-bg);
-  border-radius: var(--radius-lg);
-  width: calc(100% - 3rem);
-  max-width: 1100px;
-  margin: 1.5rem auto 0;
-  padding: 1.75rem 2rem 1.5rem;
-}
-
-.admin-hero-title {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.375rem;
-}
-
-.admin-hero-icon {
-  font-size: 2.375rem;
-  color: var(--color-pitch);
-  flex-shrink: 0;
-}
-
-.admin-hero-title h1 {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: var(--color-ink);
-  margin: 0;
-}
-
-.admin-hero-subtitle {
-  color: var(--color-muted);
-  font-size: 0.9375rem;
-  margin: 0;
-}
-
-@media (max-width: 640px) {
-  .admin-hero {
-    width: calc(100% - 1.5rem);
-    margin-top: 0.75rem;
-    padding: 1.25rem;
-  }
-}

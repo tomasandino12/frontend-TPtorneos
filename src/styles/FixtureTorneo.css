@@ -1,6 +1,6 @@
 /*
-  El encabezado de página (antes .fixture-header) ahora es la clase compartida
-  .page-header en IndexStyle.css. El mensaje de error (antes .mensaje-error)
+  El encabezado de página (antes .fixture-header, luego .page-header) ahora
+  es PageHero (src/components/ui/). El mensaje de error (antes .mensaje-error)
   ahora es <Alert variant="error">.
 */
 
