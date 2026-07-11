@@ -6,7 +6,13 @@ import { useNavigate } from "react-router-dom";
 import { FiMapPin } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
-import { Button, TextField, Card, Alert } from "../components/ui";
+import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
+
+const ESTADOS = [
+  { value: "activa", label: "Activa" },
+  { value: "mantenimiento", label: "En mantenimiento" },
+  { value: "inactiva", label: "Inactiva" },
+];
 
 export default function CrearCancha() {
   const navigate = useNavigate();
@@ -26,6 +32,9 @@ export default function CrearCancha() {
     direccion: "",
     tipoSuperficie: "",
     capacidad: "",
+    estado: "activa",
+    precioPorHora: "",
+    iluminacion: false,
   });
 
   const upd = (key, val) => setForm((prev) => ({ ...prev, [key]: val }));
@@ -44,6 +53,7 @@ export default function CrearCancha() {
     if (!form.direccion.trim())      { setError("La dirección es obligatoria."); return; }
     if (!form.tipoSuperficie.trim()) { setError("El tipo de superficie es obligatorio."); return; }
     if (!form.capacidad || Number(form.capacidad) <= 0) { setError("La capacidad debe ser mayor a 0."); return; }
+    if (!form.precioPorHora || Number(form.precioPorHora) < 0) { setError("El precio por hora es obligatorio."); return; }
 
     setLoading(true);
     try {
@@ -54,6 +64,9 @@ export default function CrearCancha() {
           direccion: form.direccion.trim(),
           tipoSuperficie: form.tipoSuperficie.trim(),
           capacidad: Number(form.capacidad),
+          estado: form.estado,
+          precioPorHora: Number(form.precioPorHora),
+          iluminacion: form.iluminacion,
         }),
       });
 
@@ -74,16 +87,13 @@ export default function CrearCancha() {
     <div className="layout">
       <AdminHeader admin={admin} onLogout={handleLogout} />
 
-      <main>
-        <section className="admin-hero">
-          <div className="admin-hero-title">
-            <FiMapPin className="admin-hero-icon" />
-            <h1>Nueva Cancha</h1>
-          </div>
-          <p className="admin-hero-subtitle">
-            Cargá los datos de la cancha para poder asignarla a los partidos.
-          </p>
-        </section>
+      <PageShell bare>
+        <PageHero
+          layout="left"
+          icon={<FiMapPin />}
+          title="Nueva Cancha"
+          subtitle="Cargá los datos de la cancha para poder asignarla a los partidos."
+        />
 
         <section className="cc-main">
           <Card className="cc-form-card">
@@ -124,6 +134,41 @@ export default function CrearCancha() {
                 />
               </div>
 
+              <div className="cc-field-row">
+                <div className="ui-field">
+                  <label className="ui-field-label" htmlFor="cc-estado">Estado</label>
+                  <div className="ui-field-control">
+                    <select
+                      id="cc-estado"
+                      className="ui-field-input"
+                      value={form.estado}
+                      onChange={(e) => upd("estado", e.target.value)}
+                    >
+                      {ESTADOS.map((e) => (
+                        <option key={e.value} value={e.value}>{e.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <TextField
+                  label="Precio por hora"
+                  type="number"
+                  min={0}
+                  value={form.precioPorHora}
+                  onChange={(e) => upd("precioPorHora", e.target.value)}
+                  placeholder="Ej: 15000"
+                />
+              </div>
+
+              <label className="cc-checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={form.iluminacion}
+                  onChange={(e) => upd("iluminacion", e.target.checked)}
+                />
+                Tiene iluminación
+              </label>
+
               {error && <Alert variant="error">{error}</Alert>}
 
               <div className="cc-actions">
@@ -142,7 +187,7 @@ export default function CrearCancha() {
             </form>
           </Card>
         </section>
-      </main>
+      </PageShell>
 
       <footer className="footer">
         <h5>
