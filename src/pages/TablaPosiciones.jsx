@@ -38,7 +38,7 @@ useEffect(() => {
       const participacionActiva = participaciones.find((p) => {
         const torneo = p.torneo;
         // torneo puede ser id o un objeto { id, estado }
-        return typeof torneo === "object" ? torneo.estado === "activo" : false;
+        return typeof torneo === "object" ? torneo.estado === "en_curso" : false;
       });
 
       if (!participacionActiva) {
