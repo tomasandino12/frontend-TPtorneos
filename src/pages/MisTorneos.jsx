@@ -165,8 +165,6 @@ export default function MisTorneos() {
               </div>
             </div>
           </div>
-        </PageHero>
-
         {/* ── Lista ───────────────────────────────────────────────────────── */}
         <section className="mt-list">
           <div className="mt-tabs">
@@ -304,6 +302,7 @@ export default function MisTorneos() {
             </div>
           )}
         </section>
+        </PageHero>
       </PageShell>
 
       <footer className="footer">

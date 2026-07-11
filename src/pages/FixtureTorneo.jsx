@@ -115,8 +115,7 @@ function FixtureTorneo() {
 
   return (
     <PageShell>
-      <PageHero icon={<FiCalendar />} title="Fixture del Torneo" subtitle="Próximos partidos a disputarse en el torneo" />
-
+      <PageHero icon={<FiCalendar />} title="Fixture del Torneo" subtitle="Próximos partidos a disputarse en el torneo">
       <section className="fixture-lista">
         <h2>Próximos Partidos</h2>
         <p className="fixture-sub">Calendario de encuentros programados</p>
@@ -193,6 +192,7 @@ function FixtureTorneo() {
             </div>
           ))}
       </section>
+      </PageHero>
     </PageShell>
   );
 }

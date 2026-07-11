@@ -150,8 +150,7 @@ function Estadisticas() {
             </Button>
           )
         }
-      />
-
+      >
       {/* === RESUMEN === */}
       <section className="resumen-boxes">
         <div className="resumen-box verde">
@@ -229,6 +228,7 @@ function Estadisticas() {
           )}
         </section>
       </div>
+      </PageHero>
     </PageShell>
   );
 }

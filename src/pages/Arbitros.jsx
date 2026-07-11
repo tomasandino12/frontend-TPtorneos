@@ -146,8 +146,7 @@ export default function Arbitros() {
           icon={<FiFlag />}
           title="Árbitros"
           subtitle="Gestioná el padrón de árbitros disponibles para asignar a los partidos."
-        />
-
+        >
         <section className="ar-list">
           <div className="ar-controls">
             <TextField
@@ -204,6 +203,7 @@ export default function Arbitros() {
             </div>
           )}
         </section>
+        </PageHero>
       </PageShell>
 
       {mostrarFormulario && (

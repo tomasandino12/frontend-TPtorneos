@@ -110,8 +110,7 @@ function MiPerfil() {
 
   return (
     <PageShell>
-      <PageHero icon={<FiUser />} title="Mi Perfil" subtitle="Gestiona tu información y estadísticas" />
-
+      <PageHero icon={<FiUser />} title="Mi Perfil" subtitle="Gestiona tu información y estadísticas">
       <form className="perfil-seccion" onSubmit={handleGuardar}>
           <div className="perfil-seccion-header">
             <div>
@@ -251,6 +250,7 @@ function MiPerfil() {
             </>
           )}
         </form>
+      </PageHero>
     </PageShell>
   );
 }

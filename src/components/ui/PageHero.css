@@ -49,6 +49,39 @@
   justify-content: center;
 }
 
+/*
+  El resto del contenido de la pantalla, anidado dentro del recuadro hero.
+  text-align: left fijo a propósito — sin esto, el `text-align: center` (o
+  `left` de layout="left", da lo mismo) del recuadro se hereda en cascada
+  hacia abajo y descentra/recentra listas, formularios y tablas que siempre
+  fueron de izquierda a derecha. Los elementos puntuales que sí necesitan
+  centrarse (cifras de `.stat-numeral`, `<td>`, etc.) ya traen su propio
+  `text-align` explícito, así que no se ven afectados por este reset.
+*/
+.ui-page-hero-body {
+  text-align: left;
+  margin-top: 1.5rem;
+}
+
+/*
+  Geometría de "un solo recuadro": cuando el hero absorbió el resto del
+  contenido de la pantalla (tiene .ui-page-hero-body adentro), pasa a ocupar
+  exactamente el mismo espacio que ocupaba el recuadro de PageShell antes
+  (ver el ajuste equivalente en PageShell.css) — mismo max-width, margen
+  respecto al viewport y sombra que la card de Tabla de Posiciones
+  (.tabla-container), la referencia de "un solo recuadro prolijo". Sin
+  .ui-page-hero-body (ej. el hero de "Gestión de Equipos" sin equipo, que
+  todavía no tiene su contenido anidado), el recuadro se queda con su
+  tamaño de antes — no tiene sentido agrandarlo si no hay nada nuevo que
+  envolver.
+*/
+.ui-page-hero-center:has(> .ui-page-hero-body),
+.ui-page-hero-split:has(> .ui-page-hero-body) {
+  max-width: 1000px;
+  margin: 2rem auto;
+  box-shadow: var(--shadow-md);
+}
+
 /* ── layout: split (EquipoInfo) — título a la izquierda, acciones a la derecha ── */
 .ui-page-hero-split {
   text-align: left;

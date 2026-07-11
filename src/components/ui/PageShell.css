@@ -27,3 +27,27 @@
   box-shadow: none;
   min-height: 100vh;
 }
+
+/*
+  Cuando PageHero absorbió el resto del contenido de la pantalla (tiene
+  .ui-page-hero-body adentro — ver PageHero.jsx/.css), el recuadro visible
+  lo dibuja PageHero, no PageShell: si los dos dibujan su propio recuadro,
+  queda un "doble recuadro" anidado (uno marfil de PageShell, con margen
+  adentro uno verde de PageHero, más chico). PageShell pasa a ser solo el
+  color de fondo detrás, a todo el ancho, sin padding/radio/sombra/max-width
+  propios — PageHero (layout="center"/"split", ver PageHero.css) toma la
+  geometría exacta que tenía este recuadro (mismo ancho, margen y radio que
+  la card de Tabla de Posiciones — la referencia de "un solo recuadro").
+
+  Acotado a los layouts "center"/"split": son los únicos que se usan hoy
+  adentro de un PageShell no-bare. El panel admin (layout="left", con
+  PageShell bare) ya renderiza un solo recuadro y no necesita este ajuste.
+*/
+.ui-page-shell:has(> .ui-page-hero-center > .ui-page-hero-body),
+.ui-page-shell:has(> .ui-page-hero-split > .ui-page-hero-body) {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}

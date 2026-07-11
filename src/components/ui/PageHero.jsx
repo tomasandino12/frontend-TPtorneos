@@ -21,9 +21,14 @@ import "./PageHero.css";
  * flush: true quita el recuadro flotante (radio/margen/sombra) y lo deja a
  * todo el ancho con un borde inferior — lo usa Inscribir Equipos, que hoy
  * tiene un hero "banner" pegado arriba en vez de una card flotante.
- * children: contenido extra debajo del título/subtítulo, dentro del mismo
- * recuadro (ej. las métricas de Mis Torneos, o el upload de escudo de
- * EquipoInfo) — no todos los usos son solo ícono+texto.
+ * children: el resto del contenido de la pantalla (filtros, listas, formularios,
+ * acciones) — el recuadro tiene que envolver visualmente TODA la información
+ * de la sección, no solo el título (si el contenido queda afuera, sin un
+ * recuadro que lo agrupe, las cards blancas quedan flotando sueltas sobre el
+ * fondo marfil en vez de leerse como una sección cohesiva). Se renderiza en un
+ * wrapper con `text-align: left` fijo — el `layout` centra o alinea el título,
+ * pero el contenido anidado (formularios, tablas, listas) siempre se lee de
+ * izquierda a derecha, sin heredar el centrado del título.
  */
 export default function PageHero({
   icon,
@@ -58,7 +63,7 @@ export default function PageHero({
         </div>
         {actions && <div className="ui-page-hero-actions">{actions}</div>}
       </div>
-      {children}
+      {children && <div className="ui-page-hero-body">{children}</div>}
     </Tag>
   );
 }

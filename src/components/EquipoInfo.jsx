@@ -408,7 +408,6 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
           </div>
         )}
         {escudoFeedback && <Alert variant={escudoFeedback.variant}>{escudoFeedback.text}</Alert>}
-      </PageHero>
 
       {/* Sobre el equipo */}
       <section className="detalle-seccion">
@@ -600,8 +599,9 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
           </Button>
         </section>
       )}
+      </PageHero>
 
-      {/* Transferencia de capitanía — paso obligatorio antes de que el capitán salga, si hay más jugadores */}
+      {/* Transferencia de capitanía — paso obligatorio antes de que el capitán salga, si hay más jugadores (modal, queda fuera del hero) */}
       {mostrarTransferirCapitania && (
         <div className="transferir-capitania-overlay">
           <div className="transferir-capitania-modal">

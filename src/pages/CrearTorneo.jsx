@@ -122,8 +122,7 @@ export default function CrearTorneo() {
           icon={<FiAward />}
           title="Crear Torneo"
           subtitle="Configurá el nuevo certamen y armá el fixture en minutos."
-        />
-
+        >
         <section className="ct-main">
           {/* ── Formulario ──────────────────────────────────────────────── */}
           <Card className="ct-form-card">
@@ -282,6 +281,7 @@ export default function CrearTorneo() {
             </Alert>
           </Card>
         </section>
+        </PageHero>
       </PageShell>
 
       <footer className="footer">

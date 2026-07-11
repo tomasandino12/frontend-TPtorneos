@@ -266,7 +266,6 @@ export default function InscribirEquipos() {
             <div className="ie-meta-chip">Inscriptos: <span>{totalInscriptos}/{torneo?.cantidadEquipos ?? "—"}</span></div>
             <div className="ie-meta-chip">Estado: <span>{torneo?.estado}</span></div>
           </div>
-        </PageHero>
 
         <section className="ie-main">
           {/* ── Panel equipos ──────────────────────────────────────────── */}
@@ -471,6 +470,7 @@ export default function InscribirEquipos() {
             </div>
           </div>
         </section>
+        </PageHero>
       </PageShell>
 
       <footer className="footer">
