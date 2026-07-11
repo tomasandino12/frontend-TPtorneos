@@ -14,6 +14,7 @@ function Equipos() {
   const [colorSecundario, setColorSecundario] = useState("#000000");
   const [descripcion, setDescripcion] = useState("");
   const [crearFeedback, setCrearFeedback] = useState(null);
+  const [salirFeedback, setSalirFeedback] = useState(null);
 
   // === Cargar jugador logueado ===
   useEffect(() => {
@@ -79,6 +80,14 @@ function Equipos() {
     }
   };
 
+  // Callback que EquipoInfo dispara al salir del equipo con éxito: actualiza
+  // el jugador local (sin recargar la página) para que esta pantalla pase de
+  // mostrar el equipo a mostrar el formulario de "crear equipo".
+  const handleEquipoLeft = (jugadorActualizado, feedback) => {
+    setJugador(jugadorActualizado);
+    setSalirFeedback(feedback);
+  };
+
   // === Seguridad adicional: render condicional si no hay jugador cargado ===
   if (!jugador) {
     return (
@@ -94,7 +103,11 @@ function Equipos() {
   if (jugador.equipo?.id) {
     return (
       <main className="subpagina-container">
-        <EquipoInfo equipoId={jugador.equipo.id} showVolver={false} />
+        <EquipoInfo
+          equipoId={jugador.equipo.id}
+          showVolver={false}
+          onEquipoLeft={handleEquipoLeft}
+        />
       </main>
     );
   }
@@ -111,6 +124,12 @@ function Equipos() {
         </h1>
         <p>Creá tu equipo para empezar a jugar</p>
       </section>
+
+      {salirFeedback && (
+        <div className="feedback-box">
+          <Alert variant={salirFeedback.variant}>{salirFeedback.text}</Alert>
+        </div>
+      )}
 
       <Card as="section" className="crear-equipo-card">
         <h2>Crear Nuevo Equipo</h2>

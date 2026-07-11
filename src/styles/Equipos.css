@@ -191,7 +191,7 @@
 
 .descripcion-seccion p {
   color: var(--color-ink);
-  margin: 0;
+  margin: 0 0 1rem 0;
   white-space: pre-wrap;
 }
 
@@ -271,6 +271,24 @@
   color: var(--color-muted);
 }
 
+/* Grupo de jugadores por posición (Delanteros, Mediocampistas, etc.) */
+.grupo-posicion {
+  margin-bottom: 1.5rem;
+}
+
+.grupo-posicion:last-child {
+  margin-bottom: 0;
+}
+
+.subtitulo-posicion {
+  color: var(--color-muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.6rem 0;
+}
+
 /* Lista de jugadores del plantel (EquipoDetalle) — no es clickeable, sin hover-lift */
 .lista-plantel {
   list-style: none;
@@ -303,12 +321,6 @@
   display: block;
 }
 
-.jugador-pos {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--color-muted);
-}
-
 .jugador-edad {
   background-color: var(--color-surface-muted);
   padding: 6px 10px;
@@ -333,13 +345,14 @@
   color: var(--color-pitch);
   font-weight: 700;
   padding: 0.8rem;
-  text-align: left;
+  text-align: center;
 }
 
 .tabla-partidos td {
   padding: 0.8rem;
   border-top: 1px solid var(--color-border);
   color: var(--color-ink);
+  text-align: center;
 }
 
 .tabla-partidos tr:hover {
@@ -348,4 +361,8 @@
 
 .equipo-cross-link {
   margin-top: 0.75rem;
+}
+
+.salir-equipo-seccion {
+  text-align: right;
 }

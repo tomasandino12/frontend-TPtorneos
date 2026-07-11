@@ -1,7 +1,7 @@
 import "../styles/IndexStyle.css";
 import "../styles/MiPerfil.css";
 import { useEffect, useState } from "react";
-import { FiUser, FiEdit2, FiLogOut } from "react-icons/fi";
+import { FiUser, FiEdit2 } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
 import { Button, TextField, Alert } from "../components/ui";
 
@@ -11,7 +11,6 @@ function MiPerfil() {
   const [editando, setEditando] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState(null);
-  const [salirFeedback, setSalirFeedback] = useState(null);
   const [form, setForm] = useState({
     nombre: "",
     apellido: "",
@@ -47,45 +46,6 @@ function MiPerfil() {
     if (jugadorId) fetchJugador();
     else setLoading(false);
   }, []);
-
-  const handleSalirEquipo = async () => {
-    if (!jugador?.equipo) return;
-
-    const confirmar = window.confirm("¿Estás seguro de que deseas salir de tu equipo?");
-    if (!confirmar) return;
-
-    try {
-      const response = await apiFetch(`/jugadores/${jugador.id}`, {
-        method: "PUT",
-        body: JSON.stringify({ ...jugador, equipo: null }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) throw new Error(data.message || "Error al salir del equipo");
-
-      const actualizado = { ...jugador, equipo: null };
-      setJugador(actualizado);
-      localStorage.setItem("jugador", JSON.stringify(actualizado));
-
-      if (data.message?.includes("Equipo eliminado")) {
-        setSalirFeedback({
-          variant: "info",
-          text: "El equipo fue eliminado porque se quedó sin jugadores.",
-        });
-      } else if (data.message?.includes("Nuevo capitán")) {
-        setSalirFeedback({
-          variant: "info",
-          text: "Se asignó un nuevo capitán automáticamente.",
-        });
-      } else {
-        setSalirFeedback({ variant: "success", text: "Has salido del equipo correctamente." });
-      }
-    } catch (error) {
-      console.error("Error al salir del equipo:", error);
-      setSalirFeedback({ variant: "error", text: "Ocurrió un error al salir del equipo." });
-    }
-  };
 
   const handleEmpezarEdicion = () => {
     setForm({
@@ -293,16 +253,6 @@ function MiPerfil() {
                 </Button>
               </div>
             </>
-          )}
-
-          {salirFeedback && <Alert variant={salirFeedback.variant}>{salirFeedback.text}</Alert>}
-
-          {jugador.equipo && !editando && (
-            <div className="boton-salir-container">
-              <Button variant="danger" icon={<FiLogOut />} onClick={handleSalirEquipo}>
-                Salir del equipo
-              </Button>
-            </div>
           )}
         </form>
       </main>

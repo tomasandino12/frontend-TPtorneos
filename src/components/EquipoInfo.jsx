@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiUsers, FiArrowLeft, FiEdit2, FiUpload, FiBarChart2, FiSearch, FiPlus } from "react-icons/fi";
+import { FiArrowLeft, FiEdit2, FiUpload, FiBarChart2, FiSearch, FiPlus, FiLogOut } from "react-icons/fi";
 import { apiFetch, apiFetchFormData, ASSETS_URL } from "../utils/api.js";
 import { Button, TextField, Alert } from "./ui";
 
@@ -18,7 +18,16 @@ import { Button, TextField, Alert } from "./ui";
  * no aparecen (no alcanza con deshabilitarlos). Ese gating es de UI: no
  * reemplaza ninguna validación que deba existir del lado del servidor.
  */
-export default function EquipoInfo({ equipoId, showVolver = true }) {
+const POSICION_LABELS = {
+  Delantero: "Delanteros",
+  Mediocampista: "Mediocampistas",
+  Defensor: "Defensores",
+  Arquero: "Arqueros",
+};
+
+const JUGADORES_SIN_EQUIPO_PAGE_SIZE = 10;
+
+export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }) {
   const navigate = useNavigate();
   const [equipo, setEquipo] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +44,11 @@ export default function EquipoInfo({ equipoId, showVolver = true }) {
   const [busqueda, setBusqueda] = useState("");
   const [filtrados, setFiltrados] = useState([]);
   const [agregarFeedback, setAgregarFeedback] = useState(null);
+  const [verTodosSinEquipo, setVerTodosSinEquipo] = useState(false);
+
+  // Salir del equipo (cualquier miembro, no solo el capitán)
+  const [saliendoEquipo, setSaliendoEquipo] = useState(false);
+  const [salirFeedback, setSalirFeedback] = useState(null);
 
   const jugadorLogueado = JSON.parse(localStorage.getItem("jugador") || "null");
   const esMiEquipo = jugadorLogueado?.equipo?.id === Number(equipoId);
@@ -77,6 +91,7 @@ export default function EquipoInfo({ equipoId, showVolver = true }) {
       return nombreCompleto.includes(busqueda.toLowerCase());
     });
     setFiltrados(resultado);
+    setVerTodosSinEquipo(false);
   }, [busqueda, jugadoresSinEquipo]);
 
   const handleAgregar = async (idJugador) => {
@@ -157,14 +172,77 @@ export default function EquipoInfo({ equipoId, showVolver = true }) {
     }
   };
 
+  const handleSalirEquipo = async () => {
+    if (!jugadorLogueado?.equipo) return;
+
+    const confirmar = window.confirm("¿Estás seguro de que deseas salir de tu equipo?");
+    if (!confirmar) return;
+
+    setSaliendoEquipo(true);
+    try {
+      const response = await apiFetch(`/jugadores/${jugadorLogueado.id}`, {
+        method: "PUT",
+        body: JSON.stringify({ ...jugadorLogueado, equipo: null }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Error al salir del equipo");
+
+      const actualizado = { ...jugadorLogueado, equipo: null };
+      localStorage.setItem("jugador", JSON.stringify(actualizado));
+
+      let feedback;
+      if (data.message?.includes("Equipo eliminado")) {
+        feedback = { variant: "info", text: "El equipo fue eliminado porque se quedó sin jugadores." };
+      } else if (data.message?.includes("Nuevo capitán")) {
+        feedback = { variant: "info", text: "Se asignó un nuevo capitán automáticamente." };
+      } else {
+        feedback = { variant: "success", text: "Has salido del equipo correctamente." };
+      }
+
+      if (onEquipoLeft) {
+        onEquipoLeft(actualizado, feedback);
+      } else {
+        navigate("/gestorTorneos/equipos");
+      }
+    } catch (error) {
+      console.error("Error al salir del equipo:", error);
+      setSalirFeedback({ variant: "error", text: "Ocurrió un error al salir del equipo." });
+    } finally {
+      setSaliendoEquipo(false);
+    }
+  };
+
   if (loading) return <p>Cargando...</p>;
   if (error) return <Alert variant="error">{error}</Alert>;
   if (!equipo) return <Alert variant="info">Equipo no encontrado.</Alert>;
 
-  // Combinar partidos de todas las participaciones
+  // Agrupar jugadores por posición preservando el orden en que ya vienen
+  // (tanto el orden de aparición de cada posición como el de los jugadores
+  // dentro de cada grupo).
+  const gruposPorPosicion = [];
+  const gruposPorPosicionMap = new Map();
+  equipo.jugadores.forEach((jugador) => {
+    const posicion = jugador.posicion ?? jugador.Posicion ?? "Sin posición";
+    if (!gruposPorPosicionMap.has(posicion)) {
+      const grupo = { posicion, jugadores: [] };
+      gruposPorPosicionMap.set(posicion, grupo);
+      gruposPorPosicion.push(grupo);
+    }
+    gruposPorPosicionMap.get(posicion).jugadores.push(jugador);
+  });
+
+  // Combinar partidos de todas las participaciones, marcando de qué lado jugó
+  // ESTE equipo — el backend solo resuelve el nombre del rival, así que el
+  // lado propio hay que completarlo con equipo.nombreEquipo (ver punto 1).
   const allPartidos = [];
   equipo.participaciones.forEach((participacion) => {
-    allPartidos.push(...participacion.partidosLocal, ...participacion.partidosVisitante);
+    participacion.partidosLocal.forEach((partido) =>
+      allPartidos.push({ ...partido, esteEquipoEsLocal: true })
+    );
+    participacion.partidosVisitante.forEach((partido) =>
+      allPartidos.push({ ...partido, esteEquipoEsLocal: false })
+    );
   });
 
   // Filtrar partidos únicos y finalizados
@@ -191,7 +269,7 @@ export default function EquipoInfo({ equipoId, showVolver = true }) {
                 style={{ backgroundColor: equipo.colorPrimario || "#e5e7eb" }}
               />
             )}
-            <FiUsers /> {equipo.nombreEquipo}
+            {equipo.nombreEquipo}
           </h1>
           <p>Gestión del equipo</p>
         </div>
@@ -278,37 +356,42 @@ export default function EquipoInfo({ equipoId, showVolver = true }) {
         </div>
       </section>
 
-      {/* Jugadores */}
+      {/* Jugadores, agrupados por posición respetando el orden en que ya vienen */}
       <section className="detalle-seccion">
         <h2 className="titulo-seccion">Jugadores</h2>
         {equipo.jugadores.length > 0 ? (
-          <ul className="lista-plantel">
-            {equipo.jugadores.map((jugador) => {
-              const posicion = jugador.posicion ?? jugador.Posicion ?? "Sin posición";
-              const fechaNacimiento =
-                jugador.fechaNacimiento ??
-                jugador.fecha_nacimiento ??
-                jugador.fechaNac ??
-                jugador.FechaNacimiento ??
-                "";
-              const edad = fechaNacimiento
-                ? new Date().getFullYear() - new Date(fechaNacimiento).getFullYear()
-                : null;
+          gruposPorPosicion.map((grupo) => (
+            <div key={grupo.posicion} className="grupo-posicion">
+              <h3 className="subtitulo-posicion">
+                {POSICION_LABELS[grupo.posicion] ?? grupo.posicion}
+              </h3>
+              <ul className="lista-plantel">
+                {grupo.jugadores.map((jugador) => {
+                  const fechaNacimiento =
+                    jugador.fechaNacimiento ??
+                    jugador.fecha_nacimiento ??
+                    jugador.fechaNac ??
+                    jugador.FechaNacimiento ??
+                    "";
+                  const edad = fechaNacimiento
+                    ? new Date().getFullYear() - new Date(fechaNacimiento).getFullYear()
+                    : null;
 
-              return (
-                <li key={jugador.id} className="jugador-plantel-item">
-                  <div>
-                    <strong>
-                      {jugador.nombre} {jugador.apellido}{" "}
-                      {jugador.esCapitan ? "(Capitán)" : ""}
-                    </strong>
-                    <p className="jugador-pos">{posicion}</p>
-                  </div>
-                  {edad !== null && <div className="jugador-edad stat-numeral">{edad} años</div>}
-                </li>
-              );
-            })}
-          </ul>
+                  return (
+                    <li key={jugador.id} className="jugador-plantel-item">
+                      <div>
+                        <strong>
+                          {jugador.nombre} {jugador.apellido}{" "}
+                          {jugador.esCapitan ? "(Capitán)" : ""}
+                        </strong>
+                      </div>
+                      {edad !== null && <div className="jugador-edad stat-numeral">{edad} años</div>}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))
         ) : (
           <Alert variant="info">No hay jugadores registrados.</Alert>
         )}
@@ -334,16 +417,26 @@ export default function EquipoInfo({ equipoId, showVolver = true }) {
           )}
 
           {filtrados.length > 0 ? (
-            <ul className="lista-jugadores">
-              {filtrados.map((j) => (
-                <li key={j.id}>
-                  {j.nombre} {j.apellido}
-                  <Button icon={<FiPlus />} onClick={() => handleAgregar(j.id)}>
-                    Agregar
-                  </Button>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="lista-jugadores">
+                {(verTodosSinEquipo
+                  ? filtrados
+                  : filtrados.slice(0, JUGADORES_SIN_EQUIPO_PAGE_SIZE)
+                ).map((j) => (
+                  <li key={j.id}>
+                    {j.nombre} {j.apellido}
+                    <Button icon={<FiPlus />} onClick={() => handleAgregar(j.id)}>
+                      Agregar
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+              {!verTodosSinEquipo && filtrados.length > JUGADORES_SIN_EQUIPO_PAGE_SIZE && (
+                <Button variant="secondary" onClick={() => setVerTodosSinEquipo(true)}>
+                  Ver más ({filtrados.length - JUGADORES_SIN_EQUIPO_PAGE_SIZE} más)
+                </Button>
+              )}
+            </>
           ) : (
             <Alert variant="info">No se encontraron jugadores sin equipo.</Alert>
           )}
@@ -368,11 +461,19 @@ export default function EquipoInfo({ equipoId, showVolver = true }) {
               {partidosUnicos.map((partido) => (
                 <tr key={partido.id}>
                   <td>{new Date(partido.fecha_partido).toLocaleDateString("es-AR")}</td>
-                  <td>{partido.local?.equipo?.nombreEquipo || "N/A"}</td>
+                  <td>
+                    {partido.esteEquipoEsLocal
+                      ? equipo.nombreEquipo
+                      : partido.local?.equipo?.nombreEquipo || "N/A"}
+                  </td>
                   <td className="stat-numeral">
                     {partido.goles_local} - {partido.goles_visitante}
                   </td>
-                  <td>{partido.visitante?.equipo?.nombreEquipo || "N/A"}</td>
+                  <td>
+                    {partido.esteEquipoEsLocal
+                      ? partido.visitante?.equipo?.nombreEquipo || "N/A"
+                      : equipo.nombreEquipo}
+                  </td>
                   <td>{partido.estado_partido}</td>
                 </tr>
               ))}
@@ -382,6 +483,21 @@ export default function EquipoInfo({ equipoId, showVolver = true }) {
           <Alert variant="info">No hay partidos finalizados.</Alert>
         )}
       </section>
+
+      {/* Salir del equipo — cualquier miembro, no solo el capitán */}
+      {esMiEquipo && (
+        <section className="detalle-seccion salir-equipo-seccion">
+          {salirFeedback && <Alert variant={salirFeedback.variant}>{salirFeedback.text}</Alert>}
+          <Button
+            variant="danger"
+            icon={<FiLogOut />}
+            onClick={handleSalirEquipo}
+            disabled={saliendoEquipo}
+          >
+            {saliendoEquipo ? "Saliendo..." : "Salir del equipo"}
+          </Button>
+        </section>
+      )}
     </>
   );
 }

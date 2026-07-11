@@ -18,6 +18,10 @@ const NAV_ITEMS = [
  */
 export default function Navbar() {
   const navigate = useNavigate();
+  const jugador = JSON.parse(localStorage.getItem("jugador") || "null");
+  const initials = jugador
+    ? `${jugador.nombre?.[0] ?? ""}${jugador.apellido?.[0] ?? ""}`.toUpperCase()
+    : "";
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -47,6 +51,17 @@ export default function Navbar() {
         </ul>
 
         <div className="gt-nav-actions">
+          {jugador && (
+            <div className="gt-user-info">
+              <div className="gt-avatar">{initials}</div>
+              <div className="gt-user-text">
+                <span className="gt-user-name">
+                  {jugador.nombre} {jugador.apellido}
+                </span>
+                {jugador.email && <span className="gt-user-email">{jugador.email}</span>}
+              </div>
+            </div>
+          )}
           <button className="gt-logout-btn" onClick={handleLogout}>
             <FiLogOut />
             Cerrar sesión

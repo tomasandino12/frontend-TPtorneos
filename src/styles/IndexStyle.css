@@ -172,7 +172,7 @@ footer {
   max-width: 1000px;
   margin: 2rem auto;
   padding: 2rem;
-  background-color: #f3fdf6;
+  background-color: var(--color-paper);
   border-radius: 12px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
 }
@@ -185,7 +185,7 @@ footer {
 */
 .page-header {
   text-align: center;
-  background-color: var(--color-success-bg);
+  background-color: var(--color-grass);
   padding: 2rem;
   border-radius: var(--radius-lg);
   margin-bottom: 2rem;

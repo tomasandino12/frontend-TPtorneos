@@ -144,7 +144,7 @@ function Estadisticas() {
             <Button
               variant="secondary"
               icon={<FiSettings />}
-              onClick={() => navigate(`/equipo/${jugadorLogueado.equipo.id}`)}
+              onClick={() => navigate("/gestorTorneos/equipos")}
             >
               {jugadorLogueado?.esCapitan ? "Gestionar mi equipo" : "Ver mi equipo"}
             </Button>
