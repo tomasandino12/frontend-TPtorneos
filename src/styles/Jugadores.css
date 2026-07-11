@@ -1,0 +1,166 @@
+/*
+  El hero (.admin-hero) viene de MenuAdmin.css. Acá solo lo específico de
+  esta pantalla — mismo patrón que Arbitros.css/Canchas.css, prefijo .jg-.
+  Sin clases de modal: esta pantalla es de solo lectura (listar + buscar).
+*/
+
+/* ── List section ────────────────────────────────────────────────────────── */
+
+.jg-list {
+  padding: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.jg-controls {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  align-items: flex-end;
+}
+
+.jg-search {
+  flex: 1;
+}
+
+.jg-contador {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  margin: 0 0 1rem 0;
+}
+
+/* ── Status (loading / error) ───────────────────────────────────────────── */
+
+.jg-status-card {
+  text-align: center;
+  color: var(--color-muted);
+}
+
+.jg-status-error {
+  color: var(--color-alert);
+}
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+
+.jg-table-wrap {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.jg-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.jg-table th {
+  background: var(--color-success-bg);
+  color: var(--color-pitch);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  text-align: left;
+  padding: 0.75rem 1rem;
+}
+
+.jg-table td {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-ink);
+  font-size: 0.875rem;
+}
+
+.jg-table tr:hover td {
+  background: var(--color-surface-muted);
+}
+
+.jg-table-vacio {
+  text-align: center;
+  color: var(--color-muted);
+  padding: 2rem !important;
+}
+
+/* ── Estado vacío (sin búsqueda todavía) ─────────────────────────────────── */
+
+.jg-empty-state {
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 3rem 1.5rem;
+}
+
+.jg-empty-icon {
+  font-size: 2.5rem;
+  color: var(--color-turf);
+  margin-bottom: 1rem;
+}
+
+.jg-empty-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  margin: 0 0 0.375rem 0;
+}
+
+.jg-empty-sub {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.jg-recientes {
+  margin-top: 1.75rem;
+}
+
+.jg-recientes-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.75rem;
+}
+
+.jg-recientes-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.jg-chip {
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-success-bg);
+  color: var(--color-pitch);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.jg-chip:hover {
+  background: var(--color-turf);
+  border-color: var(--color-turf);
+  color: var(--color-surface);
+}
+
+.jg-chip:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .jg-list { padding: 0.75rem; }
+  .jg-controls { flex-direction: column; align-items: stretch; }
+  .jg-table th, .jg-table td { padding: 0.5rem 0.625rem; font-size: 0.8125rem; }
+  .jg-empty-state { padding: 2rem 1rem; }
+}

@@ -9,8 +9,8 @@ import { Card } from "../components/ui";
 const ADMIN_CARDS = [
   { label: "Mis Torneos", icon: FiAward, path: "/admin/torneos" },
   { label: "Arbitraje", icon: FiFlag, path: "/admin/arbitros" },
-  { label: "Canchas", icon: FiMapPin, path: null },
-  { label: "Jugadores", icon: FiUsers, path: null },
+  { label: "Canchas", icon: FiMapPin, path: "/admin/canchas" },
+  { label: "Jugadores", icon: FiUsers, path: "/admin/jugadores" },
 ];
 
 function MenuAdmin() {
