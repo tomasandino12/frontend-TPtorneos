@@ -86,6 +86,10 @@
   font-size: 0.875rem;
 }
 
+.jg-table-row-clickable {
+  cursor: pointer;
+}
+
 .jg-table tr:hover td {
   background: var(--color-surface-muted);
 }
@@ -178,6 +182,139 @@
 .jg-chip:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
+}
+
+/* ── Modal de detalle / suspensión ───────────────────────────────────────── */
+
+.jg-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(22, 36, 27, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--z-modal);
+  padding: 1rem;
+}
+
+.jg-modal {
+  position: relative;
+  background-color: var(--color-surface);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 28rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.jg-modal h3 {
+  margin: 0 0 0.25rem;
+  color: var(--color-pitch);
+  padding-right: 1.5rem;
+}
+
+.jg-modal-cerrar {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--color-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.jg-modal-cerrar:hover {
+  color: var(--color-alert);
+  background-color: var(--color-surface-muted);
+}
+
+.jg-modal-cerrar:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.jg-modal-cargando {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.jg-modal-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+}
+
+.jg-modal-datos > div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+}
+
+.jg-modal-datos-label {
+  font-weight: 700;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.jg-modal-suspender {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.jg-modal-botones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.625rem;
+}
+
+.jg-modal-historial {
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.jg-modal-historial ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.jg-modal-historial li {
+  font-size: 0.8125rem;
+  color: var(--color-ink);
+}
+
+.jg-historial-activa {
+  color: var(--color-alert);
+  font-weight: 700;
+}
+
+.jg-historial-levantada {
+  color: var(--color-muted);
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
