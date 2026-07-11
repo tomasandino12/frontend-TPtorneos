@@ -1,7 +1,8 @@
 /*
-  El hero (.admin-hero) viene de MenuAdmin.css. Acá solo lo específico de
-  esta pantalla — versión simplificada de CrearTorneo.css (.ct-*, un solo
-  campo por fila, sin columna de resumen), prefijo .cc-.
+  El hero + PageShell vienen de src/components/ui (PageHero.css/PageShell.css).
+  Acá solo lo específico de esta pantalla — versión simplificada de
+  CrearTorneo.css (.ct-*, un solo campo por fila, sin columna de resumen),
+  prefijo .cc-.
 */
 
 .cc-main {
@@ -43,6 +44,15 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+}
+
+.cc-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--color-ink);
+  cursor: pointer;
 }
 
 .cc-actions {

@@ -27,10 +27,15 @@ export default function InscribirEquipos() {
   const [seleccionados, setSeleccionados] = useState(new Set());
   const [search, setSearch] = useState("");
 
-  // Estado fixture
+  // Tabs: 'equipos' | 'arbitros' | 'canchas'
+  const [tabActiva, setTabActiva] = useState("equipos");
+
+  // Árbitros/canchas del sistema (para elegir) y los ya asignados a ESTE torneo
   const [canchas, setCanchas] = useState([]);
   const [arbitros, setArbitros] = useState([]);
-  const [canchasSelec, setCanchasSelec] = useState(new Set());
+  const [canchasTorneoIds, setCanchasTorneoIds] = useState(new Set()); // persistido (TorneoCancha)
+  const [arbitrosTorneoIds, setArbitrosTorneoIds] = useState(new Set()); // persistido (TorneoArbitro)
+  const [canchasSelec, setCanchasSelec] = useState(new Set()); // selección en edición dentro del tab
   const [arbitrosSelec, setArbitrosSelec] = useState(new Set());
   const [fechaBase, setFechaBase] = useState("");
   const [horaBase, setHoraBase] = useState("15:00");
@@ -43,6 +48,12 @@ export default function InscribirEquipos() {
   const [okInscripcion, setOkInscripcion] = useState("");
   const [errorFixture, setErrorFixture] = useState("");
   const [okFixture, setOkFixture] = useState("");
+  const [guardandoArbitros, setGuardandoArbitros] = useState(false);
+  const [errorArbitros, setErrorArbitros] = useState("");
+  const [okArbitros, setOkArbitros] = useState("");
+  const [guardandoCanchas, setGuardandoCanchas] = useState(false);
+  const [errorCanchas, setErrorCanchas] = useState("");
+  const [okCanchas, setOkCanchas] = useState("");
   const [pageLoading, setPageLoading] = useState(true);
   const [pageError, setPageError] = useState("");
 
@@ -62,18 +73,22 @@ export default function InscribirEquipos() {
     setPageLoading(true);
     setPageError("");
     try {
-      const [resTorneo, resEquipos, resCanchas, resArbitros] = await Promise.all([
+      const [resTorneo, resEquipos, resCanchas, resArbitros, resCanchasTorneo, resArbitrosTorneo] = await Promise.all([
         adminApiFetch(`/torneo/${torneoId}`),
         adminApiFetch("/equipos"),
         adminApiFetch("/canchas"),
         adminApiFetch("/arbitros"),
+        adminApiFetch(`/torneo/${torneoId}/canchas`),
+        adminApiFetch(`/torneo/${torneoId}/arbitros`),
       ]);
 
-      const [dTorneo, dEquipos, dCanchas, dArbitros] = await Promise.all([
+      const [dTorneo, dEquipos, dCanchas, dArbitros, dCanchasTorneo, dArbitrosTorneo] = await Promise.all([
         resTorneo.json(),
         resEquipos.json(),
         resCanchas.json(),
         resArbitros.json(),
+        resCanchasTorneo.json(),
+        resArbitrosTorneo.json(),
       ]);
 
       if (!resTorneo.ok) throw new Error(dTorneo.message || "Error al cargar el torneo");
@@ -98,9 +113,13 @@ export default function InscribirEquipos() {
       setCanchas(dCanchas.data || []);
       setArbitros(dArbitros.data || []);
 
-      // Preseleccionar todas las canchas y árbitros disponibles
-      setCanchasSelec(new Set((dCanchas.data || []).map((c) => c.id)));
-      setArbitrosSelec(new Set((dArbitros.data || []).map((a) => a.id)));
+      // Preseleccionar lo que ya esté asignado a este torneo (no todo el sistema)
+      const idsCanchasAsignadas = new Set((dCanchasTorneo.data || []).map((c) => c.id));
+      const idsArbitrosAsignados = new Set((dArbitrosTorneo.data || []).map((a) => a.id));
+      setCanchasTorneoIds(idsCanchasAsignadas);
+      setArbitrosTorneoIds(idsArbitrosAsignados);
+      setCanchasSelec(new Set(idsCanchasAsignadas));
+      setArbitrosSelec(new Set(idsArbitrosAsignados));
 
       if (torneoData.fechaInicio) {
         setFechaBase(torneoData.fechaInicio.slice(0, 10));
@@ -182,22 +201,62 @@ export default function InscribirEquipos() {
     }
   }
 
+  async function handleGuardarArbitros() {
+    setErrorArbitros("");
+    setOkArbitros("");
+    setGuardandoArbitros(true);
+    try {
+      const res = await adminApiFetch(`/torneo/${torneoId}/arbitros`, {
+        method: "PUT",
+        body: JSON.stringify({ arbitroIds: [...arbitrosSelec] }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Error al guardar los árbitros");
+      setArbitrosTorneoIds(new Set(arbitrosSelec));
+      setOkArbitros("Árbitros del torneo actualizados.");
+    } catch (e) {
+      setErrorArbitros(e.message);
+    } finally {
+      setGuardandoArbitros(false);
+    }
+  }
+
+  async function handleGuardarCanchas() {
+    setErrorCanchas("");
+    setOkCanchas("");
+    setGuardandoCanchas(true);
+    try {
+      const res = await adminApiFetch(`/torneo/${torneoId}/canchas`, {
+        method: "PUT",
+        body: JSON.stringify({ canchaIds: [...canchasSelec] }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Error al guardar las canchas");
+      setCanchasTorneoIds(new Set(canchasSelec));
+      setOkCanchas("Canchas del torneo actualizadas.");
+    } catch (e) {
+      setErrorCanchas(e.message);
+    } finally {
+      setGuardandoCanchas(false);
+    }
+  }
+
   async function handleGenerarFixture() {
     setErrorFixture("");
     setOkFixture("");
 
     if (!fechaBase) { setErrorFixture("Ingresá la fecha de inicio del fixture."); return; }
     if (!horaBase)  { setErrorFixture("Ingresá la hora de inicio."); return; }
-    if (canchasSelec.size === 0) { setErrorFixture("Seleccioná al menos una cancha."); return; }
-    if (arbitrosSelec.size === 0) { setErrorFixture("Seleccioná al menos un árbitro."); return; }
+    if (arbitrosTorneoIds.size === 0 || canchasTorneoIds.size === 0) {
+      setErrorFixture("Asigná al menos un árbitro y una cancha desde las pestañas correspondientes.");
+      return;
+    }
 
     setLoadingFixture(true);
     try {
       const res = await adminApiFetch(`/torneo/${torneoId}/generar-fixture`, {
         method: "POST",
         body: JSON.stringify({
-          canchaIds: [...canchasSelec],
-          arbitroIds: [...arbitrosSelec],
           fechaBase,
           horaBase,
           diasEntreJornadas: Number(diasEntreJornadas),
@@ -268,8 +327,27 @@ export default function InscribirEquipos() {
           </div>
 
         <section className="ie-main">
-          {/* ── Panel equipos ──────────────────────────────────────────── */}
+          {/* ── Panel principal (tabs) ───────────────────────────────────── */}
           <div className="ie-panel">
+            <div className="ie-tabs">
+              {[
+                { key: "equipos", label: "Equipos" },
+                { key: "arbitros", label: "Árbitros" },
+                { key: "canchas", label: "Canchas" },
+              ].map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  className={`ie-tab${tabActiva === t.key ? " active" : ""}`}
+                  onClick={() => setTabActiva(t.key)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {tabActiva === "equipos" && (
+              <>
             <div className="ie-panel-header">
               <div>
                 <h2>Equipos disponibles</h2>
@@ -336,6 +414,91 @@ export default function InscribirEquipos() {
                 );
               })}
             </div>
+              </>
+            )}
+
+            {tabActiva === "arbitros" && (
+              <>
+                <div className="ie-panel-header">
+                  <div>
+                    <h2>Árbitros del torneo</h2>
+                    <p>Seleccioná los árbitros disponibles para dirigir los partidos de este torneo</p>
+                  </div>
+                  <span className="ie-badge-count">{arbitrosSelec.size} seleccionado(s)</span>
+                </div>
+
+                {errorArbitros && <Alert variant="error" className="ie-alert">{errorArbitros}</Alert>}
+                {okArbitros && <Alert variant="success" className="ie-alert">{okArbitros}</Alert>}
+
+                {arbitros.length === 0 ? (
+                  <p className="ie-list-empty">No hay árbitros cargados en el sistema.</p>
+                ) : (
+                  <div className="ie-check-list ie-check-list-tab">
+                    {arbitros.map((a) => (
+                      <label key={a.id} className="ie-check-item">
+                        <input
+                          type="checkbox"
+                          checked={arbitrosSelec.has(a.id)}
+                          onChange={() => toggleArbitro(a.id)}
+                        />
+                        {a.nombre} {a.apellido}
+                      </label>
+                    ))}
+                  </div>
+                )}
+
+                <Button
+                  className="ie-btn-block"
+                  disabled={guardandoArbitros}
+                  onClick={handleGuardarArbitros}
+                >
+                  {guardandoArbitros ? "Guardando..." : "Guardar árbitros"}
+                </Button>
+              </>
+            )}
+
+            {tabActiva === "canchas" && (() => {
+              const canchasActivas = canchas.filter((c) => c.estado === "activa");
+              return (
+                <>
+                  <div className="ie-panel-header">
+                    <div>
+                      <h2>Canchas del torneo</h2>
+                      <p>Seleccioná las canchas disponibles para los partidos de este torneo</p>
+                    </div>
+                    <span className="ie-badge-count">{canchasSelec.size} seleccionada(s)</span>
+                  </div>
+
+                  {errorCanchas && <Alert variant="error" className="ie-alert">{errorCanchas}</Alert>}
+                  {okCanchas && <Alert variant="success" className="ie-alert">{okCanchas}</Alert>}
+
+                  {canchasActivas.length === 0 ? (
+                    <p className="ie-list-empty">No hay canchas activas disponibles en el sistema.</p>
+                  ) : (
+                    <div className="ie-check-list ie-check-list-tab">
+                      {canchasActivas.map((c) => (
+                        <label key={c.id} className="ie-check-item">
+                          <input
+                            type="checkbox"
+                            checked={canchasSelec.has(c.id)}
+                            onChange={() => toggleCancha(c.id)}
+                          />
+                          {c.nombre}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+
+                  <Button
+                    className="ie-btn-block"
+                    disabled={guardandoCanchas}
+                    onClick={handleGuardarCanchas}
+                  >
+                    {guardandoCanchas ? "Guardando..." : "Guardar canchas"}
+                  </Button>
+                </>
+              );
+            })()}
           </div>
 
           {/* ── Sidebar ────────────────────────────────────────────────── */}
@@ -390,65 +553,37 @@ export default function InscribirEquipos() {
                 </Alert>
               ) : (
                 <>
-                  <div className="ie-fixture-scroll">
-                    <TextField
-                      label="Fecha de inicio"
-                      type="date"
-                      value={fechaBase}
-                      onChange={(e) => setFechaBase(e.target.value)}
-                      className="ie-fixture-field"
-                    />
-                    <TextField
-                      label="Hora de los partidos"
-                      type="time"
-                      value={horaBase}
-                      onChange={(e) => setHoraBase(e.target.value)}
-                      className="ie-fixture-field"
-                    />
-                    <TextField
-                      label="Días entre jornadas"
-                      type="number" min={1} max={30}
-                      value={diasEntreJornadas}
-                      onChange={(e) => setDiasEntreJornadas(e.target.value)}
-                      className="ie-fixture-field"
-                    />
+                  <TextField
+                    label="Fecha de inicio"
+                    type="date"
+                    value={fechaBase}
+                    onChange={(e) => setFechaBase(e.target.value)}
+                    className="ie-fixture-field"
+                  />
+                  <TextField
+                    label="Hora de los partidos"
+                    type="time"
+                    value={horaBase}
+                    onChange={(e) => setHoraBase(e.target.value)}
+                    className="ie-fixture-field"
+                  />
+                  <TextField
+                    label="Días entre jornadas"
+                    type="number" min={1} max={30}
+                    value={diasEntreJornadas}
+                    onChange={(e) => setDiasEntreJornadas(e.target.value)}
+                    className="ie-fixture-field"
+                  />
 
-                    {canchas.length > 0 && (
-                      <div className="ie-fixture-field">
-                        <label>Canchas</label>
-                        <div className="ie-check-list">
-                          {canchas.map((c) => (
-                            <label key={c.id} className="ie-check-item">
-                              <input
-                                type="checkbox"
-                                checked={canchasSelec.has(c.id)}
-                                onChange={() => toggleCancha(c.id)}
-                              />
-                              {c.nombre}
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                  <p className="ie-fixture-asignados">
+                    {arbitrosTorneoIds.size} árbitro(s) y {canchasTorneoIds.size} cancha(s) asignados a este torneo.
+                  </p>
 
-                    {arbitros.length > 0 && (
-                      <div className="ie-fixture-field">
-                        <label>Árbitros</label>
-                        <div className="ie-check-list">
-                          {arbitros.map((a) => (
-                            <label key={a.id} className="ie-check-item">
-                              <input
-                                type="checkbox"
-                                checked={arbitrosSelec.has(a.id)}
-                                onChange={() => toggleArbitro(a.id)}
-                              />
-                              {a.nombre} {a.apellido}
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  {(arbitrosTorneoIds.size === 0 || canchasTorneoIds.size === 0) && (
+                    <Alert variant="warning" className="ie-alert">
+                      Asigná al menos un árbitro y una cancha desde las pestañas "Árbitros" y "Canchas" antes de generar el fixture.
+                    </Alert>
+                  )}
 
                   {errorFixture && <Alert variant="error" className="ie-alert">{errorFixture}</Alert>}
                   {okFixture && <Alert variant="success" className="ie-alert">{okFixture}</Alert>}
@@ -456,7 +591,12 @@ export default function InscribirEquipos() {
                   <Button
                     className="ie-btn-block"
                     icon={<FiZap />}
-                    disabled={totalInscriptos < 2 || loadingFixture}
+                    disabled={
+                      totalInscriptos < 2 ||
+                      loadingFixture ||
+                      arbitrosTorneoIds.size === 0 ||
+                      canchasTorneoIds.size === 0
+                    }
                     onClick={handleGenerarFixture}
                   >
                     {loadingFixture

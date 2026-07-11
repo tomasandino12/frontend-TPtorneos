@@ -51,6 +51,9 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
   // Notificaciones de invitaciones ya resueltas por el jugador (solo capitán)
   const [notificaciones, setNotificaciones] = useState([]);
 
+  // Notificaciones personales (suspensión/habilitación) — cualquier miembro del plantel
+  const [notificacionesJugador, setNotificacionesJugador] = useState([]);
+
   // Salir del equipo (cualquier miembro, no solo el capitán)
   const [saliendoEquipo, setSaliendoEquipo] = useState(false);
   const [salirFeedback, setSalirFeedback] = useState(null);
@@ -125,6 +128,18 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
       .catch((err) => console.error("Error cargando notificaciones de invitaciones:", err));
   }, [esCapitanDeEsteEquipo, equipoId]);
 
+  // Notificaciones personales del jugador logueado (suspensión/habilitación) —
+  // visibles para cualquier miembro del plantel, no solo el capitán.
+  useEffect(() => {
+    if (!esMiEquipo || !jugadorLogueado?.id) return;
+    apiFetch(`/notificacion/jugador/${jugadorLogueado.id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data.data)) setNotificacionesJugador(data.data);
+      })
+      .catch((err) => console.error("Error cargando notificaciones del jugador:", err));
+  }, [esMiEquipo, jugadorLogueado?.id]);
+
   useEffect(() => {
     const resultado = jugadoresSinEquipo.filter((j) => {
       const nombreCompleto = `${j.nombre} ${j.apellido}`.toLowerCase();
@@ -159,6 +174,16 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
       setNotificaciones((prev) => prev.filter((n) => n.id !== idInvitacion));
     } catch (error) {
       console.error("Error marcando invitación como vista:", error);
+    }
+  };
+
+  const handleMarcarNotificacionJugadorLeida = async (idNotificacion) => {
+    try {
+      const response = await apiFetch(`/notificacion/${idNotificacion}/leida`, { method: "PATCH" });
+      if (!response.ok) throw new Error("Error al descartar la notificación");
+      setNotificacionesJugador((prev) => prev.filter((n) => n.id !== idNotificacion));
+    } catch (error) {
+      console.error("Error marcando notificación como leída:", error);
     }
   };
 
@@ -476,12 +501,16 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
                     : null;
 
                   return (
-                    <li key={jugador.id} className="jugador-plantel-item">
+                    <li
+                      key={jugador.id}
+                      className={`jugador-plantel-item${jugador.suspendido ? " jugador-plantel-item-suspendido" : ""}`}
+                    >
                       <div>
                         <strong>
                           {jugador.nombre} {jugador.apellido}{" "}
                           {jugador.esCapitan ? "(Capitán)" : ""}
                         </strong>
+                        {jugador.suspendido && <span className="badge-suspendido">Suspendido</span>}
                       </div>
                       {edad !== null && <div className="jugador-edad stat-numeral">{edad} años</div>}
                     </li>
@@ -494,6 +523,23 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
           <Alert variant="info">No hay jugadores registrados.</Alert>
         )}
       </section>
+
+      {/* Notificaciones personales (suspensión/habilitación) — cualquier miembro del plantel */}
+      {esMiEquipo && notificacionesJugador.length > 0 && (
+        <section className="detalle-seccion notificaciones-invitaciones">
+          <h2 className="titulo-seccion">Notificaciones</h2>
+          {notificacionesJugador.map((n) => (
+            <Alert key={n.id} variant={n.tipo === "suspension" ? "warning" : "success"}>
+              <div className="notificacion-invitacion-content">
+                <span>{n.mensaje}</span>
+                <Button variant="ghost" onClick={() => handleMarcarNotificacionJugadorLeida(n.id)}>
+                  Descartar
+                </Button>
+              </div>
+            </Alert>
+          ))}
+        </section>
+      )}
 
       {/* Asignar capitanía sin salir del equipo — solo el capitán de este equipo */}
       {esCapitanDeEsteEquipo && (

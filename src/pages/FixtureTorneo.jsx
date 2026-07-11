@@ -54,7 +54,7 @@ function FixtureTorneo() {
         // 4️⃣ Buscar torneo activo
         const participacionActiva = participaciones.find((p) => {
           const t = p.torneo;
-          return typeof t === "object" && t.estado === "activo";
+          return typeof t === "object" && t.estado === "en_curso";
         });
 
         if (!participacionActiva) {

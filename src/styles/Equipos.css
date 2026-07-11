@@ -299,6 +299,26 @@
   display: block;
 }
 
+/* Suspensión de jugador (admin) — colores literales pedidos, distintos de
+   los tokens de warning existentes porque es un estado semántico nuevo. */
+.lista-plantel li.jugador-plantel-item-suspendido {
+  background-color: #fff3cd;
+  border: 1px solid #ffe69c;
+}
+
+.badge-suspendido {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffe69c;
+  font-size: 0.75rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
 .jugador-edad {
   background-color: var(--color-surface-muted);
   padding: 6px 10px;

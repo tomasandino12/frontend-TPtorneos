@@ -10,22 +10,24 @@ import { Button, TextField, Card, PageShell, PageHero } from "../components/ui";
 
 // estado backend → etiqueta UI
 const ESTADO_LABEL = {
-  en_curso: "En curso",
   borrador: "Borrador",
+  inscripcion: "Inscripción",
+  en_curso: "En curso",
   finalizado: "Finalizado",
 };
 
-// "En curso" es el único estado que amerita resaltarse (activo/en progreso);
-// "Borrador" y "Finalizado" son estados neutrales/inactivos — antes Borrador
-// usaba el color de advertencia (--color-whistle), que la app reserva para
-// alertas reales, no para un estado neutral.
+// "En curso" e "Inscripción" son los estados activos/accionables (se
+// resaltan); "Borrador" y "Finalizado" son estados neutrales/inactivos.
+// "Inscripción" usa --color-whistle (el único color de "pendiente" de la
+// paleta) porque todavía le falta un paso (sumar equipos) antes de arrancar.
 const ESTADO_CONFIG = {
-  "En curso":   { color: "var(--color-turf)",  badgeBg: "var(--color-success-bg)",  badgeColor: "var(--color-pitch)" },
-  "Borrador":   { color: "var(--color-muted)", badgeBg: "var(--color-surface-muted)", badgeColor: "var(--color-ink)" },
-  "Finalizado": { color: "var(--color-muted)", badgeBg: "var(--color-surface-muted)", badgeColor: "var(--color-ink)" },
+  "En curso":    { color: "var(--color-turf)",   badgeBg: "var(--color-success-bg)", badgeColor: "var(--color-pitch)" },
+  "Inscripción": { color: "var(--color-whistle)", badgeBg: "var(--color-warning-bg)", badgeColor: "var(--color-warning-text)" },
+  "Borrador":    { color: "var(--color-muted)",  badgeBg: "var(--color-surface-muted)", badgeColor: "var(--color-ink)" },
+  "Finalizado":  { color: "var(--color-muted)",  badgeBg: "var(--color-surface-muted)", badgeColor: "var(--color-ink)" },
 };
 
-const TABS = ["Todos", "En curso", "Borradores", "Finalizados"];
+const TABS = ["Todos", "Inscripción", "En curso", "Borradores", "Finalizados"];
 
 function mapTorneo(t) {
   const estadoLabel = ESTADO_LABEL[t.estado] ?? t.estado;
@@ -116,6 +118,7 @@ export default function MisTorneos() {
   const filtered = torneos.filter((t) => {
     const matchTab =
       activeTab === "Todos" ||
+      (activeTab === "Inscripción" && t.estado === "Inscripción") ||
       (activeTab === "En curso"    && t.estado === "En curso")   ||
       (activeTab === "Borradores"  && t.estado === "Borrador")   ||
       (activeTab === "Finalizados" && t.estado === "Finalizado");
@@ -125,6 +128,7 @@ export default function MisTorneos() {
 
   const counts = {
     "Todos":       torneos.length,
+    "Inscripción": torneos.filter((t) => t.estado === "Inscripción").length,
     "En curso":    torneos.filter((t) => t.estado === "En curso").length,
     "Borradores":  torneos.filter((t) => t.estado === "Borrador").length,
     "Finalizados": torneos.filter((t) => t.estado === "Finalizado").length,
@@ -146,6 +150,10 @@ export default function MisTorneos() {
             <div className="mt-metric-card">
               <FiAward />
               <div><span className="mt-metric-value">{counts["En curso"]}</span><span className="mt-metric-label">En curso</span></div>
+            </div>
+            <div className="mt-metric-card">
+              <FiUsers />
+              <div><span className="mt-metric-value">{counts["Inscripción"]}</span><span className="mt-metric-label">Inscripción</span></div>
             </div>
             <div className="mt-metric-card">
               <FiEdit2 />
@@ -247,6 +255,20 @@ export default function MisTorneos() {
                             onClick={() => navigate(`/admin/torneos/${torneo.id}/equipos`)}
                           >
                             Equipos
+                          </Button>
+                          <button className="mt-btn-trash" onClick={() => handleEliminar(torneo.id)}>
+                            <FiTrash2 />
+                          </button>
+                        </>
+                      )}
+                      {torneo.estado === "Inscripción" && (
+                        <>
+                          <Button
+                            className="mt-btn-full"
+                            icon={<FiUsers />}
+                            onClick={() => navigate(`/admin/torneos/${torneo.id}/equipos`)}
+                          >
+                            Agregar equipos
                           </Button>
                           <button className="mt-btn-trash" onClick={() => handleEliminar(torneo.id)}>
                             <FiTrash2 />

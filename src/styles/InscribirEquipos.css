@@ -46,6 +46,55 @@
   margin: 0 auto;
 }
 
+/* ── Tabs (Equipos / Árbitros / Canchas) ─────────────────────────── */
+.ie-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  margin: -1.25rem -1.5rem 0.25rem;
+  padding: 0 1.5rem;
+}
+.ie-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.85rem 0.25rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.ie-tab:hover { color: var(--color-ink); }
+.ie-tab.active {
+  color: var(--color-pitch);
+  border-bottom-color: var(--color-pitch);
+}
+.ie-tab:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Lista de checkboxes dentro del tab (Árbitros/Canchas) — más alta que la
+   que quedaba comprimida en el sidebar, con su propio scroll si hay muchos */
+.ie-check-list-tab {
+  max-height: 380px;
+  overflow-y: auto;
+  gap: 0.6rem;
+}
+.ie-check-list-tab .ie-check-item {
+  padding: 0.6rem 0.75rem;
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-sm);
+}
+
+.ie-fixture-asignados {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin: 0 0 0.5rem;
+}
+
 /* ── Panel equipos ───────────────────────────────────────────────── */
 .ie-panel {
   background: var(--color-surface);
@@ -194,17 +243,6 @@
   font-weight: 700;
   color: var(--color-ink);
   margin: 0 0 0.75rem;
-}
-
-/*
-  Mismo tratamiento de scroll que .ie-list: antes esta columna podía crecer
-  indefinidamente con muchas canchas/árbitros mientras la de equipos sí tenía
-  tope + scroll propio, una asimetría entre las dos columnas del layout.
-*/
-.ie-fixture-scroll {
-  max-height: 420px;
-  overflow-y: auto;
-  padding-right: 0.25rem;
 }
 
 .ie-fixture-field { margin-bottom: 0.85rem; }

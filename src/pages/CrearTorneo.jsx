@@ -62,9 +62,9 @@ export default function CrearTorneo() {
   };
 
   // estado del torneo al crearlo: 'borrador' (queda sin publicar, se termina
-  // después desde "Mis Torneos") o 'en_curso' (el único otro estado no-terminal
-  // que admite la entidad Torneo — ver src/torneo/torneo.entity.ts en el
-  // backend — así que "Crear Torneo" pasa directo a inscribir equipos).
+  // después desde "Mis Torneos") o 'inscripcion' (ya acepta equipos — ver
+  // src/torneo/torneo.entity.ts en el backend para el resto del ciclo de
+  // vida — así que "Crear Torneo" pasa directo a inscribir equipos).
   async function submitTorneo(estado) {
     setError("");
 
@@ -243,7 +243,7 @@ export default function CrearTorneo() {
                 <Button
                   type="button"
                   disabled={loading}
-                  onClick={() => submitTorneo("en_curso")}
+                  onClick={() => submitTorneo("inscripcion")}
                   className="ct-btn-crear"
                 >
                   {loading ? "Creando..." : "+ Crear Torneo"}
