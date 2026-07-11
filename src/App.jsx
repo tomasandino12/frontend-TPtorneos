@@ -17,6 +17,9 @@ import MisTorneos from "./pages/MisTorneos.jsx"
 import CrearTorneo from "./pages/CrearTorneo.jsx"
 import InscribirEquipos from "./pages/InscribirEquipos.jsx"
 import Arbitros from "./pages/Arbitros.jsx"
+import Canchas from "./pages/Canchas.jsx"
+import CrearCancha from "./pages/CrearCancha.jsx"
+import Jugadores from "./pages/Jugadores.jsx"
 import OlvidePassword from "./pages/OlvidePassword.jsx"
 import RestablecerPassword from "./pages/RestablecerPassword.jsx"
 
@@ -40,6 +43,9 @@ function App() {
         <Route path="/admin/torneos/nuevo" element={<CrearTorneo />} />
         <Route path="/admin/torneos/:id/equipos" element={<InscribirEquipos />} />
         <Route path="/admin/arbitros" element={<Arbitros />} />
+        <Route path="/admin/canchas" element={<Canchas />} />
+        <Route path="/admin/canchas/nueva" element={<CrearCancha />} />
+        <Route path="/admin/jugadores" element={<Jugadores />} />
 
         {/* 📂 Sección con layout: Gestor de Torneos */}
         <Route path="/gestorTorneos" element={<PrivateRoute><GestorTorneos /></PrivateRoute>}>

@@ -1,0 +1,160 @@
+/*
+  El hero (.admin-hero) viene de MenuAdmin.css. Acá solo lo específico de
+  esta pantalla — mismo patrón que Arbitros.css (.ar-*), prefijo .cn-.
+*/
+
+/* ── List section ────────────────────────────────────────────────────────── */
+
+.cn-list {
+  padding: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.cn-controls {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  align-items: flex-end;
+}
+
+.cn-search {
+  flex: 1;
+}
+
+/* ── Status (loading / error) ───────────────────────────────────────────── */
+
+.cn-status-card {
+  text-align: center;
+  color: var(--color-muted);
+}
+
+.cn-status-error {
+  color: var(--color-alert);
+}
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+
+.cn-table-wrap {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.cn-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cn-table th {
+  background: var(--color-success-bg);
+  color: var(--color-pitch);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  text-align: left;
+  padding: 0.75rem 1rem;
+}
+
+.cn-table td {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-ink);
+  font-size: 0.875rem;
+}
+
+.cn-table tr:hover td {
+  background: var(--color-surface-muted);
+}
+
+.cn-table-vacio {
+  text-align: center;
+  color: var(--color-muted);
+  padding: 2rem !important;
+}
+
+.cn-table-acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.cn-btn-icon {
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: 0.9375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s;
+}
+
+.cn-btn-icon:hover {
+  background: var(--color-surface-muted);
+}
+
+.cn-btn-icon:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.cn-btn-icon-danger {
+  color: var(--color-alert);
+  border-color: var(--color-error-bg);
+}
+
+.cn-btn-icon-danger:hover {
+  background: var(--color-error-bg);
+}
+
+/* ── Modal (edición) ─────────────────────────────────────────────────────── */
+
+.cn-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(22, 36, 27, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--z-modal);
+}
+
+.cn-modal {
+  background-color: var(--color-surface);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 25rem;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cn-modal h3 {
+  margin: 0 0 0.5rem;
+  color: var(--color-pitch);
+  text-align: center;
+}
+
+.cn-modal-botones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.625rem;
+  margin-top: 0.5rem;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .cn-list { padding: 0.75rem; }
+  .cn-controls { flex-direction: column; align-items: stretch; }
+  .cn-table th, .cn-table td { padding: 0.5rem 0.625rem; font-size: 0.8125rem; }
+}
