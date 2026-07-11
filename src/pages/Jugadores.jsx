@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { FiUsers, FiSearch } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
-import { Card, TextField } from "../components/ui";
+import { Card, TextField, PageShell, PageHero } from "../components/ui";
 
 const MIN_CARACTERES_BUSQUEDA = 3;
 const MAX_BUSQUEDAS_RECIENTES = 6;
@@ -109,34 +109,42 @@ export default function Jugadores() {
     <div className="layout">
       <AdminHeader admin={admin} onLogout={handleLogout} />
 
-      <main>
-        <section className="admin-hero">
-          <div className="admin-hero-title">
-            <FiUsers className="admin-hero-icon" />
-            <h1>Jugadores</h1>
-          </div>
-          <p className="admin-hero-subtitle">
-            Jugadores que forman parte de equipos inscriptos en tus torneos.
-          </p>
-        </section>
-
-        <section className="jg-list">
-          <div className="jg-controls">
+      <PageShell bare>
+        <PageHero
+          icon={<FiUsers />}
+          title="Jugadores"
+          subtitle="Buscá un jugador por nombre, DNI o ID para ver sus datos."
+        >
+          <div className="jg-search-block">
             <TextField
               icon={<FiSearch />}
-              placeholder="Buscar por nombre, apellido, DNI o ID..."
+              placeholder="Ej: Forlán, 34221110, JG-00187..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               className="jg-search"
             />
+            <div className="jg-search-meta">
+              <span className="jg-search-hint">
+                Buscá por nombre, DNI o ID · mínimo {MIN_CARACTERES_BUSQUEDA} caracteres
+              </span>
+              {terminoValido && !cargando && !error && filtrados.length > 0 && (
+                <span className="jg-contador">
+                  {filtrados.length} {filtrados.length === 1 ? "jugador registrado" : "jugadores registrados"}
+                </span>
+              )}
+            </div>
           </div>
+        </PageHero>
 
+        <section className="jg-list">
           {!terminoValido && (
             <div className="jg-empty-state">
-              <FiSearch className="jg-empty-icon" />
+              <div className="jg-empty-icon-wrap">
+                <FiSearch className="jg-empty-icon" />
+              </div>
               <p className="jg-empty-title">Empezá a escribir para buscar</p>
               <p className="jg-empty-sub">
-                Ingresá al menos {MIN_CARACTERES_BUSQUEDA} caracteres (nombre, apellido, DNI o ID)
+                Ingresá al menos {MIN_CARACTERES_BUSQUEDA} caracteres. Podés combinar nombre y apellido.
               </p>
 
               {recientes.length > 0 && (
@@ -163,46 +171,38 @@ export default function Jugadores() {
           {terminoValido && error && <Card className="jg-status-card jg-status-error">{error}</Card>}
 
           {terminoValido && !cargando && !error && (
-            <>
-              {filtrados.length > 0 && (
-                <p className="jg-contador">
-                  {filtrados.length} {filtrados.length === 1 ? "jugador registrado" : "jugadores registrados"}
-                </p>
-              )}
-
-              <div className="jg-table-wrap">
-                <table className="jg-table">
-                  <thead>
-                    <tr>
-                      <th>Nombre</th>
-                      <th>Apellido</th>
-                      <th>DNI</th>
-                      <th>Equipo</th>
+            <div className="jg-table-wrap">
+              <table className="jg-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>DNI</th>
+                    <th>Equipo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtrados.map((jugador) => (
+                    <tr key={jugador.id}>
+                      <td>{jugador.nombre}</td>
+                      <td>{jugador.apellido}</td>
+                      <td>{jugador.dni}</td>
+                      <td>{jugador.equipo?.nombreEquipo || "—"}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {filtrados.map((jugador) => (
-                      <tr key={jugador.id}>
-                        <td>{jugador.nombre}</td>
-                        <td>{jugador.apellido}</td>
-                        <td>{jugador.dni}</td>
-                        <td>{jugador.equipo?.nombreEquipo || "—"}</td>
-                      </tr>
-                    ))}
-                    {filtrados.length === 0 && (
-                      <tr>
-                        <td colSpan={4} className="jg-table-vacio">
-                          No hay jugadores que coincidan con la búsqueda.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </>
+                  ))}
+                  {filtrados.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="jg-table-vacio">
+                        No hay jugadores que coincidan con la búsqueda.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
         </section>
-      </main>
+      </PageShell>
 
       <footer className="footer">
         <h5>
