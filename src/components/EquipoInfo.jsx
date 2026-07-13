@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiEdit2, FiUpload, FiBarChart2, FiSearch, FiSend, FiLogOut, FiX, FiRepeat, FiCheckCircle, FiUserX, FiPlus } from "react-icons/fi";
+import { FiArrowLeft, FiEdit2, FiUpload, FiBarChart2, FiSearch, FiSend, FiLogOut, FiX, FiRepeat, FiCheckCircle, FiUserX, FiPlus, FiInfo } from "react-icons/fi";
 import { apiFetch, apiFetchFormData, ASSETS_URL } from "../utils/api.js";
 import { Button, TextField, Alert, PageHero, Tabs, Modal } from "./ui";
 import Convocatoria from "./Convocatoria.jsx";
@@ -34,6 +34,18 @@ const JUGADORES_SIN_EQUIPO_PAGE_SIZE = 10;
 const MAX_JUGADORES_PLANTEL = 26;
 const DESCRIPCION_MAX_LENGTH = 300;
 
+// Mismo criterio en todo el archivo (plantel y detalle de jugador al agregar):
+// el backend no siempre manda la fecha de nacimiento con la misma key.
+function calcularEdad(jugador) {
+  const fechaNacimiento =
+    jugador.fechaNacimiento ??
+    jugador.fecha_nacimiento ??
+    jugador.fechaNac ??
+    jugador.FechaNacimiento ??
+    "";
+  return fechaNacimiento ? new Date().getFullYear() - new Date(fechaNacimiento).getFullYear() : null;
+}
+
 export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }) {
   const navigate = useNavigate();
   const [equipo, setEquipo] = useState(null);
@@ -49,8 +61,10 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
   // Reclutamiento (solo capitán)
   const [jugadoresSinEquipo, setJugadoresSinEquipo] = useState([]);
   const [busqueda, setBusqueda] = useState("");
+  const [posicionFiltro, setPosicionFiltro] = useState("todas");
   const [filtrados, setFiltrados] = useState([]);
   const [agregarFeedback, setAgregarFeedback] = useState(null);
+  const [jugadorDetalle, setJugadorDetalle] = useState(null);
   const [verTodosSinEquipo, setVerTodosSinEquipo] = useState(false);
   const [invitadosIds, setInvitadosIds] = useState([]);
 
@@ -177,14 +191,21 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
       .catch((err) => console.error("Error cargando la formación del equipo:", err));
   }, [esMiEquipo, equipoId]);
 
+  // Filtro por nombre y por posición — ambos en el cliente, sobre la lista
+  // que ya se trajo completa en /jugadores/sin-equipo (esa respuesta ya
+  // incluye posicion/fechaNacimiento/descripcion, no hace falta pedirle nada
+  // nuevo al backend para ninguno de los dos filtros).
   useEffect(() => {
     const resultado = jugadoresSinEquipo.filter((j) => {
       const nombreCompleto = `${j.nombre} ${j.apellido}`.toLowerCase();
-      return nombreCompleto.includes(busqueda.toLowerCase());
+      const coincideNombre = nombreCompleto.includes(busqueda.toLowerCase());
+      const posicionJugador = j.posicion ?? j.Posicion ?? "";
+      const coincidePosicion = posicionFiltro === "todas" || posicionJugador === posicionFiltro;
+      return coincideNombre && coincidePosicion;
     });
     setFiltrados(resultado);
     setVerTodosSinEquipo(false);
-  }, [busqueda, jugadoresSinEquipo]);
+  }, [busqueda, posicionFiltro, jugadoresSinEquipo]);
 
   const handleInvitar = async (idJugador) => {
     try {
@@ -503,15 +524,7 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
             </h3>
             <ul className="lista-plantel">
               {grupo.jugadores.map((jugador) => {
-                const fechaNacimiento =
-                  jugador.fechaNacimiento ??
-                  jugador.fecha_nacimiento ??
-                  jugador.fechaNac ??
-                  jugador.FechaNacimiento ??
-                  "";
-                const edad = fechaNacimiento
-                  ? new Date().getFullYear() - new Date(fechaNacimiento).getFullYear()
-                  : null;
+                const edad = calcularEdad(jugador);
 
                 return (
                   <li
@@ -615,12 +628,34 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
           <Alert variant="info">¿Necesitás encontrar jugadores para tu equipo?</Alert>
         )}
 
-        <TextField
-          icon={<FiSearch />}
-          placeholder="Buscar por nombre o apellido"
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-        />
+        <div className="agregar-jugador-filtros">
+          <TextField
+            icon={<FiSearch />}
+            placeholder="Buscar por nombre o apellido"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+          />
+          <div className="ui-field">
+            <label className="ui-field-label" htmlFor="filtro-posicion-agregar">
+              Posición
+            </label>
+            <div className="ui-field-control">
+              <select
+                id="filtro-posicion-agregar"
+                className="ui-field-input"
+                value={posicionFiltro}
+                onChange={(e) => setPosicionFiltro(e.target.value)}
+              >
+                <option value="todas">Todos</option>
+                {ORDEN_POSICIONES.map((posicion) => (
+                  <option key={posicion} value={posicion}>
+                    {POSICION_LABELS[posicion] ?? posicion}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
 
         {agregarFeedback && (
           <div className="feedback-box">
@@ -636,7 +671,14 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
                 : filtrados.slice(0, JUGADORES_SIN_EQUIPO_PAGE_SIZE)
               ).map((j) => (
                 <li key={j.id}>
-                  {j.nombre} {j.apellido}
+                  <button
+                    type="button"
+                    className="jugador-sin-equipo-nombre"
+                    onClick={() => setJugadorDetalle(j)}
+                    title="Ver detalle del jugador"
+                  >
+                    {j.nombre} {j.apellido} <FiInfo />
+                  </button>
                   {invitadosIds.includes(j.id) ? (
                     <Button variant="secondary" icon={<FiSend />} disabled>
                       Invitación enviada
@@ -657,6 +699,32 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
           </>
         ) : (
           <Alert variant="info">No se encontraron jugadores sin equipo.</Alert>
+        )}
+      </Modal>
+
+      {/* Detalle de un jugador sin equipo — posición, edad, descripción.
+          Espacio reservado para estadísticas del jugador a futuro (no
+          construido todavía, no hay endpoint pensado para esto aún). */}
+      <Modal
+        open={!!jugadorDetalle}
+        onClose={() => setJugadorDetalle(null)}
+        title={jugadorDetalle ? `${jugadorDetalle.nombre} ${jugadorDetalle.apellido}` : ""}
+      >
+        {jugadorDetalle && (
+          <div className="jugador-detalle-contenido">
+            <p>
+              <strong>Posición:</strong> {jugadorDetalle.posicion ?? jugadorDetalle.Posicion ?? "Sin posición"}
+            </p>
+            {calcularEdad(jugadorDetalle) !== null && (
+              <p>
+                <strong>Edad:</strong> {calcularEdad(jugadorDetalle)} años
+              </p>
+            )}
+            <p>
+              <strong>Descripción:</strong>{" "}
+              {jugadorDetalle.descripcion || "Este jugador todavía no tiene descripción."}
+            </p>
+          </div>
         )}
       </Modal>
     </>

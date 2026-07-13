@@ -127,6 +127,54 @@
   box-shadow: var(--shadow-md);
 }
 
+/* Nombre del jugador sin equipo, ahora clickeable para ver su detalle
+   (posición/edad/descripción) antes de invitarlo. */
+.jugador-sin-equipo-nombre {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: none;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 1rem;
+  font-family: var(--font-body);
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.jugador-sin-equipo-nombre:hover {
+  color: var(--color-pitch);
+}
+
+.jugador-sin-equipo-nombre svg {
+  color: var(--color-muted);
+  width: 0.9rem;
+  height: 0.9rem;
+  flex-shrink: 0;
+}
+
+/* Búsqueda + filtro por posición, modal "Agregar jugadores" */
+.agregar-jugador-filtros {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.agregar-jugador-filtros > .ui-field {
+  min-width: 160px;
+}
+
+.jugador-detalle-contenido p {
+  margin: 0 0 0.75rem;
+}
+
+.jugador-detalle-contenido p:last-child {
+  margin-bottom: 0;
+}
+
 /*
   === Detalle de Equipo ===
   El hero del título (antes .equipo-detalle-header/.equipo-detalle-titulo,
@@ -685,6 +733,17 @@
 .convocatoria-seleccion-item:hover {
   background-color: var(--color-surface-muted);
   border-color: var(--color-turf);
+}
+
+/* Suspendido: sigue en la lista (no se saca en silencio) pero se distingue
+   visualmente — tocarlo muestra el aviso en vez de convocarlo. */
+.convocatoria-seleccion-item-suspendido {
+  color: var(--color-muted);
+  background-color: var(--color-surface-muted);
+}
+
+.convocatoria-seleccion-item-suspendido:hover {
+  border-color: var(--color-border);
 }
 
 /* Tabla del historial de partidos — pestaña Historial (solo equipos ajenos) */

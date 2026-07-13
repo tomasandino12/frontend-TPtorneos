@@ -75,24 +75,33 @@
 }
 
 .estado {
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: var(--radius-sm);
   font-size: 0.8rem;
   text-transform: capitalize;
   font-weight: 500;
 }
 
+/* "Programado" es hoy el único estado que devuelve el backend acá (Fixture
+   solo lista partidos programados) — se distingue de .jornada (que usa el
+   mismo --color-surface-muted como fondo lleno) con un borde en vez de
+   fondo, para que las dos etiquetas no se lean como la misma cosa. */
 .estado.programado {
-  background-color: var(--color-surface-muted);
+  background-color: transparent;
+  border: 1.5px solid var(--color-border);
   color: var(--color-muted);
 }
 
 .estado.finalizado {
   background-color: var(--color-success-bg);
-  color: var(--color-pitch);
+  color: var(--color-success-text);
 }
 
-.estado.en_juego {
+/* "en_curso" (no "en_juego"): nombre alineado con Torneo.estado, que ya usa
+   "en_curso" en el resto de la app — no hay datos reales con este estado
+   todavía (Partido.estado_partido solo usa programado/finalizado hoy), pero
+   si se agrega tiene que coincidir con este nombre para aplicarse. */
+.estado.en_curso {
   background-color: var(--color-warning-bg);
   color: var(--color-warning-text);
 }

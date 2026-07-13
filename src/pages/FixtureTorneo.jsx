@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import "../styles/FixtureTorneo.css";
 import "../styles/IndexStyle.css";
-import { FiCalendar, FiClock, FiMapPin } from "react-icons/fi";
+import { FiCalendar, FiClock, FiMapPin, FiUser } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
 import { Alert, PageShell, PageHero } from "../components/ui";
 
@@ -187,6 +187,12 @@ function FixtureTorneo() {
                 </p>
                 <p>
                   <FiMapPin /> {partido.cancha?.nombre || "Cancha"}
+                </p>
+                <p>
+                  <FiUser />{" "}
+                  {partido.arbitro
+                    ? `${partido.arbitro.nombre} ${partido.arbitro.apellido}`
+                    : "Sin árbitro asignado"}
                 </p>
               </div>
             </div>

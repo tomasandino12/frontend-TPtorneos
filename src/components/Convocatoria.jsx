@@ -83,8 +83,13 @@ export default function Convocatoria({
 }) {
   const jugadores = equipo.jugadores;
   const jugadoresPorId = Object.fromEntries(jugadores.map((j) => [j.id, j]));
+  // Un jugador suspendido no puede ser convocado — no cuenta para los cupos
+  // de una formación (si contara, el capitán podría elegir un esquema que
+  // después no puede completar porque el suspendido no es seleccionable).
   const conteoPorCategoria = ORDEN_POSICIONES.reduce((acc, categoria) => {
-    acc[categoria] = jugadores.filter((j) => (j.posicion ?? j.Posicion) === categoria).length;
+    acc[categoria] = jugadores.filter(
+      (j) => (j.posicion ?? j.Posicion) === categoria && !j.suspendido
+    ).length;
     return acc;
   }, {});
 
@@ -102,6 +107,7 @@ export default function Convocatoria({
   const [asignaciones, setAsignaciones] = useState({});
   const [notas, setNotas] = useState("");
   const [puntoSeleccionado, setPuntoSeleccionado] = useState(null);
+  const [intentoSuspendido, setIntentoSuspendido] = useState(null);
   const [guardando, setGuardando] = useState(false);
   const [guardarError, setGuardarError] = useState(null);
 
@@ -140,12 +146,24 @@ export default function Convocatoria({
       });
       return;
     }
+    setIntentoSuspendido(null);
     setPuntoSeleccionado(punto);
   };
 
   const handleAsignarJugador = (idJugador) => {
     setAsignaciones((prev) => ({ ...prev, [puntoSeleccionado.id]: idJugador }));
     setPuntoSeleccionado(null);
+  };
+
+  // Un suspendido se sigue mostrando en la lista (no se saca en silencio,
+  // para que el capitán entienda por qué no está disponible), pero tocarlo
+  // muestra el motivo en vez de convocarlo.
+  const handleClickJugadorLista = (jugador) => {
+    if (jugador.suspendido) {
+      setIntentoSuspendido(`${jugador.nombre} ${jugador.apellido} está suspendido y no puede ser convocado.`);
+      return;
+    }
+    handleAsignarJugador(jugador.id);
   };
 
   const idsAsignados = new Set(Object.values(asignaciones));
@@ -412,7 +430,10 @@ export default function Convocatoria({
 
       <Modal
         open={!!puntoSeleccionado}
-        onClose={() => setPuntoSeleccionado(null)}
+        onClose={() => {
+          setPuntoSeleccionado(null);
+          setIntentoSuspendido(null);
+        }}
         title={puntoSeleccionado ? `Elegí un ${puntoSeleccionado.categoria.toLowerCase()}` : ""}
       >
         <ul className="convocatoria-seleccion-lista">
@@ -423,10 +444,11 @@ export default function Convocatoria({
                 <li key={j.id}>
                   <button
                     type="button"
-                    className="convocatoria-seleccion-item"
-                    onClick={() => handleAsignarJugador(j.id)}
+                    className={`convocatoria-seleccion-item${j.suspendido ? " convocatoria-seleccion-item-suspendido" : ""}`}
+                    onClick={() => handleClickJugadorLista(j)}
                   >
                     {j.nombre} {j.apellido}
+                    {j.suspendido && <span className="badge-suspendido">Suspendido</span>}
                   </button>
                 </li>
               ))}
@@ -434,6 +456,7 @@ export default function Convocatoria({
         {puntoSeleccionado &&
           jugadores.filter((j) => (j.posicion ?? j.Posicion) === puntoSeleccionado.categoria && !idsAsignados.has(j.id))
             .length === 0 && <Alert variant="info">No quedan jugadores disponibles en esta categoría.</Alert>}
+        {intentoSuspendido && <Alert variant="warning">{intentoSuspendido}</Alert>}
       </Modal>
     </div>
   );

@@ -67,8 +67,15 @@
   margin-bottom: 1rem;
 }
 
-/* ===== TARJETAS DE PARTIDOS ===== */
+/* ===== TARJETAS DE PARTIDOS =====
+   Card blanca siempre (antes el color de resultado pintaba TODA la fila de
+   fondo — invisible acá porque esta sección vive anidada dentro de PageHero,
+   que ya es verde: el verde de "victoria" se perdía contra el verde del
+   hero). El color de resultado ahora es un acento: borde izquierdo de la
+   card + la píldora del resultado, no el fondo completo de la fila. */
 .partido-card {
+  background-color: var(--color-surface);
+  border-left: 4px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 0.75rem 1rem;
   margin-bottom: 0.8rem;
@@ -77,21 +84,27 @@
   align-items: center;
   color: var(--color-ink);
   font-weight: 500;
+  box-shadow: var(--shadow-sm);
 }
 
-.partido-card.verde { background-color: var(--color-success-bg); }
-.partido-card.amarillo { background-color: var(--color-warning-bg); }
-.partido-card.rojo { background-color: var(--color-error-bg); }
-.partido-card.gris { background-color: var(--color-surface-muted); }
+.partido-card.verde { border-left-color: var(--color-turf); }
+.partido-card.amarillo { border-left-color: var(--color-whistle); }
+.partido-card.rojo { border-left-color: var(--color-alert); }
+.partido-card.gris { border-left-color: var(--color-border); }
 
 .partido-vs {
   font-weight: bold;
 }
 
 .partido-resultado {
-  background: var(--color-surface);
+  background: var(--color-surface-muted);
+  color: var(--color-ink);
   padding: 6px 12px;
   border-radius: 20px;
   font-weight: 600;
   font-size: 0.95rem;
 }
+
+.partido-card.verde .partido-resultado { background-color: var(--color-success-bg); color: var(--color-success-text); }
+.partido-card.amarillo .partido-resultado { background-color: var(--color-warning-bg); color: var(--color-warning-text); }
+.partido-card.rojo .partido-resultado { background-color: var(--color-error-bg); color: var(--color-error-text); }
