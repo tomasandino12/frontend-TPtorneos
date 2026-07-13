@@ -29,6 +29,12 @@ function PrivateRoute({ children }) {
   return children;
 }
 
+function AdminRoute({ children }) {
+  const adminToken = localStorage.getItem("adminToken");
+  if (!adminToken) return <Navigate to="/admin" replace />;
+  return children;
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -38,14 +44,14 @@ function App() {
         <Route path="/olvide-password" element={<OlvidePassword />} />
         <Route path="/restablecer-password" element={<RestablecerPassword />} />
         <Route path="/admin" element={<InicioSesionAdmin />} />
-        <Route path="/menu-admin" element={<MenuAdmin />} />
-        <Route path="/admin/torneos" element={<MisTorneos />} />
-        <Route path="/admin/torneos/nuevo" element={<CrearTorneo />} />
-        <Route path="/admin/torneos/:id/equipos" element={<InscribirEquipos />} />
-        <Route path="/admin/arbitros" element={<Arbitros />} />
-        <Route path="/admin/canchas" element={<Canchas />} />
-        <Route path="/admin/canchas/nueva" element={<CrearCancha />} />
-        <Route path="/admin/jugadores" element={<Jugadores />} />
+        <Route path="/menu-admin" element={<AdminRoute><MenuAdmin /></AdminRoute>} />
+        <Route path="/admin/torneos" element={<AdminRoute><MisTorneos /></AdminRoute>} />
+        <Route path="/admin/torneos/nuevo" element={<AdminRoute><CrearTorneo /></AdminRoute>} />
+        <Route path="/admin/torneos/:id/equipos" element={<AdminRoute><InscribirEquipos /></AdminRoute>} />
+        <Route path="/admin/arbitros" element={<AdminRoute><Arbitros /></AdminRoute>} />
+        <Route path="/admin/canchas" element={<AdminRoute><Canchas /></AdminRoute>} />
+        <Route path="/admin/canchas/nueva" element={<AdminRoute><CrearCancha /></AdminRoute>} />
+        <Route path="/admin/jugadores" element={<AdminRoute><Jugadores /></AdminRoute>} />
 
         {/* 📂 Sección con layout: Gestor de Torneos */}
         <Route path="/gestorTorneos" element={<PrivateRoute><GestorTorneos /></PrivateRoute>}>
