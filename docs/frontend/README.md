@@ -4,8 +4,8 @@ Esta carpeta explica cómo está armado el frontend del proyecto: su arquitectur
 
 ## Índice
 
-- [`sistema-de-diseno.md`](./sistema-de-diseno.md) — los tokens de color/tipografía/espaciado y los 4 componentes reutilizables (`Button`, `TextField`, `Card`, `Alert`), con ejemplos reales de uso.
-- [`paginas.md`](./paginas.md) — recorrido por cada pantalla de la app: qué muestra, de qué datos depende, y cómo se relacionan entre sí. Incluye una sección dedicada a explicar por qué "la pantalla de equipo" está repartida en 3 archivos distintos.
+- [`sistema-de-diseno.md`](./sistema-de-diseno.md) — los tokens de color/tipografía/espaciado y los 8 componentes reutilizables (`Button`, `TextField`, `Card`, `Alert`, `PageShell`, `PageHero`, `Tabs`, `Modal`), con ejemplos reales de uso.
+- [`paginas.md`](./paginas.md) — recorrido por cada pantalla de la app: qué muestra, de qué datos depende, y cómo se relacionan entre sí. Incluye una sección dedicada a explicar por qué "la pantalla de equipo" está repartida en 3 archivos distintos (con su estructura de pestañas Plantel/Historial/Estrategia), y otra para la campanita de notificaciones del `Navbar`.
 - [`glosario.md`](./glosario.md) — explicación en criollo de los conceptos técnicos no obvios que aparecen en el código (CSS variables, barrel files, componentes contenedor vs. presentacionales, etc.), cada uno con el ejemplo real de este proyecto.
 - [`decisiones.md`](./decisiones.md) — bitácora breve de qué se decidió en cada fase de la migración de UI y por qué.
 - [`pendientes.md`](./pendientes.md) — lo que quedó sin resolver, con el motivo concreto de cada caso.
@@ -45,10 +45,14 @@ src/
 ├── pages/               # una pantalla = un archivo. Son los componentes que
 │                         # App.jsx conecta directamente a una ruta.
 ├── components/          # componentes compartidos que NO son una pantalla
-│   ├── Navbar.jsx        # navbar de las pantallas de jugador
+│   ├── Navbar.jsx        # navbar de las pantallas de jugador (incluye la campanita)
+│   ├── NotificationBell.jsx # campanita de notificaciones (ver paginas.md)
 │   ├── AdminHeader.jsx   # navbar del panel admin
 │   ├── EquipoInfo.jsx    # contenido de "detalle de equipo" (ver paginas.md)
-│   └── ui/               # sistema de diseño: Button, TextField, Card, Alert
+│   ├── Convocatoria.jsx  # pestaña "Estrategia" de EquipoInfo: asistente de formación
+│   ├── Cancha.jsx        # cancha SVG reutilizada por Convocatoria (editable y de solo lectura)
+│   └── ui/               # sistema de diseño: Button, TextField, Card, Alert,
+│                         # PageShell, PageHero, Tabs, Modal
 ├── styles/               # un .css por pantalla/componente, más los archivos
 │                         # transversales: tokens.css, IndexStyle.css
 └── utils/

@@ -119,6 +119,36 @@ Y después, cualquier control de edición se envuelve así:
 
 Si `esCapitanDeEsteEquipo` es `false`, ese `<Button>` ni siquiera se crea — no está en el DOM, no es que esté oculto con CSS o deshabilitado. Un jugador que no es capitán de ese equipo, o que está viendo el equipo de otra persona, simplemente no tiene ese botón en la pantalla. Importante: esto decide qué se **muestra**, no qué se **permite** — la validación real de "¿este usuario puede editar este equipo?" tiene que existir también del lado del servidor.
 
+## Identificar al usuario que llama por JWT, nunca por un parámetro de URL
+
+**La idea en criollo**: cuando el backend necesita saber "¿quién está haciendo este pedido?" (para permisos, para saber de qué equipo es capitán, etc.), hay dos formas de averiguarlo. La insegura: confiar en un dato que manda el propio cliente en la URL o el body (`?capitanId=5`, o un campo `equipoId` en el JSON). La segura: leerlo del token JWT que viene en el header `Authorization`, que el servidor ya validó con su firma al pasar por el middleware de autenticación — ese token no se puede falsificar sin la clave secreta del servidor. Si el backend confía en un parámetro que manda el cliente para decidir "quién sos", cualquiera puede mandar ese request a mano (con curl, con Postman) y decir ser cualquier otra persona con solo cambiar un número.
+
+**Por qué importa acá**: el frontend nunca decide esto — es una garantía que tiene que existir en el backend, pero como consumidor de esos endpoints conviene entender el patrón, porque explica por qué algunos endpoints que "deberían" recibir un `equipoId` en realidad no lo reciben en absoluto.
+
+**El ejemplo real** — `PATCH /jugadores/:id/expulsar` (backend, `jugador.controler.ts`): el `:id` de la URL es el jugador **objetivo** (a quién echar), pero quién tiene permiso para hacerlo se resuelve leyendo `req.user?.id` (puesto ahí por el middleware de JWT, no por el cliente):
+
+```ts
+const capitan = await txEm.findOne(Jugador, { id: req.user?.id }, { populate: ['equipo'] });
+if (!capitan || !capitan.esCapitan || !capitan.equipo) {
+  throw Object.assign(new Error('Solo el capitán de un equipo puede expulsar jugadores'), { status: 403 });
+}
+// ...
+if (jugadorObjetivo.equipo?.id !== capitan.equipo.id) {
+  throw Object.assign(new Error('No sos capitán del equipo de este jugador'), { status: 403 });
+}
+```
+
+El mismo patrón se repite en `GET /formaciones` y `PUT /formaciones` (pestaña Estrategia): ninguno de los dos recibe `equipoId` — el backend siempre resuelve "el equipo del jugador autenticado" a partir del JWT. Desde el frontend (`Convocatoria.jsx`), esto se ve como una llamada más corta de lo que uno esperaría:
+
+```js
+await apiFetch("/formaciones", {
+  method: "PUT",
+  body: JSON.stringify({ esquema: formacionElegida, titulares: Object.values(asignaciones), notas }),
+});
+```
+
+Nada de `equipoId` en el body — el capitán no puede, ni por error ni a propósito, mandar el ID de OTRO equipo en el request para modificar una formación que no es la suya. El único dato que decide "de qué equipo estamos hablando" es el token, que el navegador adjunta automáticamente vía `apiFetch` (ver `README.md`) y que el jugador no puede editar sin desloguearse.
+
 ## `font-variant-numeric: tabular-nums`
 
 **La idea en criollo**: es una propiedad CSS que le dice a la tipografía "todos los dígitos (0-9) tienen que ocupar el mismo ancho horizontal". Sin esto, en la mayoría de las tipografías el "1" es más angosto que el "8", por ejemplo — lo cual está bien para leer texto normal, pero es un problema en una tabla de números que cambian: si las columnas de una tabla de estadísticas se actualizan y el ancho de cada dígito varía, los números "bailan" horizontalmente en vez de quedar alineados en una grilla prolija.
@@ -161,6 +191,107 @@ Y usarlos donde corresponde:
 ```
 
 Con esto, cualquiera que agregue un elemento nuevo que necesite superponerse a otros sabe de entrada dónde ubicarlo en la escala, en vez de inventar un número al azar.
+
+## El selector CSS `:has()`
+
+**La idea en criollo**: `:has()` es un selector CSS que le permite a un elemento "mirar hacia adentro" y aplicarse un estilo distinto según qué contenga. Antes de `:has()`, CSS solo podía seleccionar hacia abajo o hacia los costados (un hijo, un hermano) — nunca "este `<div>`, pero solo si tiene adentro un elemento con tal clase". Es, en cierto sentido, el opuesto de un selector normal: en vez de "aplicame este estilo a mí", es "aplicame este estilo a mí, pero decidido por lo que hay adentro mío".
+
+**El problema real que resuelve acá**: `PageShell` (fondo marfil de página) y `PageHero` (recuadro verde "hero") son dos componentes independientes — `PageShell` no importa `PageHero` ni sabe nada de él por JavaScript. El problema: cuando `PageHero` recibe `children` (contenido extra, no solo título/subtítulo), ese contenido queda envuelto en un `<div className="ui-page-hero-body">` — y en ese caso, el recuadro visible completo (con el resto de la sección de la pantalla adentro) lo tiene que dibujar `PageHero`, no `PageShell`. Si los dos dibujaran su propio recuadro (padding, sombra, radio), el resultado es un recuadro marfil por fuera con un recuadro verde más chico anidado adentro — dos recuadros en vez de uno.
+
+**Por qué `:has()` es la solución correcta y no, por ejemplo, una prop**: se podría resolver pasándole a `PageShell` una prop como `contieneHero={true}` — pero eso obligaría a que **cada pantalla que usa los dos juntos** se acuerde de pasar esa prop a mano, y si alguien se olvida, vuelve el bug del recuadro doble sin que nada lo avise. Con `:has()`, `PageShell` detecta la situación por su cuenta, mirando su propio DOM — es una garantía estructural, no una convención que hay que recordar.
+
+**El ejemplo real** — `PageShell.css`:
+
+```css
+.ui-page-shell:has(> .ui-page-hero-center > .ui-page-hero-body),
+.ui-page-shell:has(> .ui-page-hero-split > .ui-page-hero-body) {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+```
+
+Traducido: "si este `.ui-page-shell` tiene como hijo directo un `.ui-page-hero-center` (o `-split`) que a su vez tiene un `.ui-page-hero-body` adentro, entonces apagate — no dibujes tu propio recuadro, dejá que `PageHero` sea el único". Acotado a los layouts `"center"`/`"split"` de `PageHero` a propósito: son los únicos que se usan hoy adentro de un `PageShell` en modo card (no `bare`) — el panel admin (`layout="left"`) ya usa `PageShell bare` y no tiene este problema para empezar.
+
+## Modal accesible (cierre por Escape, click afuera, y botón)
+
+**La idea en criollo**: un modal/diálogo "accesible" no es solo uno que se ve bien — es uno que se puede cerrar de más de una forma, para cubrir distintos hábitos de uso: alguien que usa el mouse espera poder clickear afuera del modal para cerrarlo (un patrón tan extendido que su ausencia se nota); alguien que usa el teclado espera que `Escape` cierre cualquier diálogo, sin tener que tabular hasta encontrar un botón "Cancelar"; y siempre tiene que haber un botón visible ("×") para quien no sabe ninguno de los dos atajos. Si un modal solo se cierra de una forma, una parte de los usuarios queda "atrapada" sin una salida obvia.
+
+**El ejemplo real** — `src/components/ui/Modal.jsx` implementa las tres:
+
+```jsx
+export default function Modal({ open, onClose, title, children, size = "md", className = "" }) {
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose?.();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
+
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) onClose?.();
+  };
+
+  return (
+    <div className="ui-modal-overlay" onClick={handleOverlayClick}>
+      <div className="ui-modal ..." role="dialog" aria-modal="true" aria-label={title}>
+        <button type="button" className="ui-modal-cerrar" onClick={onClose} aria-label="Cerrar">
+          <FiX />
+        </button>
+        {/* ... */}
+      </div>
+    </div>
+  );
+}
+```
+
+Dos detalles no obvios de esa implementación:
+- **`handleOverlayClick` compara `e.target === e.currentTarget`** en vez de simplemente cerrar al clickear el overlay — así distingue un click en el fondo oscuro (afuera de la card) de un click en cualquier parte de adentro de la card que "burbujea" hasta el overlay. Sin esa comparación, clickear un botón adentro del modal también lo cerraría por accidente.
+- **El listener de `Escape` se agrega y saca del `document` en un `useEffect`**, no como un atributo en el JSX — porque `Escape` tiene que funcionar sin importar qué elemento tenga el foco en ese momento (un input de texto adentro del modal, por ejemplo), y solo `document` recibe todos los eventos de teclado de la página.
+
+`role="dialog"` y `aria-modal="true"` son las dos líneas que le dicen a un lector de pantalla "esto es un diálogo que bloquea el resto de la página" — sin eso, tecnología de asistencia podría seguir anunciando contenido de atrás del modal como si fuera navegable.
+
+## Cálculo de luminancia para elegir color de texto legible
+
+**La idea en criollo**: la "luminancia" de un color es, en criollo, qué tan claro u oscuro se percibe — no es lo mismo que el brillo del monitor, es una fórmula que pondera cuánto contribuye cada canal (rojo, verde, azul) a cómo el ojo humano percibe la claridad de ese color (el ojo es más sensible al verde que al azul, por ejemplo, así que el verde pesa más en la fórmula). Sirve para decidir, en tiempo de ejecución, si un texto necesita ir en negro o en blanco para leerse bien sobre un fondo que no se conoce de antemano.
+
+**Por qué hizo falta acá**: en la cancha de la pestaña Estrategia (`Cancha.jsx`), cada punto de jugador se pinta del color del equipo (`equipo.colorPrimario`) — un color que **elige el capitán**, o que queda en el default del backend al crear el equipo (blanco, `#ffffff`). El texto del nombre adentro de cada punto, si siempre fuera blanco (una elección razonable a primera vista, porque la mayoría de los colores de marca de un equipo de fútbol suelen ser oscuros), se vuelve invisible apenas el color del equipo es claro — exactamente el caso del blanco por default, que además es el más común porque es lo que le toca a cualquier equipo recién creado que todavía no personalizó su color.
+
+**El ejemplo real** — `Cancha.jsx`:
+
+```js
+function colorTextoLegible(hex) {
+  if (typeof hex !== "string") return "#fff";
+  const limpio = hex.replace("#", "");
+  if (![3, 6].includes(limpio.length)) return "#fff";
+  const completo = limpio.length === 3 ? limpio.split("").map((c) => c + c).join("") : limpio;
+  const r = parseInt(completo.slice(0, 2), 16);
+  const g = parseInt(completo.slice(2, 4), 16);
+  const b = parseInt(completo.slice(4, 6), 16);
+  const luminancia = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminancia > 0.6 ? "#16241B" : "#fff";
+}
+```
+
+La fórmula (`0.299·r + 0.587·g + 0.114·b`) es la ponderación estándar de luminancia perceptual; el resultado queda normalizado entre 0 (negro) y 1 (blanco) al dividir por 255. Si el color de fondo es "claro" (luminancia > 0.6), el texto va en `--color-ink` (el negro-verdoso del proyecto, no un negro puro); si es oscuro, va en blanco. El valor se pasa como CSS custom property por elemento (`--cancha-punto-texto`), no como una clase fija, porque cada punto puede tener un color de fondo distinto entre pantallas (o el mismo equipo puede cambiar su color entre partidos):
+
+```jsx
+const estilo = {
+  "--cancha-punto-color": color,
+  "--cancha-punto-texto": colorTextoLegible(color),
+};
+```
+
+```css
+.cancha-punto-asignado {
+  background-color: var(--cancha-punto-color, var(--color-pitch));
+  color: var(--cancha-punto-texto, #fff);
+}
+```
 
 ## El fondo amarillo del autocompletado del navegador
 

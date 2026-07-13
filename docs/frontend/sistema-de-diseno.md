@@ -3,7 +3,7 @@
 Todo lo que describe este documento vive en dos lugares:
 
 - **`src/styles/tokens.css`** — los "tokens": variables CSS con los colores, tipografías, radios, sombras y niveles de z-index de toda la app.
-- **`src/components/ui/`** — 4 componentes de React (`Button`, `TextField`, `Card`, `Alert`) que usan esos tokens y que reemplazan lo que antes cada pantalla reinventaba por su cuenta.
+- **`src/components/ui/`** — 8 componentes de React (`Button`, `TextField`, `Card`, `Alert`, `PageShell`, `PageHero`, `Tabs`, `Modal`) que usan esos tokens y que reemplazan lo que antes cada pantalla reinventaba por su cuenta.
 
 Antes de que esto existiera, cada pantalla tenía sus propios colores en hexadecimal repetidos a mano, y no había un solo `<Button>` o `<input>` reutilizable en todo el proyecto — cada botón, cada campo de formulario, cada card blanca con sombra, estaba copiado y pegado de la pantalla más parecida. El detalle de ese problema está en `../auditoria-ui.md`.
 
@@ -104,10 +104,10 @@ Se usa hoy en `TablaPosiciones.jsx` (columnas PJ/PG/PE/PP/DG/Pts) y en `Estadist
 
 ## Los componentes (`src/components/ui/`)
 
-Los 6 se importan así, desde el archivo "barrel" `src/components/ui/index.js` (ver `glosario.md`):
+Los 8 se importan así, desde el archivo "barrel" `src/components/ui/index.js` (ver `glosario.md`):
 
 ```js
-import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
+import { Button, TextField, Card, Alert, PageShell, PageHero, Tabs, Modal } from "../components/ui";
 ```
 
 ### `Button`
@@ -244,6 +244,62 @@ Ejemplo simple (`EquipoInfo.jsx`):
 </Alert>
 ```
 
+### `Tabs`
+
+```jsx
+export default function Tabs({ tabs, defaultTab, className = "" })
+// tabs: [{ id, label, content, hidden }]
+```
+
+Pestañas genéricas, sin lógica propia de ninguna pantalla — no sabe qué es "Plantel" ni "Historial", solo recibe una lista de `{ id, label, content, hidden }` y arma la lista de pestañas más el panel de la activa. El detalle importante es `hidden`: no deshabilita la pestaña, la **saca por completo** de la lista y del panel — se usa para pestañas condicionales, como "Historial" en `EquipoInfo.jsx`, que no tiene sentido en absoluto cuando estás viendo tu propio equipo (no "Historial" deshabilitado, sino Historial que directamente no existe ahí). Si la pestaña activa deja de estar visible entre renders (por ejemplo, cambiaste de "ver equipo ajeno" a "ver mi equipo" y `hidden` cambió), `Tabs` cae solo a la primera pestaña visible en vez de quedar en un estado sin panel para mostrar.
+
+Ejemplo real (`EquipoInfo.jsx`):
+
+```jsx
+const tabsConfig = [
+  { id: "plantel", label: "Plantel", content: plantelTabContent },
+  { id: "historial", label: "Historial", content: historialTabContent, hidden: esMiEquipo },
+  { id: "convocatoria", label: "Estrategia", content: convocatoriaTabContent, hidden: !esMiEquipo },
+];
+
+<Tabs tabs={tabsConfig} className="detalle-seccion" />
+```
+
+Nota sobre el `id`/`label`: el `id` de la tercera pestaña sigue siendo `"convocatoria"` aunque el texto visible diga "Estrategia" — el renombre fue solo del `label` (lo que ve el usuario), a propósito no se tocó el `id` ni el nombre del componente `Convocatoria.jsx` que renderiza su contenido, para no reescribir referencias internas por un cambio de copy.
+
+### `Modal`
+
+```jsx
+export default function Modal({ open, onClose, title, children, size = "md", className = "" })
+// size: "md" (460px, default) | "lg" (600px, contenido más denso)
+```
+
+Overlay oscuro + card centrada, con cierre por click afuera, tecla Escape, o el botón "×" — ver "Modal accesible" en `glosario.md` para el porqué de esas tres formas de cerrar. `open` controla si se renderiza (el componente no guarda su propio estado de abierto/cerrado, eso vive en la pantalla que lo usa); `onClose` se llama en los tres casos de cierre por igual.
+
+**No reemplaza los modales que ya existían antes de que `Modal` se creara** (el de transferir capitanía en `EquipoInfo.jsx`, el formulario de alta/edición de árbitros en `Arbitros.jsx`) — esos siguen con su propia implementación en CSS/JSX. `Modal` es para los diálogos **nuevos** que necesiten este mismo patrón, no una migración retroactiva de los viejos.
+
+Ejemplo real, un modal de confirmación con contenido dinámico (`EquipoInfo.jsx`, echar jugador del plantel):
+
+```jsx
+<Modal
+  open={!!jugadorAExpulsar}
+  onClose={handleCerrarExpulsar}
+  title={jugadorAExpulsar ? `Echar a ${jugadorAExpulsar.nombre} ${jugadorAExpulsar.apellido}` : ""}
+>
+  <p className="expulsar-aviso">Esta acción saca al jugador del equipo...</p>
+  {/* ...campo de motivo, botones Cancelar/Confirmar */}
+</Modal>
+```
+
+Y uno con `size="lg"`, para una lista con buscador (`EquipoInfo.jsx`, agregar jugadores):
+
+```jsx
+<Modal open={mostrarAgregarJugador} onClose={() => setMostrarAgregarJugador(false)} title="Agregar jugadores" size="lg">
+  <TextField icon={<FiSearch />} placeholder="Buscar por nombre o apellido" ... />
+  {/* ...lista de resultados */}
+</Modal>
+```
+
 ### `PageShell` y `PageHero`
 
 **Este es el único mecanismo soportado para "fondo de página" y "recuadro hero".** Antes de que existieran, cada pantalla reimplementaba el mismo patrón visual con su propia clase CSS (`.subpagina-container`, `.MiPerfil`/`.mi-perfil-container`, `.admin-main-content`, `.tabla-wrapper`, `.page-header`, `.equipo-detalle-header`, `.admin-hero`, `.ie-hero`...) y, sin una garantía estructural, esas copias driftearon 3 veces seguidas — la última vez en código nuevo (el modal de transferencia de capitanía de `Equipos.css`) escrito sin relación a los intentos anteriores de arreglo. **Si reintroducís una clase CSS que reimplemente este patrón en vez de usar `PageShell`/`PageHero`, es un bug** — no una alternativa válida, aunque compile y se vea bien en el momento: es exactamente el mismo error que ya pasó 3 veces.
@@ -272,6 +328,22 @@ Ejemplo real (`Estadisticas.jsx`):
   <section className="resumen-boxes">...</section>
 </PageShell>
 ```
+
+**El problema del recuadro duplicado, y cómo lo resuelve `:has()`**: cuando `PageHero` recibe `children` (contenido extra además de ícono/título/subtítulo — ver más abajo), ese contenido pasa a vivir *dentro* del recuadro verde de `PageHero`. Si `PageShell` (el fondo marfil, por fuera) siguiera dibujando su propio recuadro con padding/sombra/radio como hace en modo card por defecto, el resultado visual es un recuadro marfil con sombra, y adentro — con un margen — un segundo recuadro verde más chico: dos recuadros anidados donde tendría que haber uno solo. Este bug ya había pasado 3 veces con implementaciones sueltas por pantalla (ver más arriba), así que la solución acá es estructural, no un ajuste de margen a mano: `PageShell.css` usa el selector `:has()` para detectar automáticamente cuándo tiene adentro un `PageHero` con contenido, y en ese caso se "apaga" a sí mismo (sin padding/radio/sombra/max-width propios), dejando que `PageHero` sea el único que dibuja el recuadro visible:
+
+```css
+/* PageShell.css */
+.ui-page-shell:has(> .ui-page-hero-center > .ui-page-hero-body),
+.ui-page-shell:has(> .ui-page-hero-split > .ui-page-hero-body) {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+```
+
+Ver "el selector `:has()`" en `glosario.md` para la explicación completa de por qué esto funciona sin que `PageShell` necesite saber nada de `PageHero` por JavaScript (ninguna prop, ningún `if`).
 
 Ejemplo con `bare` (`Arbitros.jsx`):
 

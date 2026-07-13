@@ -80,7 +80,7 @@ Antes de la consolidación existían dos pantallas separadas para esto (`Equipos
 
 ### Quién es quién
 
-- **`src/components/EquipoInfo.jsx`** — no es una pantalla, es un **componente de contenido** (ver "componente presentacional vs. contenedor" en `glosario.md`). Recibe un `equipoId` por prop, hace su propio `fetch` a `GET /equipos/:id`, y renderiza todo lo que hay que mostrar de un equipo: encabezado con escudo y nombre, descripción (editable), plantel de jugadores (con posición y edad), un buscador para agregar jugadores nuevos, e historial de partidos. No sabe nada sobre routing — no le importa si lo montaron dentro de `/gestorTorneos/equipos` o dentro de `/equipo/7`.
+- **`src/components/EquipoInfo.jsx`** — no es una pantalla, es un **componente de contenido** (ver "componente presentacional vs. contenedor" en `glosario.md`). Recibe un `equipoId` por prop, hace su propio `fetch` a `GET /equipos/:id`, y renderiza todo lo que hay que mostrar de un equipo: encabezado con escudo y nombre (dentro de `PageHero`, `layout="split"`), descripción (editable, siempre visible fuera de cualquier pestaña), y tres pestañas — Plantel, Historial, Estrategia — armadas con el componente `Tabs` (ver `sistema-de-diseno.md`). No sabe nada sobre routing — no le importa si lo montaron dentro de `/gestorTorneos/equipos` o dentro de `/equipo/7`.
 
 - **`src/pages/EquipoDetalle.jsx`** — la ruta standalone `/equipo/:id`. Es la que usa `TablaPosiciones` cuando cualquiera clickea una fila (puede ser un equipo rival). Como es una ruta que vive **fuera** del layout `GestorTorneos`, arma su propio layout completo (navbar + contenido + footer) a mano:
 
@@ -132,20 +132,71 @@ const esCapitanDeEsteEquipo = !!jugadorLogueado?.esCapitan && esMiEquipo;
 
 - Si estás viendo un equipo que **no es el tuyo** (`esMiEquipo === false`, típicamente entraste desde `TablaPosiciones` clickeando la fila de un rival): ves todo en **solo lectura** — sin botón de editar escudo, sin editar descripción, sin buscador para agregar jugadores. Ninguno de esos controles se renderiza (no es que estén deshabilitados — directamente no están en el DOM).
 - Si es tu equipo pero **no sos capitán** (`esMiEquipo === true`, `esCapitanDeEsteEquipo === false`): mismo caso, solo lectura — ver tu propio equipo no te da permiso de editarlo, solo ser su capitán.
-- Si sos **capitán de ese equipo** (`esCapitanDeEsteEquipo === true`): aparecen todos los controles — cambiar escudo, editar descripción, y la sección de "Agregar jugadores" con el buscador de jugadores libres.
+- Si sos **capitán de ese equipo** (`esCapitanDeEsteEquipo === true`): aparecen todos los controles — cambiar escudo, editar descripción, y (dentro de la pestaña Plantel, ver más abajo) echar jugadores, agregar jugadores nuevos y asignar la capitanía.
 
-Ejemplo real de ese gating en el JSX (la sección completa de reclutamiento):
+Ejemplo real de ese gating en el JSX (el botón "Editar descripción"):
 
 ```jsx
 {esCapitanDeEsteEquipo && (
-  <section className="detalle-seccion agregar-jugadores">
-    <h2 className="titulo-seccion">Agregar jugadores</h2>
-    ...
-  </section>
+  <Button variant="secondary" icon={<FiEdit2 />} onClick={handleEmpezarEdicionDescripcion}>
+    Editar descripción
+  </Button>
 )}
 ```
 
-Es importante remarcar (está documentado en un comentario arriba del propio componente): **este gating es de interfaz, no de seguridad**. Que el botón no aparezca en pantalla no reemplaza ninguna validación que tenga que hacer el backend — si alguien arma el request a mano (por ejemplo con curl) para editar un equipo del que no es capitán, lo que lo tiene que frenar es una validación del lado del servidor, no el hecho de que el botón esté oculto en el frontend.
+Es importante remarcar (está documentado en un comentario arriba del propio componente): **este gating es de interfaz, no de seguridad**. Que el botón no aparezca en pantalla no reemplaza ninguna validación que tenga que hacer el backend — si alguien arma el request a mano (por ejemplo con curl) para editar un equipo del que no es capitán, lo que lo tiene que frenar es una validación del lado del servidor, no el hecho de que el botón esté oculto en el frontend. El caso más explícito de esto en el código real es el endpoint de expulsar jugador (ver más abajo, "La pestaña Plantel"): identifica quién puede expulsar leyendo el JWT del que llama, nunca un parámetro que mande el cliente — ver "identificar al usuario por JWT" en `glosario.md`.
+
+### Las tres pestañas: Plantel, Historial, Estrategia
+
+Debajo de la descripción, `EquipoInfo` arma un `<Tabs>` (ver `sistema-de-diseno.md`) con tres pestañas, dos de ellas condicionales según `esMiEquipo`:
+
+```jsx
+const tabsConfig = [
+  { id: "plantel", label: "Plantel", content: plantelTabContent },
+  { id: "historial", label: "Historial", content: historialTabContent, hidden: esMiEquipo },
+  { id: "convocatoria", label: "Estrategia", content: convocatoriaTabContent, hidden: !esMiEquipo },
+];
+```
+
+- **Plantel** — siempre visible, para cualquiera. Ver detalle abajo.
+- **Historial** — visible **solo cuando estás viendo un equipo ajeno** (`hidden: esMiEquipo`, o sea, se oculta cuando SÍ es el tuyo). Tiene sentido: para tu propio equipo ya existe "Ver estadísticas del equipo" (botón en las `actions` del `PageHero`, lleva a `Estadisticas.jsx`); "Historial" acá es la versión resumida (tabla Fecha/Local/Resultado/Visitante/Estado) que tiene sentido cuando estás mirando a un rival desde Tabla de Posiciones y no vas a navegar a "tus" estadísticas para verlo.
+- **Estrategia** — lo opuesto: visible **solo en tu propio equipo** (`hidden: !esMiEquipo`). El `id` interno sigue siendo `"convocatoria"` (el componente que la renderiza es `Convocatoria.jsx`) — el renombre a "Estrategia" fue solo del texto que ve el usuario.
+
+**Nota de implementación importante, documentada en un comentario en el propio código**: `Tabs` desmonta el contenido de la pestaña que no está activa (solo renderiza `active.content`, no las tres a la vez con `display:none`). Esto significa que cualquier estado que tenga que **sobrevivir** a que el capitán se vaya a otra pestaña y vuelva —como la formación de Estrategia ya guardada— no puede vivir adentro del componente de esa pestaña, porque se perdería en cada cambio de pestaña. Por eso la formación guardada (`convocatoriaGuardada`) vive como estado de `EquipoInfo.jsx` y se pasa a `Convocatoria` por props, en vez de ser un `useState` local de `Convocatoria.jsx` — ver el ejemplo completo en `sistema-de-diseno.md` (sección `Tabs`) y el comentario real en `EquipoInfo.jsx` junto a ese `useState`.
+
+### La pestaña Plantel
+
+Muestra, en este orden fijo: un contador de cupo (`"14/26 jugadores en el plantel"`), y los jugadores agrupados por posición siempre en el mismo orden — Arqueros → Defensores → Mediocampistas → Delanteros (`ORDEN_POSICIONES` en el código), sin importar en qué orden los devuelva el backend — cada grupo con su cantidad (`"Defensores · 4"`).
+
+Solo para el capitán de ese equipo (`esCapitanDeEsteEquipo`), cada fila del plantel tiene además un botón para **echar al jugador** (ícono `FiUserX`, oculto/deshabilitado en la propia fila del capitán — no podés echarte a vos mismo desde acá) que abre un `Modal` pidiendo un motivo (mínimo 5 caracteres) y llama a `PATCH /jugadores/:id/expulsar`. El `:id` de la URL es el jugador **objetivo** (a quién echar); quién tiene permiso para hacerlo lo resuelve el backend leyendo el JWT del que llama, no un parámetro — ver el ejemplo completo de este patrón en `glosario.md`.
+
+También solo para el capitán, dos acciones más viven en esta pestaña:
+- **"Agregar jugador"** — abre un `Modal` (`size="lg"`) con el buscador de jugadores libres y el botón de invitar (misma lógica de siempre, movida adentro del modal en vez de vivir como una sección fija de la pantalla).
+- **"Asignar capitanía"** — reusa el mismo modal de transferencia de capitanía que existía antes de la reestructuración en pestañas (`.transferir-capitania-overlay`/`.transferir-capitania-modal`, con su propia implementación CSS/JSX, no el componente genérico `Modal`), solo que ahora el botón que lo abre vive en Plantel en vez de estar suelto en la pantalla. La lógica de ese modal no se tocó al reorganizar las pestañas.
+
+### La pestaña Estrategia (`Convocatoria.jsx` + `Cancha.jsx`)
+
+Asistente de 4 pasos, solo para el capitán. Si el plantel tiene **menos de 11 jugadores**, el asistente ni siquiera se muestra — se reemplaza por un mensaje ("Hace falta que el plantel llegue a 11 jugadores..."); para cualquier no-capitán que entra sin que haya una formación guardada todavía, el mensaje es "El capitán todavía no armó la convocatoria para el próximo partido."
+
+1. **Elegir formación** — 4 esquemas fijos (`4-3-3`, `4-4-2`, `4-2-3-1`, `5-3-2`), cada uno con sus cupos por posición (`FORMACIONES` en el código, coordinado con el mismo mapa que usa el backend). Un esquema se deshabilita, con el motivo visible (`"Necesitás al menos 5 defensores, tenés 4"`), si el plantel actual no alcanza para sus cupos.
+2. **Armar el 11 titular** — el componente `Cancha.jsx` dibuja un SVG de cancha (fondo, líneas, arcos — ver `sistema-de-diseno.md`/`glosario.md` para el sistema de coordenadas) con un punto por cada posición del esquema elegido. Tocar un punto vacío abre un `Modal` con los jugadores disponibles de esa categoría (ya sin los que están asignados a otro punto); tocar un punto ya asignado lo libera. El color de los puntos es `equipo.colorPrimario` — como ese color lo elige cada capitán (o queda en el default del backend, blanco), `Cancha.jsx` calcula la luminancia del color para decidir si el texto va en negro o blanco, así el nombre del jugador siempre se lee bien sin importar el color del equipo (ver "cálculo de luminancia" en `glosario.md`).
+3. **Banco de suplentes** — automático, sin selección: los jugadores del plantel que no quedaron en el 11 titular.
+4. **Notas y confirmar** — un campo de texto libre opcional (notas de estrategia) y el botón "Confirmar", que llama `PUT /formaciones`.
+
+Si ya existe una formación guardada, entrar a la pestaña muestra directamente la cancha en modo lectura (para cualquier miembro del equipo) con el banco y las notas debajo; el capitán ve además un botón **"Editar formación"** que reabre el asistente desde el paso 1, con el esquema y las asignaciones actuales ya precargadas (no hace falta rearmar todo desde cero).
+
+`GET /formaciones` y `PUT /formaciones` **no reciben `equipoId` en la URL ni en el body** — el backend siempre resuelve "el equipo" a partir del jugador autenticado (el JWT): `GET` lo puede pedir cualquier miembro del equipo, `PUT` únicamente el capitán (403 si no lo es). Es el mismo patrón que expulsar jugador — ver `glosario.md`.
+
+## Campanita de notificaciones (`NotificationBell.jsx`)
+
+Vive en `src/components/Navbar.jsx`, dentro de `.gt-nav-actions` — visible en cualquier pantalla que renderice `<Navbar/>`, que son las 6 pantallas de jugador bajo `/gestorTorneos` **más** `EquipoDetalle.jsx` (ruta `/equipo/:id`, fuera de ese layout pero con su propio `<Navbar/>` armado a mano — ver "Quién es quién" más arriba). Es un componente genérico: no tiene ningún tipo de notificación hardcodeado en su lógica, solo un mapeo `tipo → ícono` para decidir qué dibujar.
+
+- **Ícono con contador**: un badge numérico (o `"9+"` si son más de 9) solo si hay notificaciones no leídas — sin badge si son cero.
+- **Panel desplegable**: se abre al clickear la campana, se cierra con click afuera, con Escape, o clickeando la campana de nuevo. Lista las notificaciones más recientes primero, cada una con su ícono según `tipo`, el mensaje, y hace cuánto llegó (`"hace 2 horas"`, calculado en el cliente a partir de `fecha`). Las no leídas se distinguen con fondo distinto, texto en negrita, y un punto de color.
+- **Marcar como leída**: al clickear una notificación puntual (no al abrir el panel) — llama `PATCH /notificaciones/:id/leida`. Si esa notificación específica ya estaba leída, el click no hace ningún request de más.
+- **Tipos reales que emite el backend hoy** (`Notificacion.tipo`): `expulsion`, `suspension`, `habilitacion`, `formacion_actualizada` — cada uno con su ícono en `TIPO_ICONOS`. Cualquier tipo que no esté en ese mapeo cae a un ícono de campana genérico, así el componente no se rompe si el backend agrega un tipo nuevo.
+- **Fuente de datos**: `GET /notificaciones` (todas las notificaciones del jugador autenticado, leídas y no leídas, sin necesidad de pedirlas por tipo o por pantalla) — la llamada está aislada en una función `fetchNotificaciones()` al tope del archivo, separada del resto del componente.
+- **Si la llamada falla** (sin conexión, error del servidor): el panel muestra un mensaje de error simple (`Alert variant="error"`) en vez de romper la pantalla o mostrar una lista vacía como si no hubiera notificaciones.
 
 ## Panel de administrador
 
@@ -159,5 +210,6 @@ El panel admin tiene su propio navbar (`AdminHeader.jsx`, distinto del `Navbar.j
 
 ## Componentes compartidos que no son pantallas
 
-- **`Navbar.jsx`** — navbar de las 6 pantallas de jugador. Ver `decisiones.md` (Fase 3) para por qué se extrajo a un componente propio en vez de vivir inline en `GestorTorneos.jsx`.
+- **`Navbar.jsx`** — navbar de las pantallas de jugador (las 6 de `/gestorTorneos/*` más `EquipoDetalle`), incluye la campanita de notificaciones (`NotificationBell.jsx`, ver más arriba). Ver `decisiones.md` (Fase 3) para por qué se extrajo a un componente propio en vez de vivir inline en `GestorTorneos.jsx`.
 - **`AdminHeader.jsx`** — navbar del panel admin, con un dropdown ("Mis Torneos") que se abre por click (no por hover) y se cierra con click afuera, Escape, o al perder el foco — ver `decisiones.md` (Fase 4) y `glosario.md` para el porqué de ese diseño.
+- **`Convocatoria.jsx`** / **`Cancha.jsx`** — contenido de la pestaña "Estrategia" de `EquipoInfo` y la cancha SVG que reutiliza (editable en el asistente, de solo lectura en la vista de la formación guardada). Ver la sección de la pestaña Estrategia más arriba.
