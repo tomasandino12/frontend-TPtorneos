@@ -31,15 +31,30 @@ const NOTAS_MAX_LENGTH = 500;
 
 const PASOS = ["Elegir formación", "Armar el 11 titular", "Banco de suplentes", "Notas y confirmar"];
 
+function filaHorizontal(categoria, indices, y) {
+  return indices.map((_, i) => ({
+    id: `${categoria}-${indices[i]}`,
+    categoria,
+    x: (100 / (indices.length + 1)) * (i + 1),
+    y,
+  }));
+}
+
 function generarPuntos(formacionKey) {
   const conteos = FORMACIONES[formacionKey];
   const puntos = [];
   ORDEN_POSICIONES.forEach((categoria) => {
     const cantidad = conteos[categoria];
-    for (let i = 0; i < cantidad; i++) {
-      const x = (100 / (cantidad + 1)) * (i + 1);
-      puntos.push({ id: `${categoria}-${i}`, categoria, x, y: FILA_Y[categoria] });
+    // El 4-2-3-1 es el único esquema con 5 mediocampistas, y no van todos en
+    // una sola línea: 2 volantes de contención más retrasados y 3 enganches
+    // más adelantados, detrás del delantero central — sin este caso especial
+    // quedaban los 5 amontonados en una fila que no representa la formación.
+    if (categoria === "Mediocampista" && cantidad === 5) {
+      puntos.push(...filaHorizontal(categoria, [0, 1], FILA_Y[categoria] + 12));
+      puntos.push(...filaHorizontal(categoria, [2, 3, 4], FILA_Y[categoria] - 12));
+      return;
     }
+    puntos.push(...filaHorizontal(categoria, Array.from({ length: cantidad }, (_, i) => i), FILA_Y[categoria]));
   });
   return puntos;
 }

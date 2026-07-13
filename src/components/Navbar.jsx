@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { FiAward, FiBarChart2, FiCalendar, FiUsers, FiUser, FiLogOut } from "react-icons/fi";
+import NotificationBell from "./NotificationBell.jsx";
 import "../styles/Navbar.css";
 
 const NAV_ITEMS = [
@@ -51,6 +52,7 @@ export default function Navbar() {
         </ul>
 
         <div className="gt-nav-actions">
+          <NotificationBell />
           {jugador && (
             <div className="gt-user-info">
               <div className="gt-avatar">{initials}</div>

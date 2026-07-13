@@ -1,0 +1,182 @@
+/* Campanita de notificaciones (src/components/NotificationBell.jsx), usada
+   dentro de Navbar.jsx — clases con prefijo notif- para no chocar con las
+   gt- del propio Navbar ni con las de otras pantallas. */
+
+.notif-bell {
+  position: relative;
+}
+
+.notif-bell-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.notif-bell-btn:hover {
+  background-color: var(--color-surface-muted);
+  color: var(--color-ink);
+}
+
+/* react-icons/Feather renderiza un <svg> crudo sin width/height por CSS. En
+   un <button> con display:flex (a diferencia de un <span>, ver
+   .notif-item-icono más abajo, que sí funciona sin esto) ese svg colapsa a
+   width:0 en Chromium — mismo bug ya resuelto para .jugador-expulsar-btn en
+   Equipos.css, acá con el mismo fix. */
+.notif-bell-btn svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+}
+
+.notif-bell-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.notif-bell-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background-color: var(--color-alert);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.notif-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(380px, 90vw);
+  max-height: 420px;
+  overflow-y: auto;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  z-index: var(--z-dropdown);
+}
+
+.notif-panel-header {
+  padding: 0.9rem 1.1rem 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.notif-panel-vacio {
+  padding: 1.5rem 1.1rem;
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.notif-panel-error {
+  padding: 0.75rem;
+}
+
+.notif-panel-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.notif-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.65rem 0.75rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.notif-item:hover {
+  background-color: var(--color-surface-muted);
+}
+
+.notif-item-no-leida {
+  background-color: var(--color-surface-muted);
+}
+
+.notif-item-no-leida:hover {
+  background-color: var(--color-border);
+}
+
+.notif-item-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: var(--color-grass);
+  color: var(--color-pitch);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.notif-item-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.notif-item-mensaje {
+  font-size: 0.88rem;
+  color: var(--color-ink);
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.notif-item-no-leida .notif-item-mensaje {
+  font-weight: 600;
+}
+
+.notif-item-tiempo {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.notif-item-punto {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.6rem;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-pitch);
+  flex-shrink: 0;
+}
+
+@media (max-width: 860px) {
+  .notif-panel {
+    right: -0.5rem;
+  }
+}

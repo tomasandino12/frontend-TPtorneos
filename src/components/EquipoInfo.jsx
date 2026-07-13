@@ -717,7 +717,7 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
   const tabsConfig = [
     { id: "plantel", label: "Plantel", content: plantelTabContent },
     { id: "historial", label: "Historial", content: historialTabContent, hidden: esMiEquipo },
-    { id: "convocatoria", label: "Convocatoria", content: convocatoriaTabContent, hidden: !esMiEquipo },
+    { id: "convocatoria", label: "Estrategia", content: convocatoriaTabContent, hidden: !esMiEquipo },
   ];
 
   return (

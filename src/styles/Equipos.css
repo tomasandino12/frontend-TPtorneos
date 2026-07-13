@@ -594,7 +594,8 @@
 
 .cancha-punto-asignado {
   background-color: var(--cancha-punto-color, var(--color-pitch));
-  color: #fff;
+  color: var(--cancha-punto-texto, #fff);
+  border: 2px solid rgba(0, 0, 0, 0.15);
   box-shadow: var(--shadow-sm);
 }
 

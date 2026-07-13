@@ -7,6 +7,22 @@ const ABREVIATURA_CATEGORIA = {
   Delantero: "DL",
 };
 
+// El color del equipo es arbitrario (elegido por el capitán, o el default
+// del backend al crear el equipo, que hoy es blanco) — no se puede asumir
+// que el texto blanco de la etiqueta siempre contraste bien contra él. Se
+// elige negro o blanco según la luminancia del color de fondo real.
+function colorTextoLegible(hex) {
+  if (typeof hex !== "string") return "#fff";
+  const limpio = hex.replace("#", "");
+  if (![3, 6].includes(limpio.length)) return "#fff";
+  const completo = limpio.length === 3 ? limpio.split("").map((c) => c + c).join("") : limpio;
+  const r = parseInt(completo.slice(0, 2), 16);
+  const g = parseInt(completo.slice(2, 4), 16);
+  const b = parseInt(completo.slice(4, 6), 16);
+  const luminancia = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminancia > 0.6 ? "#16241B" : "#fff";
+}
+
 /**
  * Cancha simplificada (SVG + puntos posicionados por porcentaje) para mostrar
  * los 11 puntos de una formación. La usan tanto el asistente de convocatoria
@@ -26,7 +42,8 @@ export default function Cancha({
   editable = false,
   onClickPunto,
 }) {
-  const color = colorEquipo || "var(--color-pitch)";
+  const color = colorEquipo || "#1F5233";
+  const colorTexto = colorTextoLegible(color);
 
   return (
     <div className="cancha-wrapper">
@@ -46,7 +63,14 @@ export default function Cancha({
         const clase = `cancha-punto${vacio ? " cancha-punto-vacio" : " cancha-punto-asignado"}${
           editable ? " cancha-punto-editable" : ""
         }`;
-        const estilo = { left: `${punto.x}%`, top: `${punto.y}%`, "--cancha-punto-color": color };
+        const estilo = vacio
+          ? { left: `${punto.x}%`, top: `${punto.y}%` }
+          : {
+              left: `${punto.x}%`,
+              top: `${punto.y}%`,
+              "--cancha-punto-color": color,
+              "--cancha-punto-texto": colorTexto,
+            };
         const etiqueta = jugador ? jugador.apellido : ABREVIATURA_CATEGORIA[punto.categoria] ?? "?";
         const tituloVacio = jugador
           ? `${jugador.nombre} ${jugador.apellido}${jugador.esCapitan ? " (Capitán)" : ""}`
