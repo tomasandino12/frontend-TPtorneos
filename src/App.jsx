@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import './App.css'
 
 import InicioSesion from "./pages/InicioSesion.jsx"
@@ -31,6 +32,7 @@ function PrivateRoute({ children }) {
 
 function App() {
   return (
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<InicioSesion />} />
@@ -61,6 +63,7 @@ function App() {
         <Route path="/equipo/:id" element={<PrivateRoute><EquipoDetalle /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
+    </GoogleOAuthProvider>
   )
 }
 

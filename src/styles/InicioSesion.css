@@ -154,6 +154,46 @@
   gap: 0.6rem;
 }
 
+/* El botón real de Google (GoogleLogin) queda invisible pero clickeable,
+   superpuesto exacto sobre el botón visible del sistema de diseño — así el
+   look es el de siempre, pero el click cae sobre el botón de Google de
+   verdad (necesario: Google no permite disparar el flujo de credential con
+   un botón propio ni con un click simulado por JS). */
+/* El wrapper ocupa el 100% del ancho (igual que "Entrar" arriba), y el botón
+   visible de adentro se fuerza también a 100% — por default un <button> no
+   estira solo, queda angosto y pegado a la izquierda (eso es lo que se veía
+   antes de este ajuste). Con los dos en 100%, el botón visible, el wrapper
+   y el overlay invisible miden y quedan alineados exactamente igual. */
+.google-btn-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.google-btn-wrapper button {
+  width: 100%;
+}
+
+.google-btn-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Descendiente, no solo hijo directo: el div real y clickeable que arma
+   Google queda varios niveles adentro, y ese puntual respeta el ancho fijo
+   del prop `width` de <GoogleLogin> en vez de estirarse solo — sin este
+   selector más amplio, el área clickeable real quedaba angosta (320px, el
+   valor del prop) aunque todo lo de arriba ya midiera el 100% del botón
+   visible. Como todo esto es invisible, forzar el ancho de cada div interno
+   no tiene costo visual, solo agranda el área que realmente se puede tocar. */
+.google-btn-overlay div {
+  width: 100% !important;
+}
+
 .auth-bottom-text {
   margin: 0;
   text-align: center;
