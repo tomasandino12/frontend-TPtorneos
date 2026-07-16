@@ -44,7 +44,7 @@ function InicioSesion() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/jugadores/login", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/jugadores/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -97,7 +97,7 @@ function InicioSesion() {
     setEnviandoGoogle(true);
     setGoogleError("");
     try {
-      const response = await fetch("http://localhost:3000/api/jugadores/google-login", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/jugadores/google-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential, ...datosExtra }),

@@ -12,8 +12,12 @@ dist
 dist-ssr
 *.local
 
-# Variables de entorno (Client ID de Google, etc.) — .env.example queda
-# versionado como referencia, .env con los valores reales no.
+# Este proyecto usa pnpm (pnpm-lock.yaml) — no el lockfile de npm
+package-lock.json
+
+# Variables de entorno (Client ID de Google, VITE_API_URL, etc.) —
+# .env.example queda versionado como referencia, .env con los valores
+# reales no.
 .env
 .env.*
 !.env.example
