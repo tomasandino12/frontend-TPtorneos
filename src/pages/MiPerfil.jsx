@@ -27,13 +27,10 @@ function MiPerfil() {
 
     const fetchJugador = async () => {
       try {
-        console.log("Obteniendo datos de jugador con ID:", jugadorId);
         const response = await apiFetch(`/jugadores/${jugadorId}`);
         if (!response.ok) throw new Error("Error al obtener los datos del jugador");
 
         const data = await response.json();
-        console.log("Datos del jugador recibidos:", data);
-
 
         setJugador(data.data);
       } catch (error) {

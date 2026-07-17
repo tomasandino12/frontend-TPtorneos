@@ -7,8 +7,8 @@
 
 .mt-metrics {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 0.75rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
 }
 
 .mt-metric-card {
@@ -19,6 +19,14 @@
   display: flex;
   align-items: center;
   gap: 0.875rem;
+  /* Los items de grid no se achican por debajo de su contenido por defecto
+     ("grid blowout") — sin esto, en mobile la card empuja la grilla entera
+     más ancha que el viewport y aparece scroll horizontal. */
+  min-width: 0;
+}
+
+.mt-metric-card > div {
+  min-width: 0;
 }
 
 .mt-metric-card > svg {
@@ -44,7 +52,7 @@
 /* ── List section ────────────────────────────────────────────────────────── */
 
 .mt-list {
-  padding: 1.5rem;
+  padding: 0.75rem;
   max-width: 1100px;
   margin: 0 auto;
 }
@@ -112,9 +120,10 @@
 
 .mt-controls {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
   gap: 0.75rem;
   margin-bottom: 1.25rem;
-  align-items: flex-end;
 }
 
 .mt-search {
@@ -136,7 +145,7 @@
 
 .mt-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
@@ -333,13 +342,16 @@
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 
-@media (max-width: 900px) {
-  .mt-metrics { grid-template-columns: 1fr 1fr; }
-  .mt-grid { grid-template-columns: 1fr; }
+/* Mobile-first, 3 niveles (igual que el diseño original, redondeado a los
+   breakpoints estándar del proyecto): base = teléfono, MD = tablet, LG =
+   escritorio (grillas completas). */
+@media (min-width: 768px) {
+  .mt-list { padding: 1.5rem; }
+  .mt-metrics { gap: 0.75rem; }
+  .mt-controls { flex-direction: row; align-items: flex-end; }
 }
 
-@media (max-width: 640px) {
-  .mt-list { padding: 0.75rem; }
-  .mt-metrics { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-  .mt-controls { flex-direction: column; align-items: stretch; }
+@media (min-width: 1024px) {
+  .mt-metrics { grid-template-columns: repeat(5, 1fr); }
+  .mt-grid { grid-template-columns: 1fr 1fr; }
 }

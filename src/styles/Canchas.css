@@ -7,8 +7,8 @@
 
 .cn-metrics {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.75rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
 }
 
 .cn-metric-card {
@@ -19,12 +19,20 @@
   display: flex;
   align-items: center;
   gap: 0.875rem;
+  /* Los items de grid no se achican por debajo de su contenido por defecto
+     ("grid blowout") — sin esto, en mobile la card empuja la grilla entera
+     más ancha que el viewport y aparece scroll horizontal. */
+  min-width: 0;
 }
 
 .cn-metric-card > svg {
   font-size: 1.75rem;
   color: var(--color-pitch);
   flex-shrink: 0;
+}
+
+.cn-metric-card > div {
+  min-width: 0;
 }
 
 .cn-metric-value {
@@ -44,7 +52,7 @@
 /* ── Inventario: header (título + buscador/acción) ──────────────────────── */
 
 .cn-inventario {
-  padding: 1.5rem;
+  padding: 0.75rem;
   max-width: 1100px;
   margin: 0 auto;
 }
@@ -73,12 +81,14 @@
 
 .cn-inventario-controls {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
   gap: 0.75rem;
-  align-items: center;
 }
 
 .cn-search {
-  min-width: 220px;
+  min-width: 0;
 }
 
 /* ── Status (loading / error) ───────────────────────────────────────────── */
@@ -96,7 +106,7 @@
 
 .cn-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: 1.25rem;
 }
 
@@ -326,15 +336,18 @@
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 
-@media (max-width: 900px) {
-  .cn-metrics { grid-template-columns: 1fr 1fr; }
+/* Mobile-first, 3 niveles (igual que el diseño original, redondeado a los
+   breakpoints estándar del proyecto): base = teléfono, MD = tablet (2
+   columnas), LG = escritorio (grillas completas). */
+@media (min-width: 768px) {
+  .cn-inventario { padding: 1.5rem; }
+  .cn-metrics { gap: 0.75rem; }
+  .cn-inventario-controls { flex-direction: row; align-items: center; width: auto; }
+  .cn-search { min-width: 220px; }
   .cn-grid { grid-template-columns: 1fr 1fr; }
 }
 
-@media (max-width: 640px) {
-  .cn-inventario { padding: 0.75rem; }
-  .cn-metrics { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-  .cn-inventario-controls { flex-direction: column; align-items: stretch; width: 100%; }
-  .cn-search { min-width: 0; }
-  .cn-grid { grid-template-columns: 1fr; }
+@media (min-width: 1024px) {
+  .cn-metrics { grid-template-columns: repeat(4, 1fr); }
+  .cn-grid { grid-template-columns: repeat(3, 1fr); }
 }

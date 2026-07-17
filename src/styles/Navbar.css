@@ -20,7 +20,8 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  padding: 0.85rem 2rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem;
 }
 
 .gt-logo {
@@ -44,6 +45,9 @@
   padding: 0;
   flex: 1;
   flex-wrap: wrap;
+  order: 3;
+  width: 100%;
+  justify-content: center;
 }
 
 .gt-navlinks a {
@@ -110,6 +114,7 @@
 }
 
 .gt-user-email {
+  display: none;
   color: var(--color-muted);
   font-size: 0.75rem;
   white-space: nowrap;
@@ -144,19 +149,21 @@
   box-shadow: var(--focus-ring);
 }
 
-@media (max-width: 860px) {
+/* Mobile-first: por defecto el navbar apila los links debajo y oculta el
+   email; a partir de LG (escritorio) vuelve a la barra en una sola línea. */
+@media (min-width: 1024px) {
   .gt-navbar-inner {
-    flex-wrap: wrap;
-    padding: 0.75rem 1rem;
+    flex-wrap: nowrap;
+    padding: 0.85rem 2rem;
   }
 
   .gt-navlinks {
-    order: 3;
-    width: 100%;
-    justify-content: center;
+    order: 0;
+    width: auto;
+    justify-content: flex-start;
   }
 
   .gt-user-email {
-    display: none;
+    display: revert;
   }
 }

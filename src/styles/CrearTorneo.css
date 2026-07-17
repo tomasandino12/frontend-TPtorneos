@@ -8,8 +8,9 @@
 
 .ct-main {
   display: flex;
+  flex-direction: column;
   gap: 1.5rem;
-  padding: 1.5rem;
+  padding: 0.75rem;
   align-items: flex-start;
   max-width: 1100px;
   margin: 0 auto;
@@ -18,19 +19,23 @@
 /* ── Form card (contenedor de superficie viene de <Card>) ─────────────────── */
 
 .ct-form-card {
-  flex: 3;
+  flex: unset;
+  width: 100%;
 }
 
 .ct-form-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 0.5rem;
   margin-bottom: 1.5rem;
   padding-bottom: 1.125rem;
   border-bottom: 1px solid var(--color-border);
 }
 
 .ct-form-header h2 {
+  min-width: 0;
   margin: 0 0 0.25rem 0;
   font-size: 1.125rem;
   font-weight: 700;
@@ -73,18 +78,15 @@
 
 .ct-field-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
-}
-
-.ct-field-row.ct-field-row-2 {
-  grid-template-columns: 1fr 1fr;
 }
 
 /* ── Format pills ────────────────────────────────────────────────────────── */
 
 .ct-pill-group {
   display: flex;
+  flex-direction: column;
   gap: 0.5rem;
 }
 
@@ -136,14 +138,9 @@
 /* ── Summary card (contenedor de superficie viene de <Card>) ──────────────── */
 
 .ct-summary-card {
-  flex: 2;
-  position: sticky;
-  /* Igual que antes de la Fase 4, esto sigue acoplado a la altura real del
-     navbar admin (.navbar en IndexStyle.css/MenuAdmin.css) — no hay forma de
-     referenciarla sin una variable dedicada. Medido en el navbar actual
-     (~70px): se corrigió acá un valor (1.5rem) que quedaba por debajo de esa
-     altura y hacía que la tarjeta se metiera debajo del navbar al scrollear. */
-  top: 5rem;
+  flex: unset;
+  width: 100%;
+  position: static;
 }
 
 .ct-summary-title {
@@ -193,14 +190,31 @@
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 
-@media (max-width: 900px) {
-  .ct-main { flex-direction: column; }
-  .ct-form-card, .ct-summary-card { flex: unset; width: 100%; }
-  .ct-summary-card { position: static; }
+/* Mobile-first: por defecto todo apilado y compacto; a partir de MD vuelven
+   los field-rows de varias columnas y las pills en fila (breakpoint
+   redondeado de 640px a 768px); a partir de LG el layout pasa a dos
+   columnas lado a lado con el resumen pegajoso (redondeado de 900px a
+   1024px). */
+@media (min-width: 768px) {
+  .ct-main { padding: 1.5rem; }
+  .ct-field-row { grid-template-columns: 1fr 1fr 1fr; }
+  .ct-field-row.ct-field-row-2 { grid-template-columns: 1fr 1fr; }
+  .ct-pill-group { flex-direction: row; }
 }
 
-@media (max-width: 640px) {
-  .ct-main { padding: 0.75rem; }
-  .ct-field-row { grid-template-columns: 1fr; }
-  .ct-pill-group { flex-direction: column; }
+@media (min-width: 1024px) {
+  .ct-main { flex-direction: row; }
+  .ct-form-card { flex: 3; width: auto; }
+  .ct-summary-card {
+    flex: 2;
+    width: auto;
+    position: sticky;
+    /* Igual que antes de la Fase 4, esto sigue acoplado a la altura real del
+       navbar admin (.navbar en IndexStyle.css/MenuAdmin.css) — no hay forma
+       de referenciarla sin una variable dedicada. Medido en el navbar actual
+       (~70px): se corrigió acá un valor (1.5rem) que quedaba por debajo de
+       esa altura y hacía que la tarjeta se metiera debajo del navbar al
+       scrollear. */
+    top: 5rem;
+  }
 }

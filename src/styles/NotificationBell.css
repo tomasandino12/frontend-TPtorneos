@@ -62,7 +62,7 @@
 .notif-panel {
   position: absolute;
   top: calc(100% + 10px);
-  right: 0;
+  right: -0.5rem;
   width: min(380px, 90vw);
   max-height: 420px;
   overflow-y: auto;
@@ -175,8 +175,10 @@
   flex-shrink: 0;
 }
 
-@media (max-width: 860px) {
+/* Mobile-first: por defecto el panel se corre un poco para no salirse del
+   viewport angosto; a partir de LG se alinea justo con el ícono. */
+@media (min-width: 1024px) {
   .notif-panel {
-    right: -0.5rem;
+    right: 0;
   }
 }

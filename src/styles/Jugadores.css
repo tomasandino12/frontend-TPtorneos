@@ -19,9 +19,10 @@
 
 .jg-search-meta {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
+  gap: 0.25rem;
   margin-top: 0.5rem;
   font-size: 0.8125rem;
 }
@@ -39,7 +40,7 @@
 /* ── List section ────────────────────────────────────────────────────────── */
 
 .jg-list {
-  padding: 1.5rem;
+  padding: 0.75rem;
   max-width: 1100px;
   margin: 0 auto;
 }
@@ -76,14 +77,14 @@
   font-weight: 700;
   font-size: 0.8125rem;
   text-align: left;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.625rem;
 }
 
 .jg-table td {
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.625rem;
   border-top: 1px solid var(--color-border);
   color: var(--color-ink);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
 }
 
 .jg-table-row-clickable {
@@ -108,7 +109,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  padding: 3rem 1.5rem;
+  padding: 2rem 1rem;
 }
 
 .jg-empty-icon-wrap {
@@ -319,9 +320,12 @@
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 
-@media (max-width: 640px) {
-  .jg-list { padding: 0.75rem; }
-  .jg-search-meta { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
-  .jg-table th, .jg-table td { padding: 0.5rem 0.625rem; font-size: 0.8125rem; }
-  .jg-empty-state { padding: 2rem 1rem; }
+/* Mobile-first: por defecto todo compacto; a partir de MD vuelve al tamaño
+   de escritorio original (breakpoint redondeado de 640px a 768px). */
+@media (min-width: 768px) {
+  .jg-list { padding: 1.5rem; }
+  .jg-search-meta { flex-direction: row; align-items: baseline; gap: 1rem; }
+  .jg-table th, .jg-table td { padding: 0.75rem 1rem; }
+  .jg-table td { font-size: 0.875rem; }
+  .jg-empty-state { padding: 3rem 1.5rem; }
 }

@@ -6,7 +6,7 @@
 */
 
 .cc-main {
-  padding: 1.5rem;
+  padding: 0.75rem;
   max-width: 700px;
   margin: 0 auto;
 }
@@ -42,7 +42,7 @@
 
 .cc-field-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
@@ -62,7 +62,9 @@
   padding-top: 0.375rem;
 }
 
-@media (max-width: 640px) {
-  .cc-main { padding: 0.75rem; }
-  .cc-field-row { grid-template-columns: 1fr; }
+/* Mobile-first: por defecto una columna y padding chico; a partir de MD el
+   formulario crece al tamaño de escritorio original. */
+@media (min-width: 768px) {
+  .cc-main { padding: 1.5rem; }
+  .cc-field-row { grid-template-columns: 1fr 1fr; }
 }

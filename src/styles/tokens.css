@@ -6,6 +6,25 @@
   (.stat-numeral): no define estilos de `body`/elementos globales, para que
   importarlo no cambie el aspecto de ninguna pantalla existente todavía.
   Las pantallas se migran en fases posteriores consumiendo estas variables.
+
+  ---- Breakpoints (mobile-first) ----
+  Todo el CSS del proyecto se escribe mobile-first: las reglas sin @media
+  son el layout de teléfono, y los @media siempre usan min-width para ir
+  agrandando la pantalla — nunca max-width. Los 3 breakpoints estándar son:
+
+    SM:  480px  (teléfono grande / ajustes menores de tamaño de texto y padding)
+    MD:  768px  (tablet — grillas de 2 columnas, formularios en fila)
+    LG: 1024px  (escritorio — layouts completos, navbar en una sola línea)
+
+  CSS todavía no permite usar custom properties dentro de un @media (min-width: var(--bp-md))
+  sin un plugin extra de PostCSS, así que estos valores se documentan acá
+  como referencia y se repiten como número literal en cada archivo — no
+  hace falta agregar una dependencia nueva solo para esto. Ejemplo de uso:
+
+    .algo { flex-direction: column; }        // por defecto: mobile
+    @media (min-width: 768px) {              // MD y más grande
+      .algo { flex-direction: row; }
+    }
 */
 
 :root {

@@ -31,7 +31,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 20;
+  z-index: var(--z-modal);
 }
 
 .formulario-crear-equipo {

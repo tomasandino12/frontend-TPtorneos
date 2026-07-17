@@ -10,7 +10,7 @@
 
 .auth-grid-2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1.1rem;
 }
 
@@ -18,8 +18,12 @@
   grid-column: 1 / -1;
 }
 
-@media (max-width: 640px) {
+/* Mobile-first: por defecto una columna; a partir de MD se arma la grilla
+   de 2 columnas original (se redondeó el breakpoint original de 640px a
+   768px, el estándar MD del proyecto, para no apretar la grilla de 2
+   columnas en anchos intermedios tipo tablet chica). */
+@media (min-width: 768px) {
   .auth-grid-2 {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 }

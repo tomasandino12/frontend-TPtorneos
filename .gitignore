@@ -34,3 +34,8 @@ package-lock.json
 *.sw?
 
 CLAUDE.md
+
+# Salida de los tests automatizados
+coverage
+playwright-report
+test-results

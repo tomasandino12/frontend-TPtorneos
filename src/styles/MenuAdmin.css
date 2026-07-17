@@ -26,23 +26,40 @@
   color: var(--color-surface);
 }
 
-/* Responsive del navbar admin (antes no tenía ningún @media: con 4 botones +
-   avatar + logout se recortaba en viewports angostos). */
-@media (max-width: 900px) {
+/* Responsive del navbar admin, mobile-first: por defecto (4 botones + avatar
+   + logout no entran en una fila angosta) los links se apilan debajo del
+   logo; a partir de LG vuelven a la barra en una sola línea. */
+.navdiv {
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+}
+
+.navlinks {
+  order: 3;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.nav-actions {
+  order: 2;
+}
+
+@media (min-width: 1024px) {
   .navdiv {
-    flex-wrap: wrap;
-    row-gap: 0.5rem;
+    flex-wrap: nowrap;
+    row-gap: 0;
   }
 
   .navlinks {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
+    order: 0;
+    width: auto;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
   }
 
   .nav-actions {
-    order: 2;
+    order: 0;
   }
 }
 
