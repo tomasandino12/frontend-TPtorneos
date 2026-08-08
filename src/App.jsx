@@ -49,6 +49,7 @@ function App() {
         <Route path="/menu-admin" element={<AdminRoute><MenuAdmin /></AdminRoute>} />
         <Route path="/admin/torneos" element={<AdminRoute><MisTorneos /></AdminRoute>} />
         <Route path="/admin/torneos/nuevo" element={<AdminRoute><CrearTorneo /></AdminRoute>} />
+        <Route path="/admin/torneos/:id/editar" element={<AdminRoute><CrearTorneo /></AdminRoute>} />
         <Route path="/admin/torneos/:id/equipos" element={<AdminRoute><InscribirEquipos /></AdminRoute>} />
         <Route path="/admin/arbitros" element={<AdminRoute><Arbitros /></AdminRoute>} />
         <Route path="/admin/canchas" element={<AdminRoute><Canchas /></AdminRoute>} />

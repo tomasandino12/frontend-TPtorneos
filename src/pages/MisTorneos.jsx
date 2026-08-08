@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { FiAward, FiEdit2, FiCheckCircle, FiUsers, FiSearch, FiPlus, FiTrash2 } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
-import { Button, TextField, Card, PageShell, PageHero } from "../components/ui";
+import { Button, TextField, Card, PageShell, PageHero, Modal, Alert } from "../components/ui";
 
 // estado backend → etiqueta UI
 const ESTADO_LABEL = {
@@ -61,6 +61,9 @@ export default function MisTorneos() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("Todos");
   const [search, setSearch] = useState("");
+  const [torneoAEliminar, setTorneoAEliminar] = useState(null); // torneo (mapeado) seleccionado para borrar, o null si el modal está cerrado
+  const [eliminando, setEliminando] = useState(false);
+  const [errorEliminar, setErrorEliminar] = useState("");
 
   useEffect(() => {
     const stored = localStorage.getItem("admin");
@@ -93,17 +96,25 @@ export default function MisTorneos() {
     }
   }
 
-  async function handleEliminar(torneoId) {
-    if (!confirm("¿Seguro que querés eliminar este torneo?")) return;
+  function cerrarModalEliminar() {
+    setTorneoAEliminar(null);
+    setErrorEliminar("");
+  }
+
+  async function confirmarEliminar() {
+    if (!torneoAEliminar) return;
+    setEliminando(true);
+    setErrorEliminar("");
     try {
-      const res = await adminApiFetch(`/torneo/${torneoId}`, { method: "DELETE" });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || "Error al eliminar");
-      }
-      setTorneos((prev) => prev.filter((t) => t.id !== torneoId));
+      const res = await adminApiFetch(`/torneo/${torneoAEliminar.id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "No se pudo eliminar el torneo. Intentá de nuevo.");
+      setTorneos((prev) => prev.filter((t) => t.id !== torneoAEliminar.id));
+      setTorneoAEliminar(null);
     } catch (e) {
-      alert(e.message);
+      setErrorEliminar(e.message);
+    } finally {
+      setEliminando(false);
     }
   }
 
@@ -256,7 +267,10 @@ export default function MisTorneos() {
                           >
                             Equipos
                           </Button>
-                          <button className="mt-btn-trash" onClick={() => handleEliminar(torneo.id)}>
+                          <button className="mt-btn-edit" onClick={() => navigate(`/admin/torneos/${torneo.id}/editar`)}>
+                            <FiEdit2 />
+                          </button>
+                          <button className="mt-btn-trash" onClick={() => setTorneoAEliminar(torneo)}>
                             <FiTrash2 />
                           </button>
                         </>
@@ -270,7 +284,10 @@ export default function MisTorneos() {
                           >
                             Agregar equipos
                           </Button>
-                          <button className="mt-btn-trash" onClick={() => handleEliminar(torneo.id)}>
+                          <button className="mt-btn-edit" onClick={() => navigate(`/admin/torneos/${torneo.id}/editar`)}>
+                            <FiEdit2 />
+                          </button>
+                          <button className="mt-btn-trash" onClick={() => setTorneoAEliminar(torneo)}>
                             <FiTrash2 />
                           </button>
                         </>
@@ -284,7 +301,10 @@ export default function MisTorneos() {
                           >
                             Agregar equipos
                           </Button>
-                          <button className="mt-btn-trash" onClick={() => handleEliminar(torneo.id)}>
+                          <button className="mt-btn-edit" onClick={() => navigate(`/admin/torneos/${torneo.id}/editar`)}>
+                            <FiEdit2 />
+                          </button>
+                          <button className="mt-btn-trash" onClick={() => setTorneoAEliminar(torneo)}>
                             <FiTrash2 />
                           </button>
                         </>
@@ -299,7 +319,10 @@ export default function MisTorneos() {
                           >
                             Ver resumen
                           </Button>
-                          <button className="mt-btn-trash" onClick={() => handleEliminar(torneo.id)}>
+                          <button className="mt-btn-edit" onClick={() => navigate(`/admin/torneos/${torneo.id}/editar`)}>
+                            <FiEdit2 />
+                          </button>
+                          <button className="mt-btn-trash" onClick={() => setTorneoAEliminar(torneo)}>
                             <FiTrash2 />
                           </button>
                         </>
@@ -326,6 +349,27 @@ export default function MisTorneos() {
         </section>
         </PageHero>
       </PageShell>
+
+      <Modal open={!!torneoAEliminar} onClose={cerrarModalEliminar} title="Eliminar torneo">
+        {torneoAEliminar && (
+          <div className="mt-modal-eliminar">
+            <p>
+              ¿Eliminar &quot;{torneoAEliminar.nombre}&quot;? Se eliminarán también sus{" "}
+              {torneoAEliminar.equipos.actual} equipo(s) inscripto(s) y sus{" "}
+              {torneoAEliminar.partidos.actual} partido(s) asociado(s). Esta acción no se puede deshacer.
+            </p>
+            {errorEliminar && <Alert variant="error">{errorEliminar}</Alert>}
+            <div className="mt-modal-eliminar-actions">
+              <Button variant="secondary" onClick={cerrarModalEliminar} disabled={eliminando}>
+                Cancelar
+              </Button>
+              <Button variant="danger" onClick={confirmarEliminar} disabled={eliminando}>
+                {eliminando ? "Eliminando..." : "Eliminar definitivamente"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       <footer className="footer">
         <h5>

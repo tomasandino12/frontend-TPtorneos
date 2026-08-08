@@ -270,6 +270,28 @@
   flex: 1;
 }
 
+.mt-btn-edit {
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.mt-btn-edit:hover {
+  background: var(--color-surface-muted);
+}
+
+.mt-btn-edit:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
 .mt-btn-trash {
   padding: 0.5rem 0.625rem;
   border: 1px solid var(--color-error-bg);
@@ -338,6 +360,21 @@
 .mt-card-new-sub {
   font-size: 0.8125rem;
   color: var(--color-muted);
+}
+
+/* ── Modal de eliminar torneo ────────────────────────────────────────────── */
+
+.mt-modal-eliminar p {
+  margin: 0 0 1rem;
+  color: var(--color-ink);
+  line-height: 1.5;
+}
+
+.mt-modal-eliminar-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */

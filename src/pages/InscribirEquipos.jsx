@@ -27,8 +27,15 @@ export default function InscribirEquipos() {
   const [seleccionados, setSeleccionados] = useState(new Set());
   const [search, setSearch] = useState("");
 
-  // Tabs: 'equipos' | 'arbitros' | 'canchas'
+  // Tabs: 'equipos' | 'arbitros' | 'canchas' | 'partidos'
   const [tabActiva, setTabActiva] = useState("equipos");
+
+  // Partidos del torneo (tab "Partidos") y edición de resultado en curso.
+  const [partidos, setPartidos] = useState([]);
+  const [resultados, setResultados] = useState({}); // { [partidoId]: { goles_local, goles_visitante } }
+  const [guardandoResultadoId, setGuardandoResultadoId] = useState(null);
+  const [errorPartidos, setErrorPartidos] = useState("");
+  const [okPartidos, setOkPartidos] = useState("");
 
   // Árbitros/canchas del sistema (para elegir) y los ya asignados a ESTE torneo
   const [canchas, setCanchas] = useState([]);
@@ -73,22 +80,24 @@ export default function InscribirEquipos() {
     setPageLoading(true);
     setPageError("");
     try {
-      const [resTorneo, resEquipos, resCanchas, resArbitros, resCanchasTorneo, resArbitrosTorneo] = await Promise.all([
+      const [resTorneo, resEquipos, resCanchas, resArbitros, resCanchasTorneo, resArbitrosTorneo, resPartidos] = await Promise.all([
         adminApiFetch(`/torneo/${torneoId}`),
         adminApiFetch("/equipos"),
         adminApiFetch("/canchas"),
         adminApiFetch("/arbitros"),
         adminApiFetch(`/torneo/${torneoId}/canchas`),
         adminApiFetch(`/torneo/${torneoId}/arbitros`),
+        adminApiFetch(`/partidos/torneo/${torneoId}`),
       ]);
 
-      const [dTorneo, dEquipos, dCanchas, dArbitros, dCanchasTorneo, dArbitrosTorneo] = await Promise.all([
+      const [dTorneo, dEquipos, dCanchas, dArbitros, dCanchasTorneo, dArbitrosTorneo, dPartidos] = await Promise.all([
         resTorneo.json(),
         resEquipos.json(),
         resCanchas.json(),
         resArbitros.json(),
         resCanchasTorneo.json(),
         resArbitrosTorneo.json(),
+        resPartidos.json(),
       ]);
 
       if (!resTorneo.ok) throw new Error(dTorneo.message || "Error al cargar el torneo");
@@ -112,6 +121,7 @@ export default function InscribirEquipos() {
 
       setCanchas(dCanchas.data || []);
       setArbitros(dArbitros.data || []);
+      setPartidos(dPartidos.data || []);
 
       // Preseleccionar lo que ya esté asignado a este torneo (no todo el sistema)
       const idsCanchasAsignadas = new Set((dCanchasTorneo.data || []).map((c) => c.id));
@@ -198,6 +208,51 @@ export default function InscribirEquipos() {
       const res = await adminApiFetch(`/torneo/${torneoId}`);
       const data = await res.json();
       if (res.ok) setTorneo(data.data);
+    }
+  }
+
+  function actualizarResultadoLocal(partidoId, campo, valor) {
+    setResultados((prev) => ({
+      ...prev,
+      [partidoId]: { ...(prev[partidoId] ?? {}), [campo]: valor },
+    }));
+  }
+
+  async function guardarResultado(partidoId) {
+    const partidoActual = partidos.find((p) => p.id === partidoId);
+    const r = resultados[partidoId] ?? {
+      goles_local: partidoActual?.goles_local ?? 0,
+      goles_visitante: partidoActual?.goles_visitante ?? 0,
+    };
+
+    setErrorPartidos("");
+    setOkPartidos("");
+    setGuardandoResultadoId(partidoId);
+    try {
+      const res = await adminApiFetch(`/partidos/${partidoId}/resultado`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          goles_local: Number(r.goles_local),
+          goles_visitante: Number(r.goles_visitante),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "No se pudo guardar el resultado.");
+
+      setPartidos((prev) =>
+        prev.map((p) =>
+          p.id === partidoId
+            ? { ...p, goles_local: data.data.goles_local, goles_visitante: data.data.goles_visitante, estado_partido: data.data.estado_partido }
+            : p
+        )
+      );
+      const nombreLocal = partidoActual?.local?.equipo?.nombreEquipo ?? "Local";
+      const nombreVisitante = partidoActual?.visitante?.equipo?.nombreEquipo ?? "Visitante";
+      setOkPartidos(`Resultado de "${nombreLocal} vs ${nombreVisitante}" guardado.`);
+    } catch (e) {
+      setErrorPartidos(e.message);
+    } finally {
+      setGuardandoResultadoId(null);
     }
   }
 
@@ -334,6 +389,7 @@ export default function InscribirEquipos() {
                 { key: "equipos", label: "Equipos" },
                 { key: "arbitros", label: "Árbitros" },
                 { key: "canchas", label: "Canchas" },
+                { key: "partidos", label: "Partidos" },
               ].map((t) => (
                 <button
                   key={t.key}
@@ -499,6 +555,75 @@ export default function InscribirEquipos() {
                 </>
               );
             })()}
+
+            {tabActiva === "partidos" && (
+              <>
+                <div className="ie-panel-header">
+                  <div>
+                    <h2>Partidos</h2>
+                    <p>Cargá el resultado de cada partido jugado</p>
+                  </div>
+                  <span className="ie-badge-count">{partidos.length} partido(s)</span>
+                </div>
+
+                {errorPartidos && <Alert variant="error" className="ie-alert">{errorPartidos}</Alert>}
+                {okPartidos && <Alert variant="success" className="ie-alert">{okPartidos}</Alert>}
+
+                {partidos.length === 0 ? (
+                  <p className="ie-list-empty">
+                    Todavía no se generó el fixture de este torneo — no hay partidos para cargar resultado.
+                  </p>
+                ) : (
+                  <div className="ie-partidos-list">
+                    {partidos.map((p) => {
+                      const r = resultados[p.id] ?? {
+                        goles_local: p.goles_local ?? 0,
+                        goles_visitante: p.goles_visitante ?? 0,
+                      };
+                      return (
+                        <div key={p.id} className="ie-partido-row">
+                          <div className="ie-partido-info">
+                            <span className="ie-partido-jornada">Jornada {p.jornada}</span>
+                            <span className="ie-partido-equipos">
+                              {p.local?.equipo?.nombreEquipo ?? "Local"} vs {p.visitante?.equipo?.nombreEquipo ?? "Visitante"}
+                            </span>
+                            <span className={`ie-partido-estado ie-partido-estado-${p.estado_partido}`}>
+                              {p.estado_partido}
+                            </span>
+                          </div>
+                          <div className="ie-partido-resultado">
+                            <input
+                              type="number"
+                              min={0}
+                              className="ie-partido-goles"
+                              value={r.goles_local}
+                              onChange={(e) => actualizarResultadoLocal(p.id, "goles_local", e.target.value)}
+                              aria-label={`Goles de ${p.local?.equipo?.nombreEquipo ?? "local"}`}
+                            />
+                            <span className="ie-partido-guion">–</span>
+                            <input
+                              type="number"
+                              min={0}
+                              className="ie-partido-goles"
+                              value={r.goles_visitante}
+                              onChange={(e) => actualizarResultadoLocal(p.id, "goles_visitante", e.target.value)}
+                              aria-label={`Goles de ${p.visitante?.equipo?.nombreEquipo ?? "visitante"}`}
+                            />
+                            <Button
+                              variant="secondary"
+                              disabled={guardandoResultadoId === p.id}
+                              onClick={() => guardarResultado(p.id)}
+                            >
+                              {guardandoResultadoId === p.id ? "Guardando..." : "Guardar"}
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
           {/* ── Sidebar ────────────────────────────────────────────────── */}

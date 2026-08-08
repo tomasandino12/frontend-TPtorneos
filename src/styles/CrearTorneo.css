@@ -188,6 +188,31 @@
   margin-top: 1.25rem;
 }
 
+/* ── Modal de cascada al extender fecha fin ─────────────────────────────── */
+
+.ct-modal-cascada p {
+  margin: 0 0 0.75rem;
+  color: var(--color-ink);
+  line-height: 1.5;
+}
+
+.ct-modal-cascada-lista {
+  margin: 0 0 0.75rem;
+  padding-left: 1.25rem;
+  color: var(--color-ink);
+}
+
+.ct-modal-cascada-warning {
+  font-weight: 600;
+}
+
+.ct-modal-cascada-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 
 /* Mobile-first: por defecto todo apilado y compacto; a partir de MD vuelven

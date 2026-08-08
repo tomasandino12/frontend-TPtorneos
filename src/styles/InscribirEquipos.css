@@ -264,6 +264,54 @@
 }
 .ie-check-item input[type="checkbox"] { accent-color: var(--color-turf); }
 
+/* ── Tab Partidos (carga de resultado) ──────────────────────────────── */
+.ie-partidos-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.ie-partido-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+.ie-partido-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+}
+.ie-partido-jornada { color: var(--color-muted); }
+.ie-partido-equipos { font-weight: 600; color: var(--color-ink); }
+.ie-partido-estado {
+  margin-left: auto;
+  padding: 0.15rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  text-transform: capitalize;
+  background: var(--color-surface-muted);
+  color: var(--color-muted);
+}
+.ie-partido-estado-jugado {
+  background: var(--color-success-bg);
+  color: var(--color-pitch);
+}
+.ie-partido-resultado {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.ie-partido-goles {
+  width: 3.5rem;
+  padding: 0.4rem;
+  text-align: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-variant-numeric: tabular-nums;
+}
+.ie-partido-guion { color: var(--color-muted); }
+
 /* Mobile-first: por defecto una sola columna apilada; a partir de MD se
    arma el layout de dos columnas (contenido + panel lateral de 340px). */
 @media (min-width: 768px) {
