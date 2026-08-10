@@ -32,6 +32,10 @@ const ORDEN_POSICIONES = ["Arquero", "Defensor", "Mediocampista", "Delantero"];
 
 const JUGADORES_SIN_EQUIPO_PAGE_SIZE = 10;
 const MAX_JUGADORES_PLANTEL = 26;
+// Copia del MIN_JUGADORES_PLANTEL_TORNEO del backend (shared/constants.ts) —
+// si un equipo cae por debajo, se lo da de baja automáticamente de sus
+// torneos en_curso (ver equipo.controler.ts, procesarBajaAutomaticaSiCorresponde).
+const MIN_JUGADORES_PLANTEL_TORNEO = 15;
 const DESCRIPCION_MAX_LENGTH = 300;
 
 // Mismo criterio en todo el archivo (plantel y detalle de jugador al agregar):
@@ -515,6 +519,17 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
         </span>
         <span className="plantel-cupo-label">jugadores en el plantel</span>
       </div>
+
+      {equipo.jugadores.length < MIN_JUGADORES_PLANTEL_TORNEO ? (
+        <Alert variant="warning" className="plantel-minimo-alert">
+          Mínimo {MIN_JUGADORES_PLANTEL_TORNEO} para participar en torneos — faltan{" "}
+          {MIN_JUGADORES_PLANTEL_TORNEO - equipo.jugadores.length} jugador(es).
+        </Alert>
+      ) : (
+        <p className="plantel-minimo-label">
+          Mínimo {MIN_JUGADORES_PLANTEL_TORNEO} para participar en torneos.
+        </p>
+      )}
 
       {equipo.jugadores.length > 0 ? (
         gruposPorPosicion.map((grupo) => (

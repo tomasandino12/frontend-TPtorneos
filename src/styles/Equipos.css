@@ -362,6 +362,16 @@
   font-size: 0.9rem;
 }
 
+.plantel-minimo-label {
+  margin: -1rem 0 1.5rem;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.plantel-minimo-alert {
+  margin-bottom: 1.5rem;
+}
+
 /* Edad + ícono de "echar del equipo" del lado derecho de cada fila */
 .jugador-plantel-acciones {
   display: flex;
