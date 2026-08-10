@@ -10,7 +10,10 @@ import { Button, TextField, Card, Alert, PageShell, PageHero, Modal } from "../c
 
 const FORMATOS = ["Solo ida", "Ida y vuelta"];
 
-const CATEGORIAS = [
+// Exportado: es la misma lista de categorías del dominio (equipos y torneos
+// comparten el mismo enum) que reutiliza Equipos.jsx para el <select> de
+// categoría al crear un equipo — evita una tercera copia de estos 5 valores.
+export const CATEGORIAS = [
   { value: "sub15",     label: "Sub-15" },
   { value: "sub17",     label: "Sub-17" },
   { value: "mayores",   label: "Mayores (+18)" },

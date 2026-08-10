@@ -174,8 +174,15 @@ function FixtureTorneo() {
               </div>
 
               <h3>
-                {partido.local?.equipo?.nombreEquipo || "Equipo Local"} vs{" "}
+                {partido.local?.equipo?.nombreEquipo || "Equipo Local"}
+                {partido.local?.estado_participacion === "dado_de_baja" && (
+                  <span className="fixture-baja-tag"> (Baja)</span>
+                )}{" "}
+                vs{" "}
                 {partido.visitante?.equipo?.nombreEquipo || "Equipo Visitante"}
+                {partido.visitante?.estado_participacion === "dado_de_baja" && (
+                  <span className="fixture-baja-tag"> (Baja)</span>
+                )}
               </h3>
 
               <div className="fixture-detalles">

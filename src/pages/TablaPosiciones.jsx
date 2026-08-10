@@ -113,7 +113,12 @@ useEffect(() => {
               {estadisticas.map((est) => (
                 <tr key={est.id} onClick={() => handleEquipoClick(est.id)} className="fila-clickeable">
                   <td className="stat-numeral">{est.posicion}</td>
-                  <td>{est.nombreEquipo}</td>
+                  <td>
+                    {est.nombreEquipo}
+                    {est.estadoParticipacion === "dado_de_baja" && (
+                      <span className="tabla-baja-tag"> (Baja)</span>
+                    )}
+                  </td>
                   <td className="stat-numeral">{est.pj}</td>
                   <td className="stat-numeral positivo">{est.pg}</td>
                   <td className="stat-numeral">{est.pe}</td>

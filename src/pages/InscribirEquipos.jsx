@@ -242,7 +242,7 @@ export default function InscribirEquipos() {
       setPartidos((prev) =>
         prev.map((p) =>
           p.id === partidoId
-            ? { ...p, goles_local: data.data.goles_local, goles_visitante: data.data.goles_visitante, estado_partido: data.data.estado_partido }
+            ? { ...p, goles_local: data.data.goles_local, goles_visitante: data.data.goles_visitante, estado_partido: data.data.estado_partido, walkover: false }
             : p
         )
       );
@@ -350,7 +350,10 @@ export default function InscribirEquipos() {
   const totalInscriptos = torneo?.participaciones?.length ?? inscriptos.size;
   const cuposRestantes = torneo ? (torneo.cantidadEquipos - totalInscriptos) : "—";
   const categoriaLabel = LABEL_CATEGORIA[torneo?.categoria] ?? torneo?.categoria ?? "—";
-  const fixtureYaGenerado = torneo?.estado === "en_curso";
+  // Antes usaba torneo?.estado === "en_curso" — un torneo puede llegar a
+  // en_curso sin tener partidos (ver validación agregada en update() del
+  // backend), así que la única fuente confiable es si hay Partidos de verdad.
+  const fixtureYaGenerado = partidos.length > 0;
 
   return (
     <div className="layout">
@@ -585,8 +588,12 @@ export default function InscribirEquipos() {
                           <div className="ie-partido-info">
                             <span className="ie-partido-jornada">Jornada {p.jornada}</span>
                             <span className="ie-partido-equipos">
-                              {p.local?.equipo?.nombreEquipo ?? "Local"} vs {p.visitante?.equipo?.nombreEquipo ?? "Visitante"}
+                              {p.local?.equipo?.nombreEquipo ?? "Local"}
+                              {p.local?.estado_participacion === "dado_de_baja" && " (Baja)"} vs{" "}
+                              {p.visitante?.equipo?.nombreEquipo ?? "Visitante"}
+                              {p.visitante?.estado_participacion === "dado_de_baja" && " (Baja)"}
                             </span>
+                            {p.walkover && <span className="ie-partido-wo">W.O.</span>}
                             <span className={`ie-partido-estado ie-partido-estado-${p.estado_partido}`}>
                               {p.estado_partido}
                             </span>

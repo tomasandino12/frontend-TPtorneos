@@ -85,3 +85,9 @@
 .puntos {
   font-size: 1.15rem;
 }
+
+.tabla-baja-tag {
+  color: var(--color-alert);
+  font-weight: 600;
+  font-size: 0.85em;
+}

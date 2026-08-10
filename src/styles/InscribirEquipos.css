@@ -293,7 +293,16 @@
   background: var(--color-surface-muted);
   color: var(--color-muted);
 }
-.ie-partido-estado-jugado {
+.ie-partido-wo {
+  padding: 0.1rem 0.5rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: var(--color-error-bg);
+  color: var(--color-alert);
+}
+.ie-partido-estado-finalizado {
   background: var(--color-success-bg);
   color: var(--color-pitch);
 }

@@ -1,10 +1,11 @@
 import "../styles/IndexStyle.css";
 import "../styles/Equipos.css";
 import { useState, useEffect } from "react";
-import { FiUsers, FiPlus, FiMail, FiCheck, FiX } from "react-icons/fi";
+import { FiUsers, FiPlus, FiMail, FiCheck, FiX, FiTag } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
 import EquipoInfo from "../components/EquipoInfo.jsx";
+import { CATEGORIAS } from "./CrearTorneo.jsx";
 
 function Equipos() {
   const [jugador, setJugador] = useState(null);
@@ -12,6 +13,7 @@ function Equipos() {
   const [nombreEquipo, setNombreEquipo] = useState("");
   const [colorPrimario, setColorPrimario] = useState("#ffffff");
   const [colorSecundario, setColorSecundario] = useState("#000000");
+  const [categoria, setCategoria] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [crearFeedback, setCrearFeedback] = useState(null);
   const [salirFeedback, setSalirFeedback] = useState(null);
@@ -70,8 +72,8 @@ function Equipos() {
   const handleSubmitEquipo = async (e) => {
     e.preventDefault();
 
-    if (!nombreEquipo || !colorPrimario || !colorSecundario) {
-      setCrearFeedback({ variant: "error", text: "Completá todos los campos." });
+    if (!nombreEquipo || !colorPrimario || !colorSecundario || !categoria) {
+      setCrearFeedback({ variant: "error", text: "Completá todos los campos, incluida la categoría." });
       return;
     }
 
@@ -90,6 +92,7 @@ function Equipos() {
           nombreEquipo,
           colorPrimario,
           colorSecundario,
+          categoria,
           descripcion,
           idJugador: jugador.id,
         }),
@@ -109,6 +112,7 @@ function Equipos() {
       setNombreEquipo("");
       setColorPrimario("#ffffff");
       setColorSecundario("#000000");
+      setCategoria("");
       setDescripcion("");
       setMostrarFormulario(false);
       setCrearFeedback({ variant: "success", text: "Equipo creado con éxito." });
@@ -222,6 +226,25 @@ function Equipos() {
                 onChange={(e) => setNombreEquipo(e.target.value)}
                 required
               />
+
+              <div className="ui-field">
+                <label className="ui-field-label" htmlFor="eq-categoria">Categoría</label>
+                <div className="ui-field-control">
+                  <FiTag className="ui-field-icon" />
+                  <select
+                    id="eq-categoria"
+                    className="ui-field-input"
+                    value={categoria}
+                    onChange={(e) => setCategoria(e.target.value)}
+                    required
+                  >
+                    <option value="" disabled>Seleccioná una categoría</option>
+                    {CATEGORIAS.map((c) => (
+                      <option key={c.value} value={c.value}>{c.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
               <div className="color-pickers-grupo">
                 <div className="color-picker-item">
