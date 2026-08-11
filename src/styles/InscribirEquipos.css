@@ -358,11 +358,39 @@
   gap: 0.35rem;
 }
 
-.ie-partido-nota {
-  margin: 0;
-  font-size: 0.78rem;
+.ie-partido-editar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
   color: var(--color-muted);
-  font-style: italic;
+  cursor: pointer;
+}
+.ie-partido-editar-btn:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-ink);
+}
+
+.ie-programacion-editor {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+.ie-programacion-input {
+  padding: 0.4rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+}
+.ie-programacion-error {
+  flex-basis: 100%;
 }
 
 .ie-partido-resultado {
