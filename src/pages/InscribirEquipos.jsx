@@ -3,10 +3,16 @@ import "../styles/MenuAdmin.css";
 import "../styles/InscribirEquipos.css";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FiUsers, FiSearch, FiArrowLeft, FiZap, FiCheck } from "react-icons/fi";
+import { FiUsers, FiSearch, FiArrowLeft, FiZap, FiCheck, FiMapPin, FiUser } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch, ASSETS_URL } from "../utils/api.js";
-import { Button, TextField, Alert, PageShell, PageHero } from "../components/ui";
+import { Button, TextField, Alert, Modal, PageShell, PageHero } from "../components/ui";
+
+// Espejo del mínimo que ya exige el backend (torneo.controler.ts,
+// MIN_ARBITROS_TORNEO/MIN_CANCHAS_TORNEO) — acá solo es refuerzo de UX
+// (deshabilitar la casilla antes de intentar guardar), la validación real
+// sigue siendo del servidor.
+const MIN_ARBITROS_CANCHAS = 3;
 
 const LABEL_CATEGORIA = {
   sub15:     "Sub-15",
@@ -36,6 +42,8 @@ export default function InscribirEquipos() {
   const [guardandoResultadoId, setGuardandoResultadoId] = useState(null);
   const [errorPartidos, setErrorPartidos] = useState("");
   const [okPartidos, setOkPartidos] = useState("");
+  const [jornadaFiltro, setJornadaFiltro] = useState("todas");
+  const [partidoAReeditar, setPartidoAReeditar] = useState(null); // partido finalizado pendiente de confirmar sobreescritura
 
   // Árbitros/canchas del sistema (para elegir) y los ya asignados a ESTE torneo
   const [canchas, setCanchas] = useState([]);
@@ -146,6 +154,29 @@ export default function InscribirEquipos() {
     [equipos, search]
   );
 
+  // Mismo patrón que FixtureTorneo.jsx (vista del jugador) — acá además se
+  // agrupan las filas por jornada para no mostrar la "lista eterna" de todos
+  // los partidos apilados sin ninguna separación visual.
+  const jornadasDisponibles = useMemo(
+    () => [...new Set(partidos.map((p) => p.jornada))].sort((a, b) => a - b),
+    [partidos]
+  );
+  const partidosFiltrados = useMemo(
+    () =>
+      jornadaFiltro === "todas"
+        ? partidos
+        : partidos.filter((p) => p.jornada === Number(jornadaFiltro)),
+    [partidos, jornadaFiltro]
+  );
+  const partidosPorJornada = useMemo(() => {
+    const grupos = new Map();
+    for (const p of partidosFiltrados) {
+      if (!grupos.has(p.jornada)) grupos.set(p.jornada, []);
+      grupos.get(p.jornada).push(p);
+    }
+    return [...grupos.entries()].sort(([a], [b]) => a - b);
+  }, [partidosFiltrados]);
+
   function toggleEquipo(id) {
     if (inscriptos.has(id)) return;
     setSeleccionados((prev) => {
@@ -218,7 +249,7 @@ export default function InscribirEquipos() {
     }));
   }
 
-  async function guardarResultado(partidoId) {
+  async function guardarResultado(partidoId, confirmarReedicion = false) {
     const partidoActual = partidos.find((p) => p.id === partidoId);
     const r = resultados[partidoId] ?? {
       goles_local: partidoActual?.goles_local ?? 0,
@@ -234,9 +265,19 @@ export default function InscribirEquipos() {
         body: JSON.stringify({
           goles_local: Number(r.goles_local),
           goles_visitante: Number(r.goles_visitante),
+          confirmarReedicion,
         }),
       });
       const data = await res.json();
+
+      // El partido ya tenía un resultado y todavía no se confirmó la
+      // sobreescritura (pudo pasar si el estado del frontend quedó
+      // desactualizado) — el flujo normal ya abre el modal antes de llegar
+      // acá (ver handleClickGuardar), esto es solo la defensa de respaldo.
+      if (res.status === 409) {
+        setPartidoAReeditar(partidoActual);
+        return;
+      }
       if (!res.ok) throw new Error(data.message || "No se pudo guardar el resultado.");
 
       setPartidos((prev) =>
@@ -249,11 +290,32 @@ export default function InscribirEquipos() {
       const nombreLocal = partidoActual?.local?.equipo?.nombreEquipo ?? "Local";
       const nombreVisitante = partidoActual?.visitante?.equipo?.nombreEquipo ?? "Visitante";
       setOkPartidos(`Resultado de "${nombreLocal} vs ${nombreVisitante}" guardado.`);
+      setPartidoAReeditar(null);
     } catch (e) {
       setErrorPartidos(e.message);
     } finally {
       setGuardandoResultadoId(null);
     }
+  }
+
+  // Si el partido ya tiene un resultado cargado, primero pide confirmación
+  // (mismo criterio que el backend, ver actualizarResultado en
+  // partido.controler.ts) — evita sobreescribir sin querer.
+  function handleClickGuardar(partido) {
+    if (partido.estado_partido === "finalizado") {
+      setPartidoAReeditar(partido);
+      return;
+    }
+    guardarResultado(partido.id);
+  }
+
+  // Después de reasignar árbitro/cancha en partidos existentes, refresca la
+  // lista de partidos para que la pestaña "Partidos" muestre el cambio sin
+  // recargar la página.
+  async function refrescarPartidos() {
+    const res = await adminApiFetch(`/partidos/torneo/${torneoId}`);
+    const data = await res.json();
+    if (res.ok) setPartidos(data.data || []);
   }
 
   async function handleGuardarArbitros() {
@@ -268,7 +330,13 @@ export default function InscribirEquipos() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Error al guardar los árbitros");
       setArbitrosTorneoIds(new Set(arbitrosSelec));
-      setOkArbitros("Árbitros del torneo actualizados.");
+      const reasignados = data.data?.partidosReasignados ?? [];
+      setOkArbitros(
+        reasignados.length > 0
+          ? `Árbitros actualizados. Se reasignaron ${reasignados.length} partido(s) que tenían un árbitro removido.`
+          : "Árbitros del torneo actualizados."
+      );
+      if (reasignados.length > 0) await refrescarPartidos();
     } catch (e) {
       setErrorArbitros(e.message);
     } finally {
@@ -288,7 +356,13 @@ export default function InscribirEquipos() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Error al guardar las canchas");
       setCanchasTorneoIds(new Set(canchasSelec));
-      setOkCanchas("Canchas del torneo actualizadas.");
+      const reasignadas = data.data?.partidosReasignados ?? [];
+      setOkCanchas(
+        reasignadas.length > 0
+          ? `Canchas actualizadas. Se reasignaron ${reasignadas.length} partido(s) que tenían una cancha removida.`
+          : "Canchas del torneo actualizadas."
+      );
+      if (reasignadas.length > 0) await refrescarPartidos();
     } catch (e) {
       setErrorCanchas(e.message);
     } finally {
@@ -486,6 +560,11 @@ export default function InscribirEquipos() {
                   <span className="ie-badge-count">{arbitrosSelec.size} seleccionado(s)</span>
                 </div>
 
+                <p className="ie-fixture-asignados">
+                  Mínimo {MIN_ARBITROS_CANCHAS} árbitros por torneo — si sacás uno con partidos programados,
+                  se reasignan automáticamente a otro de los que queden.
+                </p>
+
                 {errorArbitros && <Alert variant="error" className="ie-alert">{errorArbitros}</Alert>}
                 {okArbitros && <Alert variant="success" className="ie-alert">{okArbitros}</Alert>}
 
@@ -493,16 +572,24 @@ export default function InscribirEquipos() {
                   <p className="ie-list-empty">No hay árbitros cargados en el sistema.</p>
                 ) : (
                   <div className="ie-check-list ie-check-list-tab">
-                    {arbitros.map((a) => (
-                      <label key={a.id} className="ie-check-item">
-                        <input
-                          type="checkbox"
-                          checked={arbitrosSelec.has(a.id)}
-                          onChange={() => toggleArbitro(a.id)}
-                        />
-                        {a.nombre} {a.apellido}
-                      </label>
-                    ))}
+                    {arbitros.map((a) => {
+                      const bloqueado = arbitrosSelec.has(a.id) && arbitrosSelec.size <= MIN_ARBITROS_CANCHAS;
+                      return (
+                        <label
+                          key={a.id}
+                          className="ie-check-item"
+                          title={bloqueado ? `Un torneo debe tener al menos ${MIN_ARBITROS_CANCHAS} árbitros` : undefined}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={arbitrosSelec.has(a.id)}
+                            disabled={bloqueado}
+                            onChange={() => toggleArbitro(a.id)}
+                          />
+                          {a.nombre} {a.apellido}
+                        </label>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -528,6 +615,11 @@ export default function InscribirEquipos() {
                     <span className="ie-badge-count">{canchasSelec.size} seleccionada(s)</span>
                   </div>
 
+                  <p className="ie-fixture-asignados">
+                    Mínimo {MIN_ARBITROS_CANCHAS} canchas por torneo — si sacás una con partidos programados,
+                    se reasignan automáticamente a otra de las que queden.
+                  </p>
+
                   {errorCanchas && <Alert variant="error" className="ie-alert">{errorCanchas}</Alert>}
                   {okCanchas && <Alert variant="success" className="ie-alert">{okCanchas}</Alert>}
 
@@ -535,16 +627,24 @@ export default function InscribirEquipos() {
                     <p className="ie-list-empty">No hay canchas activas disponibles en el sistema.</p>
                   ) : (
                     <div className="ie-check-list ie-check-list-tab">
-                      {canchasActivas.map((c) => (
-                        <label key={c.id} className="ie-check-item">
-                          <input
-                            type="checkbox"
-                            checked={canchasSelec.has(c.id)}
-                            onChange={() => toggleCancha(c.id)}
-                          />
-                          {c.nombre}
-                        </label>
-                      ))}
+                      {canchasActivas.map((c) => {
+                        const bloqueada = canchasSelec.has(c.id) && canchasSelec.size <= MIN_ARBITROS_CANCHAS;
+                        return (
+                          <label
+                            key={c.id}
+                            className="ie-check-item"
+                            title={bloqueada ? `Un torneo debe tener al menos ${MIN_ARBITROS_CANCHAS} canchas` : undefined}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={canchasSelec.has(c.id)}
+                              disabled={bloqueada}
+                              onChange={() => toggleCancha(c.id)}
+                            />
+                            {c.nombre}
+                          </label>
+                        );
+                      })}
                     </div>
                   )}
 
@@ -559,7 +659,9 @@ export default function InscribirEquipos() {
               );
             })()}
 
-            {tabActiva === "partidos" && (
+            {tabActiva === "partidos" && (() => {
+              const torneoEnCurso = torneo?.estado === "en_curso";
+              return (
               <>
                 <div className="ie-panel-header">
                   <div>
@@ -569,6 +671,11 @@ export default function InscribirEquipos() {
                   <span className="ie-badge-count">{partidos.length} partido(s)</span>
                 </div>
 
+                {!torneoEnCurso && partidos.length > 0 && (
+                  <Alert variant="warning" className="ie-alert">
+                    Solo se pueden cargar resultados mientras el torneo está en curso.
+                  </Alert>
+                )}
                 {errorPartidos && <Alert variant="error" className="ie-alert">{errorPartidos}</Alert>}
                 {okPartidos && <Alert variant="success" className="ie-alert">{okPartidos}</Alert>}
 
@@ -577,60 +684,97 @@ export default function InscribirEquipos() {
                     Todavía no se generó el fixture de este torneo — no hay partidos para cargar resultado.
                   </p>
                 ) : (
-                  <div className="ie-partidos-list">
-                    {partidos.map((p) => {
-                      const r = resultados[p.id] ?? {
-                        goles_local: p.goles_local ?? 0,
-                        goles_visitante: p.goles_visitante ?? 0,
-                      };
-                      return (
-                        <div key={p.id} className="ie-partido-row">
-                          <div className="ie-partido-info">
-                            <span className="ie-partido-jornada">Jornada {p.jornada}</span>
-                            <span className="ie-partido-equipos">
-                              {p.local?.equipo?.nombreEquipo ?? "Local"}
-                              {p.local?.estado_participacion === "dado_de_baja" && " (Baja)"} vs{" "}
-                              {p.visitante?.equipo?.nombreEquipo ?? "Visitante"}
-                              {p.visitante?.estado_participacion === "dado_de_baja" && " (Baja)"}
-                            </span>
-                            {p.walkover && <span className="ie-partido-wo">W.O.</span>}
-                            <span className={`ie-partido-estado ie-partido-estado-${p.estado_partido}`}>
-                              {p.estado_partido}
-                            </span>
-                          </div>
-                          <div className="ie-partido-resultado">
-                            <input
-                              type="number"
-                              min={0}
-                              className="ie-partido-goles"
-                              value={r.goles_local}
-                              onChange={(e) => actualizarResultadoLocal(p.id, "goles_local", e.target.value)}
-                              aria-label={`Goles de ${p.local?.equipo?.nombreEquipo ?? "local"}`}
-                            />
-                            <span className="ie-partido-guion">–</span>
-                            <input
-                              type="number"
-                              min={0}
-                              className="ie-partido-goles"
-                              value={r.goles_visitante}
-                              onChange={(e) => actualizarResultadoLocal(p.id, "goles_visitante", e.target.value)}
-                              aria-label={`Goles de ${p.visitante?.equipo?.nombreEquipo ?? "visitante"}`}
-                            />
-                            <Button
-                              variant="secondary"
-                              disabled={guardandoResultadoId === p.id}
-                              onClick={() => guardarResultado(p.id)}
-                            >
-                              {guardandoResultadoId === p.id ? "Guardando..." : "Guardar"}
-                            </Button>
-                          </div>
+                  <>
+                    <div className="ie-partido-filtro">
+                      <label htmlFor="ie-filtro-jornada">Filtrar por jornada</label>
+                      <select
+                        id="ie-filtro-jornada"
+                        className="ie-partido-filtro-select"
+                        value={jornadaFiltro}
+                        onChange={(e) => setJornadaFiltro(e.target.value)}
+                      >
+                        <option value="todas">Todas las jornadas</option>
+                        {jornadasDisponibles.map((j) => (
+                          <option key={j} value={j}>Jornada {j}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {partidosFiltrados.length === 0 && (
+                      <p className="ie-list-empty">No hay partidos para esa jornada.</p>
+                    )}
+
+                    {partidosPorJornada.map(([jornada, partidosDeJornada]) => (
+                      <div key={jornada} className="ie-jornada-grupo">
+                        {jornadaFiltro === "todas" && <h4 className="ie-jornada-titulo">Jornada {jornada}</h4>}
+                        <div className="ie-partidos-list">
+                          {partidosDeJornada.map((p) => {
+                            const r = resultados[p.id] ?? {
+                              goles_local: p.goles_local ?? 0,
+                              goles_visitante: p.goles_visitante ?? 0,
+                            };
+                            const aunNoJugado = new Date(p.fecha_partido) > new Date();
+                            const bloqueado = !torneoEnCurso || aunNoJugado;
+                            return (
+                              <div key={p.id} className="ie-partido-row">
+                                <div className="ie-partido-info">
+                                  <span className="ie-partido-jornada">Jornada {p.jornada}</span>
+                                  <span className="ie-partido-equipos">
+                                    {p.local?.equipo?.nombreEquipo ?? "Local"}
+                                    {p.local?.estado_participacion === "dado_de_baja" && " (Baja)"} vs{" "}
+                                    {p.visitante?.equipo?.nombreEquipo ?? "Visitante"}
+                                    {p.visitante?.estado_participacion === "dado_de_baja" && " (Baja)"}
+                                  </span>
+                                  {p.walkover && <span className="ie-partido-wo">W.O.</span>}
+                                  <span className={`ie-partido-estado ie-partido-estado-${p.estado_partido}`}>
+                                    {p.estado_partido}
+                                  </span>
+                                </div>
+                                <div className="ie-partido-detalle">
+                                  <span><FiMapPin /> {p.cancha?.nombre ?? "Sin cancha"}</span>
+                                  <span><FiUser /> {p.arbitro ? `${p.arbitro.nombre} ${p.arbitro.apellido}` : "Sin árbitro"}</span>
+                                </div>
+                                <div className="ie-partido-resultado">
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    className="ie-partido-goles"
+                                    value={r.goles_local}
+                                    disabled={bloqueado}
+                                    onChange={(e) => actualizarResultadoLocal(p.id, "goles_local", e.target.value)}
+                                    aria-label={`Goles de ${p.local?.equipo?.nombreEquipo ?? "local"}`}
+                                  />
+                                  <span className="ie-partido-guion">–</span>
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    className="ie-partido-goles"
+                                    value={r.goles_visitante}
+                                    disabled={bloqueado}
+                                    onChange={(e) => actualizarResultadoLocal(p.id, "goles_visitante", e.target.value)}
+                                    aria-label={`Goles de ${p.visitante?.equipo?.nombreEquipo ?? "visitante"}`}
+                                  />
+                                  <Button
+                                    variant="secondary"
+                                    disabled={bloqueado || guardandoResultadoId === p.id}
+                                    title={aunNoJugado ? "Este partido todavía no se jugó" : undefined}
+                                    onClick={() => handleClickGuardar(p)}
+                                  >
+                                    {guardandoResultadoId === p.id ? "Guardando..." : "Guardar"}
+                                  </Button>
+                                </div>
+                                {aunNoJugado && <p className="ie-partido-nota">Aún no jugado.</p>}
+                              </div>
+                            );
+                          })}
                         </div>
-                      );
-                    })}
-                  </div>
+                      </div>
+                    ))}
+                  </>
                 )}
               </>
-            )}
+              );
+            })()}
           </div>
 
           {/* ── Sidebar ────────────────────────────────────────────────── */}
@@ -742,6 +886,22 @@ export default function InscribirEquipos() {
             </div>
           </div>
         </section>
+
+        <Modal
+          open={!!partidoAReeditar}
+          onClose={() => setPartidoAReeditar(null)}
+          title="Sobreescribir resultado"
+        >
+          <p>
+            {partidoAReeditar?.local?.equipo?.nombreEquipo ?? "Local"} vs{" "}
+            {partidoAReeditar?.visitante?.equipo?.nombreEquipo ?? "Visitante"} ya tiene un resultado cargado
+            ({partidoAReeditar?.goles_local}-{partidoAReeditar?.goles_visitante}). ¿Confirmás que querés sobreescribirlo?
+          </p>
+          <div className="ie-modal-reeditar-actions">
+            <Button variant="secondary" onClick={() => setPartidoAReeditar(null)}>Cancelar</Button>
+            <Button onClick={() => guardarResultado(partidoAReeditar.id, true)}>Sobreescribir</Button>
+          </div>
+        </Modal>
         </PageHero>
       </PageShell>
 
