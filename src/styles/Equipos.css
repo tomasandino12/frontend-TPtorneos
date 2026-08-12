@@ -122,9 +122,11 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.lista-jugadores li:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+@media (hover: hover) {
+  .lista-jugadores li:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 /* Nombre del jugador sin equipo, ahora clickeable para ver su detalle
@@ -143,8 +145,10 @@
   text-align: left;
 }
 
-.jugador-sin-equipo-nombre:hover {
-  color: var(--color-pitch);
+@media (hover: hover) {
+  .jugador-sin-equipo-nombre:hover {
+    color: var(--color-pitch);
+  }
 }
 
 .jugador-sin-equipo-nombre svg {
@@ -408,11 +412,18 @@
   flex-shrink: 0;
 }
 
-.jugador-expulsar-btn:hover,
 .jugador-expulsar-btn:focus-visible {
   opacity: 1;
   color: var(--color-alert-dark);
   background-color: var(--color-error-bg);
+}
+
+@media (hover: hover) {
+  .jugador-expulsar-btn:hover {
+    opacity: 1;
+    color: var(--color-alert-dark);
+    background-color: var(--color-error-bg);
+  }
 }
 
 .jugador-expulsar-btn:focus-visible {
@@ -756,14 +767,22 @@
   border-color: var(--color-border);
 }
 
-/* Tabla del historial de partidos — pestaña Historial (solo equipos ajenos) */
+/*
+  Tabla del historial de partidos — pestaña Historial (solo equipos ajenos).
+  El recorte de esquinas (antes en la propia .tabla-partidos) ahora vive en
+  .tabla-partidos-wrap, el contenedor externo que agrega ScrollableTable
+  (src/components/ui/) — separar el radio del overflow-x:auto es lo que
+  permite tener las dos cosas al mismo tiempo sin que una rompa la otra.
+*/
+.tabla-partidos-wrap {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
 .tabla-partidos {
   width: 100%;
   border-collapse: collapse;
-  background-color: var(--color-surface);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
 }
 
 .tabla-partidos th {
@@ -771,18 +790,56 @@
   color: var(--color-pitch);
   font-weight: 700;
   padding: 0.8rem;
-  text-align: center;
+  text-align: left;
+}
+
+/* Encabezado fijo al hacer scroll vertical del contenedor. */
+.tabla-partidos thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .tabla-partidos td {
   padding: 0.8rem;
   border-top: 1px solid var(--color-border);
   color: var(--color-ink);
+  text-align: left;
+}
+
+/* Solo "Resultado" (3ª columna) es un valor numérico — el resto es texto. */
+.tabla-partidos th:nth-child(3),
+.tabla-partidos td:nth-child(3) {
   text-align: center;
 }
 
-.tabla-partidos tr:hover {
-  background-color: var(--color-surface-muted);
+/* Primera columna (Fecha) fija al hacer scroll horizontal, con fondo
+   opaco propio (esta tabla no tiene zebra-striping). */
+.tabla-partidos th:first-child,
+.tabla-partidos td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.tabla-partidos thead th:first-child {
+  z-index: 3;
+}
+
+.tabla-partidos td:first-child {
+  background-color: var(--color-surface);
+}
+
+@media (hover: hover) {
+  .tabla-partidos tr:hover {
+    background-color: var(--color-surface-muted);
+  }
+
+  /* La celda fija trae su propio fondo opaco (arriba) y no la alcanza la
+     regla de hover de la fila por cascada normal — se repite acá. */
+  .tabla-partidos tr:hover td:first-child {
+    background-color: var(--color-surface-muted);
+  }
 }
 
 /* Suspensión de jugador (admin) — colores literales pedidos, distintos de
@@ -888,9 +945,11 @@
   border-radius: var(--radius-sm);
 }
 
-.transferir-capitania-cerrar:hover {
-  color: var(--color-alert);
-  background-color: var(--color-surface-muted);
+@media (hover: hover) {
+  .transferir-capitania-cerrar:hover {
+    color: var(--color-alert);
+    background-color: var(--color-surface-muted);
+  }
 }
 
 .transferir-capitania-cerrar:focus-visible {
@@ -936,8 +995,10 @@
   transition: border-color 0.15s ease;
 }
 
-.transferir-capitania-card:hover {
-  border-color: var(--color-turf);
+@media (hover: hover) {
+  .transferir-capitania-card:hover {
+    border-color: var(--color-turf);
+  }
 }
 
 /*

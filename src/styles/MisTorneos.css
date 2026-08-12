@@ -82,9 +82,11 @@
   transition: all 0.18s;
 }
 
-.mt-tab:hover:not(.active) {
-  border-color: var(--color-turf);
-  color: var(--color-pitch);
+@media (hover: hover) {
+  .mt-tab:hover:not(.active) {
+    border-color: var(--color-turf);
+    color: var(--color-pitch);
+  }
 }
 
 .mt-tab.active {
@@ -283,8 +285,10 @@
   cursor: pointer;
 }
 
-.mt-btn-edit:hover {
-  background: var(--color-surface-muted);
+@media (hover: hover) {
+  .mt-btn-edit:hover {
+    background: var(--color-surface-muted);
+  }
 }
 
 .mt-btn-edit:focus-visible {
@@ -308,8 +312,10 @@
   flex-shrink: 0;
 }
 
-.mt-btn-trash:hover {
-  background: var(--color-error-bg);
+@media (hover: hover) {
+  .mt-btn-trash:hover {
+    background: var(--color-error-bg);
+  }
 }
 
 .mt-btn-trash:focus-visible {
@@ -335,8 +341,10 @@
   text-align: center;
 }
 
-.mt-card-new:hover {
-  border-color: var(--color-turf);
+@media (hover: hover) {
+  .mt-card-new:hover {
+    border-color: var(--color-turf);
+  }
 }
 
 .mt-card-new-icon {

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiEdit2, FiUpload, FiBarChart2, FiSearch, FiSend, FiLogOut, FiX, FiRepeat, FiCheckCircle, FiUserX, FiPlus, FiInfo } from "react-icons/fi";
 import { apiFetch, apiFetchFormData, ASSETS_URL } from "../utils/api.js";
-import { Button, TextField, Alert, PageHero, Tabs, Modal } from "./ui";
+import { Button, TextField, Alert, PageHero, Tabs, Modal, ScrollableTable } from "./ui";
 import Convocatoria from "./Convocatoria.jsx";
 
 /**
@@ -748,38 +748,40 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
   const historialTabContent = (
     <section className="detalle-seccion historial-seccion">
       {partidosUnicos.length > 0 ? (
-        <table className="tabla-partidos">
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Local</th>
-              <th>Resultado</th>
-              <th>Visitante</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {partidosUnicos.map((partido) => (
-              <tr key={partido.id}>
-                <td>{new Date(partido.fecha_partido).toLocaleDateString("es-AR")}</td>
-                <td>
-                  {partido.esteEquipoEsLocal
-                    ? equipo.nombreEquipo
-                    : partido.local?.equipo?.nombreEquipo || "N/A"}
-                </td>
-                <td className="stat-numeral">
-                  {partido.goles_local} - {partido.goles_visitante}
-                </td>
-                <td>
-                  {partido.esteEquipoEsLocal
-                    ? partido.visitante?.equipo?.nombreEquipo || "N/A"
-                    : equipo.nombreEquipo}
-                </td>
-                <td>{partido.estado_partido}</td>
+        <ScrollableTable className="tabla-partidos-wrap" ariaLabel="Historial de partidos">
+          <table className="tabla-partidos">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Local</th>
+                <th>Resultado</th>
+                <th>Visitante</th>
+                <th>Estado</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {partidosUnicos.map((partido) => (
+                <tr key={partido.id}>
+                  <td>{new Date(partido.fecha_partido).toLocaleDateString("es-AR")}</td>
+                  <td>
+                    {partido.esteEquipoEsLocal
+                      ? equipo.nombreEquipo
+                      : partido.local?.equipo?.nombreEquipo || "N/A"}
+                  </td>
+                  <td className="stat-numeral">
+                    {partido.goles_local} - {partido.goles_visitante}
+                  </td>
+                  <td>
+                    {partido.esteEquipoEsLocal
+                      ? partido.visitante?.equipo?.nombreEquipo || "N/A"
+                      : equipo.nombreEquipo}
+                  </td>
+                  <td>{partido.estado_partido}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </ScrollableTable>
       ) : (
         <Alert variant="info">No hay partidos finalizados.</Alert>
       )}

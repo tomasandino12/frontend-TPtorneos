@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiAward } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
-import { Alert, PageShell } from "../components/ui";
+import { Alert, PageShell, ScrollableTable } from "../components/ui";
 
 function TablaPosiciones() {
   const [estadisticas, setEstadisticas] = useState([]);
@@ -95,18 +95,18 @@ useEffect(() => {
         </h2>
         <p className="tabla-subtitulo">Tabla de Posiciones - Temporada Regular</p>
 
-        <div className="tabla-scroll">
+        <ScrollableTable ariaLabel="Tabla de posiciones">
           <table className="tabla-posiciones">
             <thead>
               <tr>
                 <th>Pos</th>
                 <th>Equipo</th>
-                <th>PJ</th>
-                <th>PG</th>
-                <th>PE</th>
-                <th>PP</th>
-                <th>DG</th>
-                <th>Pts</th>
+                <th><abbr title="Partidos jugados">PJ</abbr></th>
+                <th><abbr title="Partidos ganados">PG</abbr></th>
+                <th><abbr title="Partidos empatados">PE</abbr></th>
+                <th><abbr title="Partidos perdidos">PP</abbr></th>
+                <th><abbr title="Diferencia de gol">DG</abbr></th>
+                <th><abbr title="Puntos">Pts</abbr></th>
               </tr>
             </thead>
             <tbody>
@@ -131,7 +131,7 @@ useEffect(() => {
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollableTable>
       </div>
     </PageShell>
   );

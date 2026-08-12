@@ -19,7 +19,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-size: 2rem;
+  font-size: var(--font-size-tabla-titulo);
   color: var(--color-pitch);
   margin-bottom: 0.25rem;
   text-align: center;
@@ -32,20 +32,22 @@
 }
 
 /*
-  Contenedor de scroll propio para la tabla: en mobile permite desplazar
-  horizontalmente y ver todas las columnas (PJ..Pts), en vez de depender de
-  pisar el overflow-x: hidden global del body (antes las columnas de la
-  derecha quedaban recortadas sin forma de verlas).
+  Scroll horizontal: lo resuelve el componente compartido ScrollableTable
+  (src/components/ui/), que envuelve esta tabla con los dos contenedores
+  anidados (recorte de esquinas afuera, overflow-x:auto + accesibilidad
+  adentro) — ver docs/frontend/decisiones-mobile.md.
 */
-.tabla-scroll {
-  overflow-x: auto;
-}
-
 .tabla-posiciones {
   width: 100%;
   min-width: 560px;
   border-collapse: collapse;
   font-size: 1rem;
+  text-align: left;
+}
+
+/* Solo "Equipo" (2ª columna) es texto — el resto son valores numéricos. */
+.tabla-posiciones th:not(:nth-child(2)),
+.tabla-posiciones td:not(:nth-child(2)) {
   text-align: center;
 }
 
@@ -57,12 +59,40 @@
   white-space: nowrap;
 }
 
+/* Encabezado fijo al hacer scroll vertical del contenedor. */
+.tabla-posiciones thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
 .tabla-posiciones td {
   padding: 10px 8px;
   border-bottom: 1px solid var(--color-border);
 }
 
+/* Primera columna (Pos) fija al hacer scroll horizontal, con fondo opaco
+   propio que respeta el zebra-striping de abajo. */
+.tabla-posiciones th:first-child,
+.tabla-posiciones td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.tabla-posiciones thead th:first-child {
+  z-index: 3;
+}
+
+.tabla-posiciones td:first-child {
+  background-color: var(--color-surface);
+}
+
 .tabla-posiciones tbody tr:nth-child(odd) {
+  background-color: var(--color-surface-muted);
+}
+
+.tabla-posiciones tbody tr:nth-child(odd) td:first-child {
   background-color: var(--color-surface-muted);
 }
 
@@ -70,8 +100,17 @@
   cursor: pointer;
 }
 
-.tabla-posiciones tbody tr:hover {
-  background-color: var(--color-success-bg);
+@media (hover: hover) {
+  .tabla-posiciones tbody tr:hover {
+    background-color: var(--color-success-bg);
+  }
+
+  /* La celda fija (sticky) trae su propio fondo opaco (arriba), así que el
+     hover de la fila no la alcanza por cascada normal — se repite acá para
+     que no quede un fondo distinto al resto de la fila al pasar el mouse. */
+  .tabla-posiciones tbody tr:hover td:first-child {
+    background-color: var(--color-success-bg);
+  }
 }
 
 .positivo {

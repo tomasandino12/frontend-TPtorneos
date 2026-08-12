@@ -8,6 +8,7 @@ Esta carpeta explica cómo está armado el frontend del proyecto: su arquitectur
 - [`paginas.md`](./paginas.md) — recorrido por cada pantalla de la app: qué muestra, de qué datos depende, y cómo se relacionan entre sí. Incluye una sección dedicada a explicar por qué "la pantalla de equipo" está repartida en 3 archivos distintos (con su estructura de pestañas Plantel/Historial/Estrategia), y otra para la campanita de notificaciones del `Navbar`.
 - [`glosario.md`](./glosario.md) — explicación en criollo de los conceptos técnicos no obvios que aparecen en el código (CSS variables, barrel files, componentes contenedor vs. presentacionales, etc.), cada uno con el ejemplo real de este proyecto.
 - [`decisiones.md`](./decisiones.md) — bitácora breve de qué se decidió en cada fase de la migración de UI y por qué.
+- [`decisiones-mobile.md`](./decisiones-mobile.md) — decisiones del rediseño mobile (320–767px): navegación jugador/admin, tablas con scroll horizontal, y la lección aprendida de *stacking context* que apareció tres veces. Trabajo independiente del resto de este índice — ver [`auditoria-mobile.md`](./auditoria-mobile.md).
 - [`pendientes.md`](./pendientes.md) — lo que quedó sin resolver, con el motivo concreto de cada caso.
 
 También son relevantes, fuera de esta carpeta:

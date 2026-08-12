@@ -17,14 +17,16 @@ a {
   color: var(--color-pitch);
   text-decoration: inherit;
 }
-a:hover {
-  color: var(--color-turf);
+@media (hover: hover) {
+  a:hover {
+    color: var(--color-turf);
+  }
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 #root {
@@ -47,8 +49,10 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
-button:hover {
-  border-color: var(--color-turf);
+@media (hover: hover) {
+  button:hover {
+    border-color: var(--color-turf);
+  }
 }
 button:focus,
 button:focus-visible {
@@ -60,10 +64,13 @@ button:focus-visible {
     color: #213547;
     background-color: #ffffff;
   }
-  a:hover {
-    color: #747bff;
-  }
   button {
     background-color: #f9f9f9;
+  }
+}
+
+@media (prefers-color-scheme: light) and (hover: hover) {
+  a:hover {
+    color: #747bff;
   }
 }

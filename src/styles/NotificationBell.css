@@ -22,9 +22,11 @@
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.notif-bell-btn:hover {
-  background-color: var(--color-surface-muted);
-  color: var(--color-ink);
+@media (hover: hover) {
+  .notif-bell-btn:hover {
+    background-color: var(--color-surface-muted);
+    color: var(--color-ink);
+  }
 }
 
 /* react-icons/Feather renderiza un <svg> crudo sin width/height por CSS. En
@@ -59,26 +61,86 @@
   text-align: center;
 }
 
+/* Overlay solo-mobile detrás de la hoja inferior. Necesario porque, a ese
+   ancho, el panel pasa a fixed/full-width y no queda nada del documento
+   realmente "afuera" de él para que el listener de click-afuera existente
+   (NotificationBell.jsx:63-77, sin tocar) lo detecte — este overlay tiene su
+   propio onClick explícito que llama al mismo setAbierto(false). */
+.notif-panel-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(22, 36, 27, 0.6);
+  z-index: var(--z-modal);
+}
+
+/* Mobile-first: por defecto (mobile) el panel es una hoja inferior a ancho
+   completo; a partir de MD vuelve al dropdown absoluto anclado a la
+   campanita, sin cambiar nada de su aspecto actual. */
 .notif-panel {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: -0.5rem;
-  width: min(380px, 90vw);
-  max-height: 420px;
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  top: auto;
+  width: 100%;
+  max-height: 70dvh;
   overflow-y: auto;
   background-color: var(--color-surface);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   box-shadow: var(--shadow-md);
-  z-index: var(--z-dropdown);
+  z-index: var(--z-modal);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .notif-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
   padding: 0.9rem 1.1rem 0.6rem;
   font-family: var(--font-display);
   font-size: 1rem;
   letter-spacing: 0.02em;
   color: var(--color-ink);
   border-bottom: 1px solid var(--color-border);
+}
+
+.notif-panel-cerrar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  margin: -0.5rem -0.4rem -0.5rem 0;
+  border: none;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+/* react-icons/Feather renderiza un <svg width="1em" height="1em"> crudo que
+   colapsa a width:0 en Chromium dentro de un botón flex de un solo ícono
+   (mismo bug ya documentado para .jugador-expulsar-btn en Equipos.css y
+   resuelto en la Fase 3 para .admin-hamburger-btn / .admin-drawer-close /
+   .account-sheet-close). */
+.notif-panel-cerrar svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex-shrink: 0;
+}
+
+.notif-panel-cerrar:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .notif-panel-cerrar:hover {
+    color: var(--color-ink);
+    background-color: var(--color-surface-muted);
+  }
 }
 
 .notif-panel-vacio {
@@ -107,6 +169,7 @@
   align-items: flex-start;
   gap: 0.7rem;
   width: 100%;
+  min-height: var(--tap-min);
   text-align: left;
   padding: 0.65rem 0.75rem;
   border: none;
@@ -116,16 +179,20 @@
   transition: background-color 0.15s ease;
 }
 
-.notif-item:hover {
-  background-color: var(--color-surface-muted);
+@media (hover: hover) {
+  .notif-item:hover {
+    background-color: var(--color-surface-muted);
+  }
 }
 
 .notif-item-no-leida {
   background-color: var(--color-surface-muted);
 }
 
-.notif-item-no-leida:hover {
-  background-color: var(--color-border);
+@media (hover: hover) {
+  .notif-item-no-leida:hover {
+    background-color: var(--color-border);
+  }
 }
 
 .notif-item-icono {
@@ -173,6 +240,34 @@
   border-radius: 50%;
   background-color: var(--color-pitch);
   flex-shrink: 0;
+}
+
+/* Mobile-first: por debajo de MD el panel es la hoja inferior de arriba; a
+   partir de MD conserva exactamente el comportamiento previo (dropdown
+   absoluto anclado a la campanita) — overlay y botón de cerrar nuevos
+   desaparecen, ya no hacen falta con el listener de click-afuera de
+   siempre. */
+@media (min-width: 768px) {
+  .notif-panel-overlay {
+    display: none;
+  }
+
+  .notif-panel-cerrar {
+    display: none;
+  }
+
+  .notif-panel {
+    position: absolute;
+    inset-inline: auto;
+    top: calc(100% + 10px);
+    right: -0.5rem;
+    bottom: auto;
+    width: min(380px, 90vw);
+    max-height: 420px;
+    border-radius: var(--radius-md);
+    z-index: var(--z-dropdown);
+    padding-bottom: 0;
+  }
 }
 
 /* Mobile-first: por defecto el panel se corre un poco para no salirse del

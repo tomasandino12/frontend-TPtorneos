@@ -45,9 +45,11 @@
   border-radius: var(--radius-sm);
 }
 
-.ui-modal-cerrar:hover {
-  color: var(--color-alert);
-  background-color: var(--color-surface-muted);
+@media (hover: hover) {
+  .ui-modal-cerrar:hover {
+    color: var(--color-alert);
+    background-color: var(--color-surface-muted);
+  }
 }
 
 .ui-modal-cerrar:focus-visible {

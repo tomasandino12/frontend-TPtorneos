@@ -1,0 +1,109 @@
+.account-sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.account-sheet-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--color-success-bg);
+  color: var(--color-pitch);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.account-sheet-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.account-sheet-name {
+  font-weight: 700;
+  color: var(--color-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-sheet-email {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-sheet-close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-min);
+  height: var(--tap-min);
+  border: none;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+/* react-icons/Feather renderiza un <svg width="1em" height="1em"> crudo que
+   colapsa a width:0 en Chromium dentro de un botón flex de un solo ícono
+   (mismo bug ya documentado para .jugador-expulsar-btn en Equipos.css). */
+.account-sheet-close svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+}
+
+.account-sheet-close:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.account-sheet-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: calc(100% - 2 * var(--space-4));
+  margin: var(--space-4);
+  min-height: var(--tap-min);
+  padding: 0.65em 1em;
+  border: 1.5px solid var(--color-alert);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-alert);
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.account-sheet-logout:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .account-sheet-close:hover {
+    color: var(--color-ink);
+    background-color: var(--color-surface-muted);
+  }
+
+  .account-sheet-logout:hover {
+    background-color: var(--color-alert);
+    color: var(--color-surface);
+  }
+}

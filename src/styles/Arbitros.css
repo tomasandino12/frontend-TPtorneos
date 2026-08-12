@@ -58,6 +58,13 @@
   padding: 0.5rem 0.625rem;
 }
 
+/* Encabezado fijo al hacer scroll vertical del contenedor. */
+.ar-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
 .ar-table td {
   padding: 0.5rem 0.625rem;
   border-top: 1px solid var(--color-border);
@@ -65,8 +72,34 @@
   font-size: 0.8125rem;
 }
 
-.ar-table tr:hover td {
-  background: var(--color-surface-muted);
+/* Primera columna (Nombre) fija al hacer scroll horizontal, con fondo
+   opaco propio (esta tabla no tiene zebra-striping, así que alcanza con
+   un solo color para todos los estados). */
+.ar-table th:first-child,
+.ar-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.ar-table thead th:first-child {
+  z-index: 3;
+}
+
+.ar-table td:first-child {
+  background: var(--color-surface);
+}
+
+@media (hover: hover) {
+  .ar-table tr:hover td {
+    background: var(--color-surface-muted);
+  }
+
+  /* La celda fija trae su propio fondo opaco (arriba) y no la alcanza la
+     regla de hover de la fila por cascada normal — se repite acá. */
+  .ar-table tr:hover td:first-child {
+    background: var(--color-surface-muted);
+  }
 }
 
 .ar-table-vacio {
@@ -81,6 +114,7 @@
 }
 
 .ar-btn-icon {
+  position: relative;
   padding: 0.375rem 0.625rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -94,8 +128,18 @@
   transition: background 0.18s, border-color 0.18s;
 }
 
-.ar-btn-icon:hover {
-  background: var(--color-surface-muted);
+/* Área táctil de 44px sin agrandar el botón visible (Fase 1, aplicado acá
+   a pedido explícito): el botón real mide bastante menos en cada eje. */
+.ar-btn-icon::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+@media (hover: hover) {
+  .ar-btn-icon:hover {
+    background: var(--color-surface-muted);
+  }
 }
 
 .ar-btn-icon:focus-visible {
@@ -108,8 +152,10 @@
   border-color: var(--color-error-bg);
 }
 
-.ar-btn-icon-danger:hover {
-  background: var(--color-error-bg);
+@media (hover: hover) {
+  .ar-btn-icon-danger:hover {
+    background: var(--color-error-bg);
+  }
 }
 
 /* ── Modal (alta / edición) ──────────────────────────────────────────────── */

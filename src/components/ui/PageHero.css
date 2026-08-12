@@ -1,6 +1,6 @@
 .ui-page-hero {
   text-align: center;
-  padding: 2rem;
+  padding: 1rem;
   border-radius: var(--radius-lg);
   margin-bottom: 2rem;
 }
@@ -25,7 +25,7 @@
   justify-content: center;
   gap: 0.5rem;
   color: var(--color-pitch);
-  font-size: 2.2rem;
+  font-size: var(--font-size-hero-title);
   margin: 0 0 0.5rem 0;
 }
 
@@ -159,6 +159,10 @@
 /* Mobile-first: por defecto el layout es el compacto de arriba; a partir de
    MD (tablet) se agranda al layout de escritorio original. */
 @media (min-width: 768px) {
+  .ui-page-hero {
+    padding: 2rem;
+  }
+
   .ui-page-hero-left {
     width: calc(100% - 3rem);
     margin-top: 1.5rem;

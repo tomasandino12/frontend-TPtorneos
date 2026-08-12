@@ -80,6 +80,13 @@
   padding: 0.5rem 0.625rem;
 }
 
+/* Encabezado fijo al hacer scroll vertical del contenedor. */
+.jg-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
 .jg-table td {
   padding: 0.5rem 0.625rem;
   border-top: 1px solid var(--color-border);
@@ -87,12 +94,37 @@
   font-size: 0.8125rem;
 }
 
+/* Primera columna (Nombre) fija al hacer scroll horizontal, con fondo
+   opaco propio (esta tabla no tiene zebra-striping). */
+.jg-table th:first-child,
+.jg-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.jg-table thead th:first-child {
+  z-index: 3;
+}
+
+.jg-table td:first-child {
+  background: var(--color-surface);
+}
+
 .jg-table-row-clickable {
   cursor: pointer;
 }
 
-.jg-table tr:hover td {
-  background: var(--color-surface-muted);
+@media (hover: hover) {
+  .jg-table tr:hover td {
+    background: var(--color-surface-muted);
+  }
+
+  /* La celda fija trae su propio fondo opaco (arriba) y no la alcanza la
+     regla de hover de la fila por cascada normal — se repite acá. */
+  .jg-table tr:hover td:first-child {
+    background: var(--color-surface-muted);
+  }
 }
 
 .jg-table-vacio {
@@ -175,9 +207,11 @@
   transition: background 0.15s, border-color 0.15s;
 }
 
-.jg-chip:hover {
-  background: var(--color-surface-muted);
-  border-color: var(--color-turf);
+@media (hover: hover) {
+  .jg-chip:hover {
+    background: var(--color-surface-muted);
+    border-color: var(--color-turf);
+  }
 }
 
 .jg-chip:focus-visible {
@@ -236,9 +270,11 @@
   border-radius: var(--radius-sm);
 }
 
-.jg-modal-cerrar:hover {
-  color: var(--color-alert);
-  background-color: var(--color-surface-muted);
+@media (hover: hover) {
+  .jg-modal-cerrar:hover {
+    color: var(--color-alert);
+    background-color: var(--color-surface-muted);
+  }
 }
 
 .jg-modal-cerrar:focus-visible {

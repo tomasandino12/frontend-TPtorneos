@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiAward, FiChevronDown, FiList, FiPlusCircle, FiFlag, FiMapPin, FiUsers, FiLogOut } from "react-icons/fi";
+import { FiAward, FiChevronDown, FiList, FiPlusCircle, FiFlag, FiMapPin, FiUsers, FiLogOut, FiMenu } from "react-icons/fi";
+import AdminDrawer from "./AdminDrawer.jsx";
 import "../styles/IndexStyle.css";
 import "../styles/MenuAdmin.css";
 
@@ -19,6 +20,18 @@ export default function AdminHeader({ admin, onLogout }) {
   const triggerRefTorneos = useRef(null);
   const wrapRefCanchas = useRef(null);
   const triggerRefCanchas = useRef(null);
+
+  // Drawer lateral (<1024px) — ver AdminDrawer.jsx. Se renderiza como
+  // hermano de <nav>, no como hijo: <nav> tiene position:sticky + z-index
+  // propio, que crea un stacking context y confinaría el overlay del drawer
+  // dentro de ese nivel (mismo bug ya resuelto en Navbar.jsx/AccountSheet).
+  const [drawerAbierto, setDrawerAbierto] = useState(false);
+  const hamburgerBtnRef = useRef(null);
+
+  const handleCerrarDrawer = () => {
+    setDrawerAbierto(false);
+    hamburgerBtnRef.current?.focus();
+  };
 
   // Click para abrir/cerrar (en vez de hover + setTimeout): evita el bug de
   // que el dropdown se cierre si el mouse se mueve en diagonal antes de
@@ -59,140 +72,155 @@ export default function AdminHeader({ admin, onLogout }) {
   const initials = `${admin.nombre?.[0] ?? ""}${admin.apellido?.[0] ?? ""}`.toUpperCase();
 
   return (
-    <nav className="navbar">
-      <div className="navdiv">
+    <>
+      <nav className="navbar">
+        <div className="navdiv">
 
-        <div className="logo">
-          <div
-            className="logo-admin-wrap"
-            onClick={() => navigate("/menu-admin")}
-            style={{ cursor: "pointer" }}
-          >
-            <span className="logo-admin-text">Gestor de Torneos</span>
-            <span className="admin-badge">ADMIN</span>
-          </div>
-        </div>
-
-        <ul className="navlinks">
-          {/* Dropdown: Mis Torneos */}
-          <li className="admin-dropdown-wrap" ref={wrapRefTorneos} onBlur={handleBlur(wrapRefTorneos)}>
-            <button
-              ref={triggerRefTorneos}
-              className={`admin-nav-btn${isTorneos ? " active" : ""}`}
-              onClick={() => setOpenMenu((v) => (v === "torneos" ? null : "torneos"))}
-              aria-haspopup="true"
-              aria-expanded={openMenu === "torneos"}
+          <div className="logo">
+            <div
+              className="logo-admin-wrap"
+              onClick={() => navigate("/menu-admin")}
+              style={{ cursor: "pointer" }}
             >
-              <FiAward />
-              Mis Torneos
-              <FiChevronDown className="admin-nav-chevron" />
-            </button>
-
-            {openMenu === "torneos" && (
-              <div className="admin-dropdown">
-                <button
-                  className="admin-dropdown-item"
-                  onClick={() => { navigate("/admin/torneos"); setOpenMenu(null); }}
-                >
-                  <div className="admin-dropdown-icon">
-                    <FiList />
-                  </div>
-                  <div>
-                    <span className="admin-dropdown-label">Mis Torneos</span>
-                    <span className="admin-dropdown-desc">Listá, editá o eliminá tus torneos</span>
-                  </div>
-                </button>
-                <button
-                  className="admin-dropdown-item"
-                  onClick={() => { navigate("/admin/torneos/nuevo"); setOpenMenu(null); }}
-                >
-                  <div className="admin-dropdown-icon">
-                    <FiPlusCircle />
-                  </div>
-                  <div>
-                    <span className="admin-dropdown-label">Crear Torneo</span>
-                    <span className="admin-dropdown-desc">Nuevo certamen desde cero</span>
-                  </div>
-                </button>
-              </div>
-            )}
-          </li>
-
-          {/* Dropdown: Canchas — mismo patrón que Mis Torneos */}
-          <li className="admin-dropdown-wrap" ref={wrapRefCanchas} onBlur={handleBlur(wrapRefCanchas)}>
-            <button
-              ref={triggerRefCanchas}
-              className={`admin-nav-btn${isCanchas ? " active" : ""}`}
-              onClick={() => setOpenMenu((v) => (v === "canchas" ? null : "canchas"))}
-              aria-haspopup="true"
-              aria-expanded={openMenu === "canchas"}
-            >
-              <FiMapPin />
-              Canchas
-              <FiChevronDown className="admin-nav-chevron" />
-            </button>
-
-            {openMenu === "canchas" && (
-              <div className="admin-dropdown">
-                <button
-                  className="admin-dropdown-item"
-                  onClick={() => { navigate("/admin/canchas"); setOpenMenu(null); }}
-                >
-                  <div className="admin-dropdown-icon">
-                    <FiList />
-                  </div>
-                  <div>
-                    <span className="admin-dropdown-label">Ver canchas</span>
-                    <span className="admin-dropdown-desc">Listá, editá o eliminá canchas</span>
-                  </div>
-                </button>
-                <button
-                  className="admin-dropdown-item"
-                  onClick={() => { navigate("/admin/canchas/nueva"); setOpenMenu(null); }}
-                >
-                  <div className="admin-dropdown-icon">
-                    <FiPlusCircle />
-                  </div>
-                  <div>
-                    <span className="admin-dropdown-label">Nueva cancha</span>
-                    <span className="admin-dropdown-desc">Agregar una cancha nueva</span>
-                  </div>
-                </button>
-              </div>
-            )}
-          </li>
-
-          {OTHER_NAV.map((item) => {
-            const Icon = item.icon;
-            return (
-              <li key={item.label}>
-                <button
-                  className="admin-nav-btn"
-                  onClick={() => navigate(item.path ?? "/menu-admin")}
-                >
-                  <Icon />
-                  {item.label}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-
-        <div className="nav-actions">
-          <div className="admin-user-info">
-            <div className="admin-avatar">{initials}</div>
-            <div className="admin-user-text">
-              <span className="admin-user-name">{admin.nombre} {admin.apellido}</span>
-              <span className="admin-user-role">Administrador</span>
+              <span className="logo-admin-text">Gestor de Torneos</span>
+              <span className="admin-badge">ADMIN</span>
             </div>
-            <button className="btn-logout" onClick={onLogout}>
-              <FiLogOut />
-              Cerrar sesión
-            </button>
           </div>
-        </div>
 
-      </div>
-    </nav>
+          <ul className="navlinks">
+            {/* Dropdown: Mis Torneos */}
+            <li className="admin-dropdown-wrap" ref={wrapRefTorneos} onBlur={handleBlur(wrapRefTorneos)}>
+              <button
+                ref={triggerRefTorneos}
+                className={`admin-nav-btn${isTorneos ? " active" : ""}`}
+                onClick={() => setOpenMenu((v) => (v === "torneos" ? null : "torneos"))}
+                aria-haspopup="true"
+                aria-expanded={openMenu === "torneos"}
+              >
+                <FiAward />
+                Mis Torneos
+                <FiChevronDown className="admin-nav-chevron" />
+              </button>
+
+              {openMenu === "torneos" && (
+                <div className="admin-dropdown">
+                  <button
+                    className="admin-dropdown-item"
+                    onClick={() => { navigate("/admin/torneos"); setOpenMenu(null); }}
+                  >
+                    <div className="admin-dropdown-icon">
+                      <FiList />
+                    </div>
+                    <div>
+                      <span className="admin-dropdown-label">Mis Torneos</span>
+                      <span className="admin-dropdown-desc">Listá, editá o eliminá tus torneos</span>
+                    </div>
+                  </button>
+                  <button
+                    className="admin-dropdown-item"
+                    onClick={() => { navigate("/admin/torneos/nuevo"); setOpenMenu(null); }}
+                  >
+                    <div className="admin-dropdown-icon">
+                      <FiPlusCircle />
+                    </div>
+                    <div>
+                      <span className="admin-dropdown-label">Crear Torneo</span>
+                      <span className="admin-dropdown-desc">Nuevo certamen desde cero</span>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </li>
+
+            {/* Dropdown: Canchas — mismo patrón que Mis Torneos */}
+            <li className="admin-dropdown-wrap" ref={wrapRefCanchas} onBlur={handleBlur(wrapRefCanchas)}>
+              <button
+                ref={triggerRefCanchas}
+                className={`admin-nav-btn${isCanchas ? " active" : ""}`}
+                onClick={() => setOpenMenu((v) => (v === "canchas" ? null : "canchas"))}
+                aria-haspopup="true"
+                aria-expanded={openMenu === "canchas"}
+              >
+                <FiMapPin />
+                Canchas
+                <FiChevronDown className="admin-nav-chevron" />
+              </button>
+
+              {openMenu === "canchas" && (
+                <div className="admin-dropdown">
+                  <button
+                    className="admin-dropdown-item"
+                    onClick={() => { navigate("/admin/canchas"); setOpenMenu(null); }}
+                  >
+                    <div className="admin-dropdown-icon">
+                      <FiList />
+                    </div>
+                    <div>
+                      <span className="admin-dropdown-label">Ver canchas</span>
+                      <span className="admin-dropdown-desc">Listá, editá o eliminá canchas</span>
+                    </div>
+                  </button>
+                  <button
+                    className="admin-dropdown-item"
+                    onClick={() => { navigate("/admin/canchas/nueva"); setOpenMenu(null); }}
+                  >
+                    <div className="admin-dropdown-icon">
+                      <FiPlusCircle />
+                    </div>
+                    <div>
+                      <span className="admin-dropdown-label">Nueva cancha</span>
+                      <span className="admin-dropdown-desc">Agregar una cancha nueva</span>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </li>
+
+            {OTHER_NAV.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.label}>
+                  <button
+                    className="admin-nav-btn"
+                    onClick={() => navigate(item.path ?? "/menu-admin")}
+                  >
+                    <Icon />
+                    {item.label}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="nav-actions">
+            <div className="admin-user-info">
+              <div className="admin-avatar">{initials}</div>
+              <div className="admin-user-text">
+                <span className="admin-user-name">{admin.nombre} {admin.apellido}</span>
+                <span className="admin-user-role">Administrador</span>
+              </div>
+              <button className="btn-logout" onClick={onLogout}>
+                <FiLogOut />
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="admin-hamburger-btn"
+            ref={hamburgerBtnRef}
+            onClick={() => setDrawerAbierto(true)}
+            aria-label="Abrir menú"
+            aria-expanded={drawerAbierto}
+          >
+            <FiMenu />
+          </button>
+
+        </div>
+      </nav>
+
+      <AdminDrawer open={drawerAbierto} onClose={handleCerrarDrawer} onLogout={onLogout} />
+    </>
   );
 }

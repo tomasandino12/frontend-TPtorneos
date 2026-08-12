@@ -66,7 +66,9 @@
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s;
 }
-.ie-tab:hover { color: var(--color-ink); }
+@media (hover: hover) {
+  .ie-tab:hover { color: var(--color-ink); }
+}
 .ie-tab.active {
   color: var(--color-pitch);
   border-bottom-color: var(--color-pitch);
@@ -152,7 +154,9 @@
   cursor: pointer;
   transition: background 0.15s;
 }
-.ie-equipo-row:hover { background: var(--color-surface-muted); }
+@media (hover: hover) {
+  .ie-equipo-row:hover { background: var(--color-surface-muted); }
+}
 .ie-equipo-row.inscripto { opacity: 0.55; cursor: default; }
 .ie-equipo-row input[type="checkbox"] {
   width: 17px;
@@ -371,9 +375,11 @@
   color: var(--color-muted);
   cursor: pointer;
 }
-.ie-partido-editar-btn:hover {
-  background: var(--color-surface-muted);
-  color: var(--color-ink);
+@media (hover: hover) {
+  .ie-partido-editar-btn:hover {
+    background: var(--color-surface-muted);
+    color: var(--color-ink);
+  }
 }
 
 .ie-programacion-editor {

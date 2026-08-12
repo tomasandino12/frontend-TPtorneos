@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { FiUsers, FiSearch, FiX } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
-import { Card, TextField, Button, Alert, PageShell, PageHero } from "../components/ui";
+import { Card, TextField, Button, Alert, PageShell, PageHero, ScrollableTable } from "../components/ui";
 
 const MIN_CARACTERES_BUSQUEDA = 3;
 const MAX_BUSQUEDAS_RECIENTES = 6;
@@ -245,7 +245,7 @@ export default function Jugadores() {
           {terminoValido && error && <Card className="jg-status-card jg-status-error">{error}</Card>}
 
           {terminoValido && !cargando && !error && (
-            <div className="jg-table-wrap">
+            <ScrollableTable className="jg-table-wrap" ariaLabel="Tabla de jugadores">
               <table className="jg-table">
                 <thead>
                   <tr>
@@ -277,7 +277,7 @@ export default function Jugadores() {
                   )}
                 </tbody>
               </table>
-            </div>
+            </ScrollableTable>
           )}
         </section>
       </PageShell>
