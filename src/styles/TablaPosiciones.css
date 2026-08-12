@@ -39,7 +39,6 @@
 */
 .tabla-posiciones {
   width: 100%;
-  min-width: 560px;
   border-collapse: collapse;
   font-size: 1rem;
   text-align: left;
@@ -51,12 +50,49 @@
   text-align: center;
 }
 
+/*
+  Densidad mobile (Fase 8), mobile-first: celdas más compactas para que
+  entren más columnas visibles antes de necesitar el scroll horizontal, sin
+  eliminar ninguna. A partir de MD vuelve al padding/tamaño original.
+*/
 .tabla-posiciones th {
   background-color: var(--color-success-bg);
   color: var(--color-pitch);
-  padding: 12px 8px;
   font-weight: 600;
   white-space: nowrap;
+  padding: 8px 5px;
+}
+
+.tabla-posiciones td {
+  padding: 7px 5px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Los 5 datos "de partido" (PJ, PG, PE, PP, DG) en un tamaño más chico que
+   el resto de la tabla — Pos, Equipo y Pts mantienen el tamaño base. Nunca
+   baja de 12px (0.75rem con el font-size raíz de 16px del proyecto). */
+.tabla-posiciones th:nth-child(n + 3):nth-child(-n + 7),
+.tabla-posiciones td:nth-child(n + 3):nth-child(-n + 7) {
+  font-size: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .tabla-posiciones {
+    min-width: 560px;
+  }
+
+  .tabla-posiciones th {
+    padding: 12px 8px;
+  }
+
+  .tabla-posiciones td {
+    padding: 10px 8px;
+  }
+
+  .tabla-posiciones th:nth-child(n + 3):nth-child(-n + 7),
+  .tabla-posiciones td:nth-child(n + 3):nth-child(-n + 7) {
+    font-size: 1rem;
+  }
 }
 
 /* Encabezado fijo al hacer scroll vertical del contenedor. */
@@ -64,11 +100,6 @@
   position: sticky;
   top: 0;
   z-index: 2;
-}
-
-.tabla-posiciones td {
-  padding: 10px 8px;
-  border-bottom: 1px solid var(--color-border);
 }
 
 /* Primera columna (Pos) fija al hacer scroll horizontal, con fondo opaco
@@ -125,8 +156,90 @@
   font-size: 1.15rem;
 }
 
+/*
+  Columna de Puntos destacada (Fase 8), mobile-first: fondo distinto al
+  resto de la tabla (con tokens ya existentes) — junto con el font-size ya
+  mayor de arriba, es el segundo diferenciador. A partir de MD vuelve a no
+  tener fondo propio, igual que antes de esta fase.
+*/
+.tabla-posiciones td.puntos {
+  background-color: var(--color-grass);
+}
+
+.tabla-posiciones tbody tr:nth-child(odd) td.puntos {
+  background-color: var(--color-success-bg);
+}
+
+.tabla-posiciones th:last-child {
+  background-color: var(--color-grass);
+}
+
+@media (min-width: 768px) {
+  .tabla-posiciones td.puntos {
+    background-color: transparent;
+  }
+
+  .tabla-posiciones tbody tr:nth-child(odd) td.puntos {
+    background-color: var(--color-surface-muted);
+  }
+
+  .tabla-posiciones th:last-child {
+    background-color: var(--color-success-bg);
+  }
+}
+
 .tabla-baja-tag {
   color: var(--color-alert);
   font-weight: 600;
   font-size: 0.85em;
+}
+
+/*
+  Indicador de color por equipo (Fase 8), mobile-first: círculo generado por
+  hash determinístico del nombre en TablaPosiciones.jsx (el endpoint no
+  devuelve el color real de camiseta — ver comentario en el JSX). Se oculta
+  a partir de MD: por encima de 768px la tabla vuelve a verse exactamente
+  igual que antes de esta fase.
+*/
+.tabla-equipo-nombre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tabla-equipo-color {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/*
+  Nombres largos truncados con "..." en vez de envolver a varias líneas —
+  sin esto, un nombre largo descuadraba la altura de la fila y la
+  alineación con el swatch de color. El texto completo queda accesible por
+  el atributo title (JSX). min-width:0 es necesario para que el ellipsis
+  funcione: por defecto un ítem flex no se encoge por debajo de su ancho de
+  contenido, sin importar el max-width que tenga.
+*/
+.tabla-equipo-texto {
+  min-width: 0;
+  max-width: 120px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 768px) {
+  .tabla-equipo-color {
+    display: none;
+  }
+
+  .tabla-equipo-texto {
+    max-width: none;
+    overflow: visible;
+    white-space: normal;
+    text-overflow: clip;
+  }
 }

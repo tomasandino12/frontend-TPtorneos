@@ -21,7 +21,7 @@ export default function MobileBottomNav() {
                 className={({ isActive }) => `gt-bottomnav-link${isActive ? " active" : ""}`}
               >
                 <Icon className="gt-bottomnav-icon" />
-                <span className="gt-bottomnav-label">{item.label}</span>
+                <span className="gt-bottomnav-label">{item.shortLabel ?? item.label}</span>
               </NavLink>
             </li>
           );

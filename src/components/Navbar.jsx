@@ -6,7 +6,10 @@ import AccountSheet from "./AccountSheet.jsx";
 import "../styles/Navbar.css";
 
 export const NAV_ITEMS = [
-  { to: "/gestorTorneos", end: true, icon: FiAward, label: "Tabla de Posiciones" },
+  // shortLabel: solo para MobileBottomNav.jsx (una palabra, no se parte en
+  // dos líneas en el espacio angosto de la barra inferior). El navbar de
+  // escritorio sigue usando `label` completo, que tiene lugar de sobra.
+  { to: "/gestorTorneos", end: true, icon: FiAward, label: "Tabla de Posiciones", shortLabel: "Posiciones" },
   { to: "/gestorTorneos/estadisticas", icon: FiBarChart2, label: "Estadísticas" },
   { to: "/gestorTorneos/fixture", icon: FiCalendar, label: "Fixture" },
   { to: "/gestorTorneos/equipos", icon: FiUsers, label: "Equipos" },

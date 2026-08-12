@@ -6,6 +6,20 @@ import { FiAward } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
 import { Alert, PageShell, ScrollableTable } from "../components/ui";
 
+// El endpoint de estadísticas no devuelve el color de camiseta del equipo
+// (confirmado contra el backend: la entidad Equipo lo tiene, pero
+// getEstadisticasTorneo no lo incluye en la respuesta) — se genera acá un
+// color determinístico a partir del nombre, no el color real de la
+// camiseta. Mismo nombre, siempre el mismo color entre renders.
+function colorPorEquipo(nombre) {
+  let hash = 0;
+  for (let i = 0; i < nombre.length; i++) {
+    hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue}, 62%, 45%)`;
+}
+
 function TablaPosiciones() {
   const [estadisticas, setEstadisticas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -114,7 +128,16 @@ useEffect(() => {
                 <tr key={est.id} onClick={() => handleEquipoClick(est.id)} className="fila-clickeable">
                   <td className="stat-numeral">{est.posicion}</td>
                   <td>
-                    {est.nombreEquipo}
+                    <span className="tabla-equipo-nombre">
+                      <span
+                        className="tabla-equipo-color"
+                        style={{ backgroundColor: colorPorEquipo(est.nombreEquipo) }}
+                        aria-hidden="true"
+                      />
+                      <span className="tabla-equipo-texto" title={est.nombreEquipo}>
+                        {est.nombreEquipo}
+                      </span>
+                    </span>
                     {est.estadoParticipacion === "dado_de_baja" && (
                       <span className="tabla-baja-tag"> (Baja)</span>
                     )}
