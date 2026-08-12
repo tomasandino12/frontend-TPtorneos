@@ -6,9 +6,15 @@
 .ui-page-shell {
   max-width: 1000px;
   margin: 2rem auto;
-  padding: 2rem;
+  padding: 1rem;
   border-radius: 12px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 768px) {
+  .ui-page-shell {
+    padding: 2rem;
+  }
 }
 
 .ui-page-shell-bg-paper { background-color: var(--color-paper); }
@@ -25,7 +31,7 @@
   padding: 2rem 2.5rem;
   border-radius: 0;
   box-shadow: none;
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /*

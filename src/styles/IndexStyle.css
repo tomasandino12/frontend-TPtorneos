@@ -18,7 +18,7 @@ body {
   border-bottom: 2px solid #b7dfbe;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: var(--z-navbar);
   width: 100%;
   margin: 0;
   padding: 0;
@@ -83,9 +83,11 @@ body {
   font-family: inherit;
 }
 
-.btn-logout:hover {
-  background-color: #e53935;
-  color: #fff;
+@media (hover: hover) {
+  .btn-logout:hover {
+    background-color: #e53935;
+    color: #fff;
+  }
 }
 
 .btn-logout svg {
@@ -103,9 +105,11 @@ body {
   gap: 6px;
 }
 
-.navdiv ul a:hover {
-  background-color: #dcf7e3;
-  color: #338637;
+@media (hover: hover) {
+  .navdiv ul a:hover {
+    background-color: #dcf7e3;
+    color: #338637;
+  }
 }
 
 .navdiv ul a.active {
@@ -155,7 +159,7 @@ main, .content {
 .layout {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
 }
 

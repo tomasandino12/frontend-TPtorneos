@@ -7,6 +7,7 @@
   font-weight: 600;
   font-size: 0.95rem;
   padding: 0.65em 1.4em;
+  min-height: var(--tap-min);
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   cursor: pointer;
@@ -39,8 +40,10 @@
   background-color: var(--color-pitch);
   color: var(--color-surface);
 }
-.ui-btn-primary:hover:not(:disabled) {
-  background-color: var(--color-turf);
+@media (hover: hover) {
+  .ui-btn-primary:hover:not(:disabled) {
+    background-color: var(--color-turf);
+  }
 }
 .ui-btn-primary:active:not(:disabled) {
   background-color: var(--color-pitch-dark);
@@ -52,9 +55,11 @@
   color: var(--color-pitch);
   border-color: var(--color-border);
 }
-.ui-btn-secondary:hover:not(:disabled) {
-  background-color: var(--color-surface-muted);
-  border-color: var(--color-turf);
+@media (hover: hover) {
+  .ui-btn-secondary:hover:not(:disabled) {
+    background-color: var(--color-surface-muted);
+    border-color: var(--color-turf);
+  }
 }
 
 /* danger — acción destructiva (eliminar, salir del equipo) */
@@ -62,8 +67,10 @@
   background-color: var(--color-alert);
   color: var(--color-surface);
 }
-.ui-btn-danger:hover:not(:disabled) {
-  background-color: var(--color-alert-dark);
+@media (hover: hover) {
+  .ui-btn-danger:hover:not(:disabled) {
+    background-color: var(--color-alert-dark);
+  }
 }
 
 /* ghost — acción de bajo énfasis (ej. "volver", texto-only) */
@@ -74,6 +81,8 @@
   padding-left: 0.6em;
   padding-right: 0.6em;
 }
-.ui-btn-ghost:hover:not(:disabled) {
-  background-color: var(--color-surface-muted);
+@media (hover: hover) {
+  .ui-btn-ghost:hover:not(:disabled) {
+    background-color: var(--color-surface-muted);
+  }
 }

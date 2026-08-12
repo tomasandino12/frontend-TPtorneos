@@ -51,7 +51,9 @@
   opacity: 0.65;
   cursor: pointer;
 }
-.ui-toast-close:hover { opacity: 1; }
+@media (hover: hover) {
+  .ui-toast-close:hover { opacity: 1; }
+}
 
 .ui-toast-success {
   background-color: var(--color-success-bg);

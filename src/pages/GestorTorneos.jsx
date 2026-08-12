@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import "../styles/IndexStyle.css";
 import Navbar from "../components/Navbar.jsx";
+import MobileBottomNav from "../components/MobileBottomNav.jsx";
 
 function GestorTorneos() {
   return (
@@ -11,9 +12,11 @@ function GestorTorneos() {
         <Outlet />
       </main>
 
-      <footer className="footer">
+      <footer className="footer gt-page-footer">
         <h5>© 2025 - Gestor de Torneos -Para mas información o problemas con la página contactate a: 341 6173297 o a nuestra cuenta de instagram @todotorneos</h5>
       </footer>
+
+      <MobileBottomNav />
     </div>
   );
 }

@@ -3,6 +3,7 @@
   flex-direction: column;
   gap: 0.35em;
   width: 100%;
+  min-width: 0;
   font-family: var(--font-body);
 }
 
@@ -45,10 +46,20 @@
   outline: none;
   background: transparent;
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--color-ink);
   padding: 0.7em 0;
   text-align: left;
+}
+
+/* Mobile-first: 16px evita que Safari en iOS haga zoom automático al enfocar
+   el campo (cualquier valor menor dispara el zoom y descuadra el layout). A
+   partir de MD (tablet/escritorio) no hay zoom automático táctil, así que se
+   restaura el tamaño más compacto original. */
+@media (min-width: 768px) {
+  .ui-field-input {
+    font-size: 0.95rem;
+  }
 }
 
 .ui-field-input::placeholder {
@@ -68,11 +79,18 @@
   autocompletable (nombre, email, etc.) rompe la paleta de marca.
 */
 .ui-field-input:-webkit-autofill,
-.ui-field-input:-webkit-autofill:hover,
 .ui-field-input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0 1000px var(--color-surface) inset;
   -webkit-text-fill-color: var(--color-ink);
   transition: background-color 9999s ease-in-out 0s;
+}
+
+@media (hover: hover) {
+  .ui-field-input:-webkit-autofill:hover {
+    -webkit-box-shadow: 0 0 0 1000px var(--color-surface) inset;
+    -webkit-text-fill-color: var(--color-ink);
+    transition: background-color 9999s ease-in-out 0s;
+  }
 }
 
 .ui-field-action {
@@ -89,9 +107,11 @@
   font-size: 1.1em;
 }
 
-.ui-field-action:hover {
-  color: var(--color-ink);
-  background-color: var(--color-surface-muted);
+@media (hover: hover) {
+  .ui-field-action:hover {
+    color: var(--color-ink);
+    background-color: var(--color-surface-muted);
+  }
 }
 
 .ui-field-action:focus-visible {

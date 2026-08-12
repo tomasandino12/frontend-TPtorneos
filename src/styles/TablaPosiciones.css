@@ -19,7 +19,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-size: 2rem;
+  font-size: var(--font-size-tabla-titulo);
   color: var(--color-pitch);
   margin-bottom: 0.25rem;
   text-align: center;
@@ -32,37 +32,145 @@
 }
 
 /*
-  Contenedor de scroll propio para la tabla: en mobile permite desplazar
-  horizontalmente y ver todas las columnas (PJ..Pts), en vez de depender de
-  pisar el overflow-x: hidden global del body (antes las columnas de la
-  derecha quedaban recortadas sin forma de verlas).
+  Scroll horizontal: lo resuelve el componente compartido ScrollableTable
+  (src/components/ui/), que envuelve esta tabla con los dos contenedores
+  anidados (recorte de esquinas afuera, overflow-x:auto + accesibilidad
+  adentro) — ver docs/frontend/decisiones-mobile.md.
 */
-.tabla-scroll {
-  overflow-x: auto;
-}
-
 .tabla-posiciones {
   width: 100%;
-  min-width: 560px;
   border-collapse: collapse;
   font-size: 1rem;
+  text-align: left;
+}
+
+/* Solo "Equipo" (2ª columna) es texto — el resto son valores numéricos. */
+.tabla-posiciones th:not(:nth-child(2)),
+.tabla-posiciones td:not(:nth-child(2)) {
   text-align: center;
 }
 
+/*
+  Densidad mobile (Fase 8), mobile-first: celdas más compactas para que
+  entren más columnas visibles antes de necesitar el scroll horizontal, sin
+  eliminar ninguna. A partir de MD vuelve al padding/tamaño original.
+*/
 .tabla-posiciones th {
   background-color: var(--color-success-bg);
   color: var(--color-pitch);
-  padding: 12px 8px;
   font-weight: 600;
   white-space: nowrap;
+  padding: 8px 5px;
 }
 
 .tabla-posiciones td {
-  padding: 10px 8px;
+  padding: 7px 5px;
   border-bottom: 1px solid var(--color-border);
 }
 
+/*
+  Fase 10.1: recorta el padding horizontal solo de la celda "Equipo" (2ª
+  columna) en mobile — unos px más para que "G-E-P" entre sin scroll a
+  393px, sin tocar max-width:120px del nombre (Fase 8) ni el padding
+  vertical (heredado de la regla de arriba: solo se pisan left/right). A
+  partir de MD vuelve al mismo padding horizontal que el resto de las
+  celdas, como estaba antes de este ajuste.
+*/
+.tabla-posiciones td:nth-child(2) {
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+@media (min-width: 768px) {
+  .tabla-posiciones td:nth-child(2) {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+
+/* Los datos "de partido" (PJ, PG/PE/PP o el récord combinado que las
+   reemplaza en mobile, DG) en un tamaño más chico que el resto de la tabla
+   — Pos, Equipo y Pts mantienen el tamaño base. Nunca baja de 12px (0.75rem
+   con el font-size raíz de 16px del proyecto). Antes esto se resolvía con
+   nth-child (columnas 3 a 7); pasa a ser una clase explícita en la Fase 10,
+   porque nth-child ya no alcanza para identificar el mismo grupo de columnas
+   una vez que mobile y desktop muestran una cantidad distinta de ellas
+   (ver .tabla-col-mobile/.tabla-col-desktop más abajo).*/
+.tabla-col-chica {
+  font-size: 0.75rem;
+}
+
+/*
+  Columna de récord combinado (Fase 10), mobile-first: por debajo de 768px,
+  PG/PE/PP (.tabla-col-desktop) se ocultan y se muestra en su lugar una sola
+  columna "G-E-P" (.tabla-col-mobile) con el string "PG-PE-PP" — libera
+  ancho para que entren más columnas sin scroll horizontal en un celular
+  real. A partir de MD vuelve el desglose de siempre en 3 columnas
+  separadas, igual que antes de esta fase.
+*/
+.tabla-col-desktop {
+  display: none;
+}
+
+.tabla-col-mobile {
+  display: table-cell;
+}
+
+@media (min-width: 768px) {
+  .tabla-posiciones {
+    min-width: 560px;
+  }
+
+  .tabla-posiciones th {
+    padding: 12px 8px;
+  }
+
+  .tabla-posiciones td {
+    padding: 10px 8px;
+  }
+
+  .tabla-col-chica {
+    font-size: 1rem;
+  }
+
+  .tabla-col-desktop {
+    display: table-cell;
+  }
+
+  .tabla-col-mobile {
+    display: none;
+  }
+}
+
+/* Encabezado fijo al hacer scroll vertical del contenedor. */
+.tabla-posiciones thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* Primera columna (Pos) fija al hacer scroll horizontal, con fondo opaco
+   propio que respeta el zebra-striping de abajo. */
+.tabla-posiciones th:first-child,
+.tabla-posiciones td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.tabla-posiciones thead th:first-child {
+  z-index: 3;
+}
+
+.tabla-posiciones td:first-child {
+  background-color: var(--color-surface);
+}
+
 .tabla-posiciones tbody tr:nth-child(odd) {
+  background-color: var(--color-surface-muted);
+}
+
+.tabla-posiciones tbody tr:nth-child(odd) td:first-child {
   background-color: var(--color-surface-muted);
 }
 
@@ -70,8 +178,17 @@
   cursor: pointer;
 }
 
-.tabla-posiciones tbody tr:hover {
-  background-color: var(--color-success-bg);
+@media (hover: hover) {
+  .tabla-posiciones tbody tr:hover {
+    background-color: var(--color-success-bg);
+  }
+
+  /* La celda fija (sticky) trae su propio fondo opaco (arriba), así que el
+     hover de la fila no la alcanza por cascada normal — se repite acá para
+     que no quede un fondo distinto al resto de la fila al pasar el mouse. */
+  .tabla-posiciones tbody tr:hover td:first-child {
+    background-color: var(--color-success-bg);
+  }
 }
 
 .positivo {
@@ -86,8 +203,93 @@
   font-size: 1.15rem;
 }
 
+/*
+  Columna de Puntos destacada (Fase 8), mobile-first: fondo distinto al
+  resto de la tabla (con tokens ya existentes) — junto con el font-size ya
+  mayor de arriba, es el segundo diferenciador. A partir de MD vuelve a no
+  tener fondo propio, igual que antes de esta fase.
+*/
+.tabla-posiciones td.puntos {
+  background-color: var(--color-grass);
+}
+
+.tabla-posiciones tbody tr:nth-child(odd) td.puntos {
+  background-color: var(--color-success-bg);
+}
+
+.tabla-posiciones th:last-child {
+  background-color: var(--color-grass);
+}
+
+@media (min-width: 768px) {
+  .tabla-posiciones td.puntos {
+    background-color: transparent;
+  }
+
+  .tabla-posiciones tbody tr:nth-child(odd) td.puntos {
+    background-color: var(--color-surface-muted);
+  }
+
+  .tabla-posiciones th:last-child {
+    background-color: var(--color-success-bg);
+  }
+}
+
 .tabla-baja-tag {
   color: var(--color-alert);
   font-weight: 600;
   font-size: 0.85em;
+}
+
+/*
+  Indicador de color por equipo (Fase 8): círculo generado por hash
+  determinístico del nombre en TablaPosiciones.jsx (el endpoint no devuelve
+  el color real de camiseta — ver comentario en el JSX). Visible en todos
+  los anchos (Fase 9): antes solo se mostraba en mobile.
+*/
+/* Fase 10.1: gap más chico en mobile (unos px más para "G-E-P", mismo
+   motivo que el padding de arriba) — vuelve a 0.4rem desde MD. */
+.tabla-equipo-nombre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .tabla-equipo-nombre {
+    gap: 0.4rem;
+  }
+}
+
+.tabla-equipo-color {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/*
+  Nombres largos truncados con "..." en vez de envolver a varias líneas —
+  sin esto, un nombre largo descuadraba la altura de la fila y la
+  alineación con el swatch de color. El texto completo queda accesible por
+  el atributo title (JSX). min-width:0 es necesario para que el ellipsis
+  funcione: por defecto un ítem flex no se encoge por debajo de su ancho de
+  contenido, sin importar el max-width que tenga.
+*/
+.tabla-equipo-texto {
+  min-width: 0;
+  max-width: 120px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 768px) {
+  .tabla-equipo-texto {
+    max-width: none;
+    overflow: visible;
+    white-space: normal;
+    text-overflow: clip;
+  }
 }

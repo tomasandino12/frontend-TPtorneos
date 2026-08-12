@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { FiFlag, FiSearch, FiEdit2, FiTrash2 } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
-import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
+import { Button, TextField, Card, Alert, PageShell, PageHero, ScrollableTable } from "../components/ui";
 
 const FORM_VACIO = { nombre: "", apellido: "", nro_matricula: "", email: "" };
 
@@ -163,7 +163,7 @@ export default function Arbitros() {
           {error && <Card className="ar-status-card ar-status-error">{error}</Card>}
 
           {!loading && !error && (
-            <div className="ar-table-wrap">
+            <ScrollableTable className="ar-table-wrap" ariaLabel="Tabla de árbitros">
               <table className="ar-table">
                 <thead>
                   <tr>
@@ -200,7 +200,7 @@ export default function Arbitros() {
                   )}
                 </tbody>
               </table>
-            </div>
+            </ScrollableTable>
           )}
         </section>
         </PageHero>

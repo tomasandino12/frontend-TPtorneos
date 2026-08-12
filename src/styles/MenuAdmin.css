@@ -21,37 +21,81 @@
   color: var(--color-alert);
 }
 
-.btn-logout:hover {
-  background-color: var(--color-alert);
-  color: var(--color-surface);
+@media (hover: hover) {
+  .btn-logout:hover {
+    background-color: var(--color-alert);
+    color: var(--color-surface);
+  }
 }
 
-/* Responsive del navbar admin, mobile-first: por defecto (4 botones + avatar
-   + logout no entran en una fila angosta) los links se apilan debajo del
-   logo; a partir de LG vuelven a la barra en una sola línea. */
+/* Header compacto (Fase 3), mobile-first: por debajo de LG el header queda
+   en --header-h con logo + hamburguesa únicamente — los 7 destinos y las
+   acciones (avatar/nombre/"Cerrar sesión") se mudan al drawer lateral
+   (AdminDrawer.jsx). A partir de LG vuelve el navbar de siempre en una sola
+   línea, sin nada de esto. */
 .navdiv {
-  flex-wrap: wrap;
-  row-gap: 0.5rem;
+  flex-wrap: nowrap;
+  row-gap: 0;
+  height: var(--header-h);
+  padding-inline: max(var(--space-4), env(safe-area-inset-left));
 }
 
 .navlinks {
-  order: 3;
-  width: 100%;
-  justify-content: center;
-  flex-wrap: wrap;
+  display: none;
 }
 
 .nav-actions {
-  order: 2;
+  display: none;
+}
+
+.admin-hamburger-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-left: auto;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: 1.4rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.admin-hamburger-btn::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+}
+
+/* react-icons/Feather renderiza un <svg width="1em" height="1em"> crudo que
+   colapsa a width:0 en Chromium dentro de un contenedor flex (mismo bug ya
+   resuelto para .jugador-expulsar-btn en Equipos.css y .notif-bell-btn en
+   NotificationBell.css) — se fija el tamaño acá. */
+.admin-hamburger-btn svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  flex-shrink: 0;
+}
+
+.admin-hamburger-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 @media (min-width: 1024px) {
   .navdiv {
     flex-wrap: nowrap;
     row-gap: 0;
+    height: auto;
+    padding: 14px 32px;
   }
 
   .navlinks {
+    display: flex;
     order: 0;
     width: auto;
     justify-content: flex-start;
@@ -59,7 +103,12 @@
   }
 
   .nav-actions {
+    display: flex;
     order: 0;
+  }
+
+  .admin-hamburger-btn {
+    display: none;
   }
 }
 
@@ -118,9 +167,11 @@
   vertical-align: middle;
 }
 
-.admin-nav-btn:hover {
-  background-color: var(--color-surface-muted);
-  color: var(--color-ink);
+@media (hover: hover) {
+  .admin-nav-btn:hover {
+    background-color: var(--color-surface-muted);
+    color: var(--color-ink);
+  }
 }
 
 .admin-nav-btn.active {
@@ -221,8 +272,10 @@
   transition: background 0.15s;
 }
 
-.admin-dropdown-item:hover {
-  background: var(--color-success-bg);
+@media (hover: hover) {
+  .admin-dropdown-item:hover {
+    background: var(--color-success-bg);
+  }
 }
 
 .admin-dropdown-item:focus-visible {
@@ -309,10 +362,12 @@
   transition: border-color 0.18s, transform 0.12s, box-shadow 0.18s;
 }
 
-.admin-card:hover {
-  border-color: var(--color-turf);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+@media (hover: hover) {
+  .admin-card:hover {
+    border-color: var(--color-turf);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
 }
 
 .admin-card-disabled {
@@ -320,10 +375,12 @@
   opacity: 0.6;
 }
 
-.admin-card-disabled:hover {
-  border-color: var(--color-border);
-  transform: none;
-  box-shadow: var(--shadow-sm);
+@media (hover: hover) {
+  .admin-card-disabled:hover {
+    border-color: var(--color-border);
+    transform: none;
+    box-shadow: var(--shadow-sm);
+  }
 }
 
 .admin-card-icon {

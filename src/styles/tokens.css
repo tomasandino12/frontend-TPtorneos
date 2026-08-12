@@ -80,6 +80,30 @@
   --z-navbar: 100;
   --z-dropdown: 200;
   --z-modal: 300;
+
+  /* ---- Fase 1 rediseño mobile: target táctil, header/bottomnav, espaciado, tipografía fluida ----
+     --tap-min: alto/ancho mínimo recomendado para cualquier elemento tocable.
+     --header-h / --bottomnav-h: alturas fijas usadas por el header compacto y la
+     barra inferior mobile (Fase 2/3) para poder calcular paddings de reserva. */
+  --tap-min: 44px;
+  --header-h: 56px;
+  --bottomnav-h: 60px;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 2.5rem;
+  --space-8: 3rem;
+
+  /* Escala tipográfica fluida: el máximo coincide con el valor fijo que tenía
+     cada título en escritorio (no cambia nada a partir de donde el clamp
+     alcanza su tope, bastante antes de 768px), el mínimo es exactamente la
+     mitad para cumplir el criterio de redimensionado de texto al 200%. */
+  --font-size-hero-title: clamp(1.1rem, 4vw + 0.6rem, 2.2rem);
+  --font-size-tabla-titulo: clamp(1rem, 4vw + 0.5rem, 2rem);
 }
 
 /*

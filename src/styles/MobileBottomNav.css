@@ -1,0 +1,83 @@
+/*
+  z-index menor al de .gt-navbar (var(--z-navbar)) a propósito: el panel de
+  notificaciones (NotificationBell.jsx) sigue viviendo DENTRO de .gt-navbar
+  (no se movió de lugar, a diferencia de AccountSheet/AdminDrawer, para no
+  tocar su listener de click-afuera existente) y en mobile pasa a ser una
+  hoja fija a pantalla completa. Como .gt-navbar tiene su propio
+  position:sticky + z-index, crea un stacking context que confina a CUALQUIER
+  descendiente fixed a su mismo nivel (100), sin importar el z-index local
+  que tenga ese descendiente — así que si esta barra usara ese mismo nivel,
+  al ser hermana y posterior en el DOM ganaría el empate y taparía el panel.
+  Con un valor menor acá, el nivel confinado de .gt-navbar (100) queda arriba
+  del de esta barra, sin importar el orden en el DOM.
+*/
+.gt-bottomnav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -2px 8px rgba(22, 36, 27, 0.08);
+}
+
+.gt-bottomnav-list {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  height: var(--bottomnav-h);
+}
+
+.gt-bottomnav-list li {
+  flex: 1;
+  display: flex;
+}
+
+.gt-bottomnav-link {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  min-height: var(--tap-min);
+  text-decoration: none;
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+.gt-bottomnav-icon {
+  font-size: 1.3rem;
+}
+
+/* Estado activo: no solo color, también peso tipográfico (accesibilidad
+   para quienes no distinguen bien el contraste de color). */
+.gt-bottomnav-link.active {
+  color: var(--color-pitch);
+  font-weight: 700;
+}
+
+/* Reserva de espacio para que el footer no quede tapado detrás de la barra
+   fija. Va en el footer (último elemento del flujo) y no en <main>: la barra
+   es position:fixed, así que un padding-bottom dentro de main no empuja al
+   footer — el footer es un hermano posterior, no un hijo de main. */
+.gt-page-footer {
+  padding-bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom));
+}
+
+/* Mobile-first: la barra inferior solo existe por debajo de 768px — a partir
+   de MD el navbar apilado actual ya entra cómodo en una fila. */
+@media (min-width: 768px) {
+  .gt-bottomnav {
+    display: none;
+  }
+
+  .gt-page-footer {
+    padding-bottom: 0;
+  }
+}

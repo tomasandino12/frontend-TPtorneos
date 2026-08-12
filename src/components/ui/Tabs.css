@@ -20,8 +20,10 @@
   transition: color 0.15s ease, border-color 0.15s ease;
 }
 
-.ui-tabs-tab:hover {
-  color: var(--color-ink);
+@media (hover: hover) {
+  .ui-tabs-tab:hover {
+    color: var(--color-ink);
+  }
 }
 
 .ui-tabs-tab.active {

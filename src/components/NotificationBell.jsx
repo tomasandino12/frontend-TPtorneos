@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { FiBell, FiUserX, FiAlertTriangle, FiUserCheck, FiGrid } from "react-icons/fi";
+import { FiBell, FiUserX, FiAlertTriangle, FiUserCheck, FiGrid, FiX } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
 import { Alert } from "./ui";
 import "../styles/NotificationBell.css";
@@ -106,40 +106,59 @@ export default function NotificationBell() {
       </button>
 
       {abierto && (
-        <div className="notif-panel" role="menu">
-          <div className="notif-panel-header">Notificaciones</div>
-          {error ? (
-            <div className="notif-panel-error">
-              <Alert variant="error">No se pudieron cargar las notificaciones.</Alert>
+        <>
+          {/* Solo visible <768px (ver NotificationBell.css): el panel pasa a
+              hoja inferior a ancho completo y este overlay es la única forma
+              de "tocar afuera" para cerrarlo, ya que a ese ancho no queda
+              nada del documento realmente afuera del panel. No reemplaza el
+              listener de click-afuera existente (sigue activo para
+              escritorio) — solo se le agrega este cierre explícito. */}
+          <div className="notif-panel-overlay" onClick={() => setAbierto(false)} />
+          <div className="notif-panel" role="menu">
+            <div className="notif-panel-header">
+              <span>Notificaciones</span>
+              <button
+                type="button"
+                className="notif-panel-cerrar"
+                onClick={() => setAbierto(false)}
+                aria-label="Cerrar"
+              >
+                <FiX />
+              </button>
             </div>
-          ) : notificaciones.length === 0 ? (
-            <p className="notif-panel-vacio">No tenés notificaciones.</p>
-          ) : (
-            <ul className="notif-panel-lista">
-              {notificaciones.map((n) => {
-                const Icono = TIPO_ICONOS[n.tipo] ?? FiBell;
-                return (
-                  <li key={n.id}>
-                    <button
-                      type="button"
-                      className={`notif-item${n.leida ? "" : " notif-item-no-leida"}`}
-                      onClick={() => handleMarcarLeida(n.id)}
-                    >
-                      <span className="notif-item-icono">
-                        <Icono />
-                      </span>
-                      <span className="notif-item-texto">
-                        <span className="notif-item-mensaje">{n.mensaje}</span>
-                        <span className="notif-item-tiempo">{tiempoRelativo(n.fecha)}</span>
-                      </span>
-                      {!n.leida && <span className="notif-item-punto" aria-hidden="true" />}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
+            {error ? (
+              <div className="notif-panel-error">
+                <Alert variant="error">No se pudieron cargar las notificaciones.</Alert>
+              </div>
+            ) : notificaciones.length === 0 ? (
+              <p className="notif-panel-vacio">No tenés notificaciones.</p>
+            ) : (
+              <ul className="notif-panel-lista">
+                {notificaciones.map((n) => {
+                  const Icono = TIPO_ICONOS[n.tipo] ?? FiBell;
+                  return (
+                    <li key={n.id}>
+                      <button
+                        type="button"
+                        className={`notif-item${n.leida ? "" : " notif-item-no-leida"}`}
+                        onClick={() => handleMarcarLeida(n.id)}
+                      >
+                        <span className="notif-item-icono">
+                          <Icono />
+                        </span>
+                        <span className="notif-item-texto">
+                          <span className="notif-item-mensaje">{n.mensaje}</span>
+                          <span className="notif-item-tiempo">{tiempoRelativo(n.fecha)}</span>
+                        </span>
+                        {!n.leida && <span className="notif-item-punto" aria-hidden="true" />}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </>
       )}
     </div>
   );

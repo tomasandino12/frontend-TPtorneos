@@ -1,0 +1,27 @@
+.ui-scrollable-table {
+  position: relative;
+  overflow: hidden;
+}
+
+.ui-scrollable-table-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.ui-scrollable-table-scroll:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Indicador de scroll: degradado sobre el borde derecho — sin esto el
+   usuario no descubre que hay más columnas fuera de pantalla. */
+.ui-scrollable-table::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, rgba(22, 36, 27, 0.14) 85%);
+}
