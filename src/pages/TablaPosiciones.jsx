@@ -6,11 +6,10 @@ import { FiAward } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
 import { Alert, PageShell, ScrollableTable } from "../components/ui";
 
-// El endpoint de estadísticas no devuelve el color de camiseta del equipo
-// (confirmado contra el backend: la entidad Equipo lo tiene, pero
-// getEstadisticasTorneo no lo incluye en la respuesta) — se genera acá un
-// color determinístico a partir del nombre, no el color real de la
-// camiseta. Mismo nombre, siempre el mismo color entre renders.
+// Hash determinístico a partir del nombre — respaldo SOLO para el caso
+// (no esperado, pero posible) de que colorPrimario venga null para algún
+// equipo. Desde que getEstadisticasTorneo devuelve colorPrimario (color
+// real de camiseta), este hash dejó de ser la fuente principal del color.
 function colorPorEquipo(nombre) {
   let hash = 0;
   for (let i = 0; i < nombre.length; i++) {
@@ -141,7 +140,7 @@ useEffect(() => {
                     <span className="tabla-equipo-nombre">
                       <span
                         className="tabla-equipo-color"
-                        style={{ backgroundColor: colorPorEquipo(est.nombreEquipo) }}
+                        style={{ backgroundColor: est.colorPrimario || colorPorEquipo(est.nombreEquipo) }}
                         aria-hidden="true"
                       />
                       <span className="tabla-equipo-texto" title={est.nombreEquipo}>

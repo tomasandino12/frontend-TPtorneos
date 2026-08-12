@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiArrowLeft, FiEdit2, FiUpload, FiBarChart2, FiSearch, FiSend, FiLogOut, FiX, FiRepeat, FiCheckCircle, FiUserX, FiPlus, FiInfo } from "react-icons/fi";
-import { apiFetch, apiFetchFormData, ASSETS_URL } from "../utils/api.js";
+import { FiArrowLeft, FiEdit2, FiBarChart2, FiSearch, FiSend, FiLogOut, FiX, FiRepeat, FiCheckCircle, FiUserX, FiPlus, FiInfo } from "react-icons/fi";
+import { apiFetch } from "../utils/api.js";
 import { Button, TextField, Alert, PageHero, Tabs, Modal, ScrollableTable } from "./ui";
 import Convocatoria from "./Convocatoria.jsx";
 
 /**
- * Contenido de "detalle de un equipo" (header con escudo, descripción,
+ * Contenido de "detalle de un equipo" (header con nombre, descripción,
  * plantel + reclutamiento). Reutilizado por:
  * - EquipoDetalle.jsx (ruta /equipo/:id, para ver CUALQUIER equipo —
  *   ej. desde un click en Tabla de Posiciones — de solo lectura si no sos
@@ -14,7 +14,7 @@ import Convocatoria from "./Convocatoria.jsx";
  * - Equipos.jsx, cuando el jugador logueado ya tiene equipo: se renderiza
  *   directo para su propio equipo, sin el paso intermedio de "Ver mi equipo".
  *
- * Los controles de edición (escudo, descripción, agregar jugadores) solo
+ * Los controles de edición (descripción, agregar jugadores) solo
  * se renderizan si el jugador logueado es capitán de ESTE equipo — si no,
  * no aparecen (no alcanza con deshabilitarlos). Ese gating es de UI: no
  * reemplaza ninguna validación que deba existir del lado del servidor.
@@ -59,8 +59,6 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
   const [descripcionForm, setDescripcionForm] = useState("");
   const [guardandoDescripcion, setGuardandoDescripcion] = useState(false);
   const [descripcionFeedback, setDescripcionFeedback] = useState(null);
-  const [subiendoEscudo, setSubiendoEscudo] = useState(false);
-  const [escudoFeedback, setEscudoFeedback] = useState(null);
 
   // Reclutamiento (solo capitán)
   const [jugadoresSinEquipo, setJugadoresSinEquipo] = useState([]);
@@ -271,33 +269,6 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
       setDescripcionFeedback({ variant: "error", text: err.message });
     } finally {
       setGuardandoDescripcion(false);
-    }
-  };
-
-  const handleSubirEscudo = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.type !== "image/jpeg") {
-      setEscudoFeedback({ variant: "error", text: "El escudo debe ser un archivo .jpg o .jpeg." });
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("escudo", file);
-
-    setSubiendoEscudo(true);
-    setEscudoFeedback(null);
-    try {
-      const response = await apiFetchFormData(`/equipos/${equipoId}/escudo`, formData);
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Error al subir el escudo");
-      setEquipo({ ...equipo, escudoUrl: data.data.escudoUrl });
-    } catch (err) {
-      setEscudoFeedback({ variant: "error", text: err.message });
-    } finally {
-      setSubiendoEscudo(false);
-      e.target.value = "";
     }
   };
 
@@ -821,20 +792,6 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
     <>
       <PageHero
         layout="split"
-        icon={
-          equipo.escudoUrl ? (
-            <img
-              src={`${ASSETS_URL}${equipo.escudoUrl}`}
-              alt={`Escudo de ${equipo.nombreEquipo}`}
-              className="escudo-preview"
-            />
-          ) : (
-            <span
-              className="escudo-preview escudo-preview-empty"
-              style={{ backgroundColor: equipo.colorPrimario || "#e5e7eb" }}
-            />
-          )
-        }
         title={equipo.nombreEquipo}
         subtitle="Gestión del equipo"
         actions={
@@ -856,24 +813,6 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
           </>
         }
       >
-        {esCapitanDeEsteEquipo && (
-          <div className="escudo-upload">
-            <input
-              id="escudo-input"
-              type="file"
-              accept=".jpg,.jpeg,image/jpeg"
-              onChange={handleSubirEscudo}
-              disabled={subiendoEscudo}
-              className="escudo-input-hidden"
-            />
-            <label htmlFor="escudo-input" className="ui-btn ui-btn-secondary escudo-upload-btn">
-              <FiUpload /> {subiendoEscudo ? "Subiendo..." : "Cambiar escudo (.jpg)"}
-            </label>
-            <span className="escudo-upload-hint">Se muestra arriba, junto al nombre del equipo</span>
-          </div>
-        )}
-        {escudoFeedback && <Alert variant={escudoFeedback.variant}>{escudoFeedback.text}</Alert>}
-
       {/* Sobre el equipo — siempre visible, fuera de las pestañas */}
       <section className="detalle-seccion">
         <h2 className="titulo-seccion">Sobre el equipo</h2>

@@ -80,27 +80,30 @@
   font-weight: 600;
 }
 
+/*
+  margin-left:auto ancla el bloque de usuario (campana/avatar/logout) a la
+  esquina superior derecha en cualquier ancho (Fase 9 lo agregó solo desde
+  MD; Fase 11 lo extiende por debajo de 768px, donde el mismo síntoma
+  apareció en el header compacto de mobile). gt-navlinks (el otro flex item
+  con flex:1, más abajo) es el que normalmente empuja gt-nav-actions a la
+  derecha, pero: por debajo de 768px directamente no se renderiza
+  (display:none, los links viven en MobileBottomNav) y entre 768px y 1023px
+  tiene order:3 y width:100% (baja a su propia fila) — en ninguno de los dos
+  casos está en la misma línea que gt-nav-actions para empujarlo. Con
+  margin-left:auto puesto acá sin condicionar a un breakpoint, el resultado
+  es el mismo en los tres casos: cuando gt-navlinks SÍ comparte línea
+  (≥1024px) ya no queda espacio libre para este margen — así que no cambia
+  nada ahí — y cuando no la comparte (<1024px, con o sin gt-navlinks
+  presente), es lo único que empuja el bloque hasta el borde. El padding
+  inline del contenedor (línea de gt-navbar-inner más arriba) es lo que seguí
+  respetando como límite real de ese borde — el margin no lo pisa, solo
+  ocupa el espacio libre que queda dentro de él.
+*/
 .gt-nav-actions {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-}
-
-/*
-  Ancla el bloque de usuario (campana/avatar/logout) a la esquina superior
-  derecha desde MD. Sin esto, entre 768px y 1023px queda pegado al logo: acá
-  gt-navlinks (el otro flex item con flex:1, más abajo) es el que normalmente
-  empuja gt-nav-actions a la derecha, pero en ese rango tiene order:3 y
-  width:100% (baja a su propia fila), así que no está en la misma línea para
-  empujar nada. margin-left:auto resuelve ambos casos: cuando gt-navlinks SÍ
-  comparte línea (≥1024px) ya no queda espacio libre para este margen — así
-  que no cambia nada ahí — y cuando no la comparte (768–1023px), es lo único
-  que empuja el bloque hasta el borde.
-*/
-@media (min-width: 768px) {
-  .gt-nav-actions {
-    margin-left: auto;
-  }
+  margin-left: auto;
 }
 
 .gt-user-info {
