@@ -695,11 +695,23 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
                     {j.nombre} {j.apellido} <FiInfo />
                   </button>
                   {invitadosIds.includes(j.id) ? (
-                    <Button variant="secondary" icon={<FiSend />} disabled>
+                    <Button
+                      variant="secondary"
+                      icon={<FiSend />}
+                      disabled
+                      className="invitar-btn"
+                      aria-label={`Invitación ya enviada a ${j.nombre} ${j.apellido}`}
+                    >
                       Invitación enviada
                     </Button>
                   ) : (
-                    <Button icon={<FiSend />} onClick={() => handleInvitar(j.id)} disabled={plantelCompleto}>
+                    <Button
+                      icon={<FiSend />}
+                      onClick={() => handleInvitar(j.id)}
+                      disabled={plantelCompleto}
+                      className="invitar-btn"
+                      aria-label={`Enviar invitación a ${j.nombre} ${j.apellido}`}
+                    >
                       Enviar invitación
                     </Button>
                   )}

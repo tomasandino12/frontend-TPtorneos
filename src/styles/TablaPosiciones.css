@@ -195,11 +195,10 @@
 }
 
 /*
-  Indicador de color por equipo (Fase 8), mobile-first: círculo generado por
-  hash determinístico del nombre en TablaPosiciones.jsx (el endpoint no
-  devuelve el color real de camiseta — ver comentario en el JSX). Se oculta
-  a partir de MD: por encima de 768px la tabla vuelve a verse exactamente
-  igual que antes de esta fase.
+  Indicador de color por equipo (Fase 8): círculo generado por hash
+  determinístico del nombre en TablaPosiciones.jsx (el endpoint no devuelve
+  el color real de camiseta — ver comentario en el JSX). Visible en todos
+  los anchos (Fase 9): antes solo se mostraba en mobile.
 */
 .tabla-equipo-nombre {
   display: inline-flex;
@@ -232,10 +231,6 @@
 }
 
 @media (min-width: 768px) {
-  .tabla-equipo-color {
-    display: none;
-  }
-
   .tabla-equipo-texto {
     max-width: none;
     overflow: visible;

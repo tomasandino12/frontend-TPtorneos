@@ -86,6 +86,23 @@
   gap: 0.85rem;
 }
 
+/*
+  Ancla el bloque de usuario (campana/avatar/logout) a la esquina superior
+  derecha desde MD. Sin esto, entre 768px y 1023px queda pegado al logo: acá
+  gt-navlinks (el otro flex item con flex:1, más abajo) es el que normalmente
+  empuja gt-nav-actions a la derecha, pero en ese rango tiene order:3 y
+  width:100% (baja a su propia fila), así que no está en la misma línea para
+  empujar nada. margin-left:auto resuelve ambos casos: cuando gt-navlinks SÍ
+  comparte línea (≥1024px) ya no queda espacio libre para este margen — así
+  que no cambia nada ahí — y cuando no la comparte (768–1023px), es lo único
+  que empuja el bloque hasta el borde.
+*/
+@media (min-width: 768px) {
+  .gt-nav-actions {
+    margin-left: auto;
+  }
+}
+
 .gt-user-info {
   display: flex;
   align-items: center;

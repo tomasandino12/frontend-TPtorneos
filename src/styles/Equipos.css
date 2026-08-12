@@ -158,6 +158,39 @@
   flex-shrink: 0;
 }
 
+/*
+  Botón "Enviar invitación" / "Invitación enviada" compacto en mobile (Fase
+  9): con el texto completo era más ancho que el nombre del jugador al lado
+  y descuadraba la fila en pantallas angostas. Mobile-first: por debajo de
+  768px se oculta el texto (.ui-btn-label) y queda solo el ícono, cuadrado,
+  con el mínimo táctil de 44x44 ya establecido (--tap-min) — el aria-label
+  puesto en el JSX (EquipoInfo.jsx) mantiene el botón legible por lector de
+  pantalla aunque el texto visual desaparezca. A partir de MD vuelve al
+  botón normal con texto e ícono.
+*/
+.ui-btn.invitar-btn {
+  width: var(--tap-min);
+  height: var(--tap-min);
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.invitar-btn .ui-btn-label {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .ui-btn.invitar-btn {
+    width: auto;
+    height: auto;
+    padding: 0.65em 1.4em;
+  }
+
+  .invitar-btn .ui-btn-label {
+    display: inline;
+  }
+}
+
 /* Búsqueda + filtro por posición, modal "Agregar jugadores" */
 .agregar-jugador-filtros {
   display: flex;
@@ -236,6 +269,20 @@
   margin-top: 1rem;
 }
 
+/*
+  font-size:0 (Fase 9): si el <img> no carga (404 u otro error, ver
+  pendientes.md #12 — bug real encontrado en la ficha de Arsenal), el
+  navegador dibuja el ícono de "imagen rota" + el texto alt ahí adentro, y
+  ese texto se derrama fuera de la caja de 64x64 declarada y queda
+  superpuesto al título/subtítulo de al lado en PageHero. `overflow:hidden`
+  NO lo resuelve (probado): es un quirk conocido de Chromium, el texto de
+  fallback de un <img> roto ignora el overflow tanto del propio <img> como
+  el de sus contenedores. font-size:0 sí funciona porque colapsa el texto a
+  tamaño cero sin removerlo del DOM — el atributo `alt` sigue intacto y lo
+  sigue leyendo un lector de pantalla, que no depende del tamaño visual del
+  texto. No afecta el caso de imagen cargada: object-fit:cover ya recorta
+  el contenido dentro de la caja y no hay texto que mostrar.
+*/
 .escudo-preview {
   width: 64px;
   height: 64px;
@@ -243,6 +290,7 @@
   object-fit: cover;
   box-shadow: var(--shadow-sm);
   flex-shrink: 0;
+  font-size: 0;
 }
 
 .escudo-preview-empty {
