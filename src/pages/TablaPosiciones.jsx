@@ -20,6 +20,13 @@ function colorPorEquipo(nombre) {
   return `hsl(${hue}, 62%, 45%)`;
 }
 
+// Desglose en palabras de PG/PE/PP para el aria-label de la columna
+// "récord" (Fase 10) — singular solo cuando la cantidad es exactamente 1,
+// plural en cualquier otro caso (incluido 0: "0 empatados").
+function pluralizar(cantidad, singular, plural) {
+  return `${cantidad} ${cantidad === 1 ? singular : plural}`;
+}
+
 function TablaPosiciones() {
   const [estadisticas, setEstadisticas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -115,11 +122,14 @@ useEffect(() => {
               <tr>
                 <th>Pos</th>
                 <th>Equipo</th>
-                <th><abbr title="Partidos jugados">PJ</abbr></th>
-                <th><abbr title="Partidos ganados">PG</abbr></th>
-                <th><abbr title="Partidos empatados">PE</abbr></th>
-                <th><abbr title="Partidos perdidos">PP</abbr></th>
-                <th><abbr title="Diferencia de gol">DG</abbr></th>
+                <th className="tabla-col-chica"><abbr title="Partidos jugados">PJ</abbr></th>
+                <th className="tabla-col-chica tabla-col-desktop"><abbr title="Partidos ganados">PG</abbr></th>
+                <th className="tabla-col-chica tabla-col-desktop"><abbr title="Partidos empatados">PE</abbr></th>
+                <th className="tabla-col-chica tabla-col-desktop"><abbr title="Partidos perdidos">PP</abbr></th>
+                <th className="tabla-col-chica tabla-col-mobile">
+                  <abbr title="Ganados-Empatados-Perdidos">G-E-P</abbr>
+                </th>
+                <th className="tabla-col-chica"><abbr title="Diferencia de gol">DG</abbr></th>
                 <th><abbr title="Puntos">Pts</abbr></th>
               </tr>
             </thead>
@@ -142,11 +152,17 @@ useEffect(() => {
                       <span className="tabla-baja-tag"> (Baja)</span>
                     )}
                   </td>
-                  <td className="stat-numeral">{est.pj}</td>
-                  <td className="stat-numeral positivo">{est.pg}</td>
-                  <td className="stat-numeral">{est.pe}</td>
-                  <td className="stat-numeral negativo">{est.pp}</td>
-                  <td className={`stat-numeral ${est.dg >= 0 ? "positivo" : "negativo"}`}>
+                  <td className="stat-numeral tabla-col-chica">{est.pj}</td>
+                  <td className="stat-numeral positivo tabla-col-chica tabla-col-desktop">{est.pg}</td>
+                  <td className="stat-numeral tabla-col-chica tabla-col-desktop">{est.pe}</td>
+                  <td className="stat-numeral negativo tabla-col-chica tabla-col-desktop">{est.pp}</td>
+                  <td
+                    className="stat-numeral tabla-col-chica tabla-col-mobile"
+                    aria-label={`${pluralizar(est.pg, "ganado", "ganados")}, ${pluralizar(est.pe, "empatado", "empatados")}, ${pluralizar(est.pp, "perdido", "perdidos")}`}
+                  >
+                    {est.pg}-{est.pe}-{est.pp}
+                  </td>
+                  <td className={`stat-numeral tabla-col-chica ${est.dg >= 0 ? "positivo" : "negativo"}`}>
                     {est.dg > 0 ? "+" : ""}{est.dg}
                   </td>
                   <td className="stat-numeral puntos">{est.pts}</td>
