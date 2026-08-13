@@ -1,25 +1,26 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FiAward, FiChevronDown, FiList, FiPlusCircle, FiFlag, FiMapPin, FiUsers, FiLogOut, FiMenu } from "react-icons/fi";
+import { FiAward, FiChevronDown, FiList, FiPlusCircle, FiFlag, FiMapPin, FiUsers, FiSearch, FiAlertTriangle, FiLogOut, FiMenu } from "react-icons/fi";
 import AdminDrawer from "./AdminDrawer.jsx";
 import "../styles/IndexStyle.css";
 import "../styles/MenuAdmin.css";
 
 const OTHER_NAV = [
   { label: "Arbitraje", icon: FiFlag, path: "/admin/arbitros" },
-  { label: "Jugadores", icon: FiUsers, path: "/admin/jugadores" },
 ];
 
 export default function AdminHeader({ admin, onLogout }) {
   const navigate = useNavigate();
   const location = useLocation();
-  // Un solo estado indica cuál de los dos dropdowns ('torneos' | 'canchas')
+  // Un solo estado indica cuál de los tres dropdowns ('torneos' | 'canchas' | 'sanciones')
   // está abierto — abrir uno cierra el otro, como en cualquier navbar.
   const [openMenu, setOpenMenu] = useState(null);
   const wrapRefTorneos = useRef(null);
   const triggerRefTorneos = useRef(null);
   const wrapRefCanchas = useRef(null);
   const triggerRefCanchas = useRef(null);
+  const wrapRefSanciones = useRef(null);
+  const triggerRefSanciones = useRef(null);
 
   // Drawer lateral (<1024px) — ver AdminDrawer.jsx. Se renderiza como
   // hermano de <nav>, no como hijo: <nav> tiene position:sticky + z-index
@@ -39,15 +40,19 @@ export default function AdminHeader({ admin, onLogout }) {
   useEffect(() => {
     if (!openMenu) return;
 
+    const triggerRefs = { torneos: triggerRefTorneos, canchas: triggerRefCanchas, sanciones: triggerRefSanciones };
+
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
         setOpenMenu(null);
-        (openMenu === "torneos" ? triggerRefTorneos : triggerRefCanchas).current?.focus();
+        triggerRefs[openMenu]?.current?.focus();
       }
     };
     const handleClickOutside = (e) => {
       const dentroDeAlguno =
-        wrapRefTorneos.current?.contains(e.target) || wrapRefCanchas.current?.contains(e.target);
+        wrapRefTorneos.current?.contains(e.target) ||
+        wrapRefCanchas.current?.contains(e.target) ||
+        wrapRefSanciones.current?.contains(e.target);
       if (!dentroDeAlguno) {
         setOpenMenu(null);
       }
@@ -69,6 +74,7 @@ export default function AdminHeader({ admin, onLogout }) {
 
   const isTorneos = location.pathname.startsWith("/admin/torneos");
   const isCanchas = location.pathname.startsWith("/admin/canchas");
+  const isSanciones = location.pathname.startsWith("/admin/jugadores") || location.pathname.startsWith("/admin/sanciones");
   const initials = `${admin.nombre?.[0] ?? ""}${admin.apellido?.[0] ?? ""}`.toUpperCase();
 
   return (
@@ -170,6 +176,50 @@ export default function AdminHeader({ admin, onLogout }) {
                     <div>
                       <span className="admin-dropdown-label">Nueva cancha</span>
                       <span className="admin-dropdown-desc">Agregar una cancha nueva</span>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </li>
+
+            {/* Dropdown: Sanciones — mismo patrón que Mis Torneos / Canchas */}
+            <li className="admin-dropdown-wrap" ref={wrapRefSanciones} onBlur={handleBlur(wrapRefSanciones)}>
+              <button
+                ref={triggerRefSanciones}
+                className={`admin-nav-btn${isSanciones ? " active" : ""}`}
+                onClick={() => setOpenMenu((v) => (v === "sanciones" ? null : "sanciones"))}
+                aria-haspopup="true"
+                aria-expanded={openMenu === "sanciones"}
+              >
+                <FiUsers />
+                Sanciones
+                <FiChevronDown className="admin-nav-chevron" />
+              </button>
+
+              {openMenu === "sanciones" && (
+                <div className="admin-dropdown">
+                  <button
+                    className="admin-dropdown-item"
+                    onClick={() => { navigate("/admin/jugadores"); setOpenMenu(null); }}
+                  >
+                    <div className="admin-dropdown-icon">
+                      <FiSearch />
+                    </div>
+                    <div>
+                      <span className="admin-dropdown-label">Buscar Jugador</span>
+                      <span className="admin-dropdown-desc">Encontrá un jugador y gestioná su estado</span>
+                    </div>
+                  </button>
+                  <button
+                    className="admin-dropdown-item"
+                    onClick={() => { navigate("/admin/sanciones"); setOpenMenu(null); }}
+                  >
+                    <div className="admin-dropdown-icon">
+                      <FiAlertTriangle />
+                    </div>
+                    <div>
+                      <span className="admin-dropdown-label">Registro de Sanciones</span>
+                      <span className="admin-dropdown-desc">Historial de suspensiones de tus torneos</span>
                     </div>
                   </button>
                 </div>

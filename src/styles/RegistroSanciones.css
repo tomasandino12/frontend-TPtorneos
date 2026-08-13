@@ -1,0 +1,178 @@
+/*
+  El hero + PageShell vienen de src/components/ui (PageHero.css/PageShell.css).
+  Acá solo lo específico de esta pantalla, prefijo .rs-.
+*/
+
+.rs-list {
+  padding: 0.75rem 0 0;
+}
+
+/* ── Tabs (mismo patrón que MisTorneos .mt-tab) ─────────────────────────── */
+
+.rs-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.rs-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+@media (hover: hover) {
+  .rs-tab:hover:not(.active) {
+    border-color: var(--color-turf);
+    color: var(--color-pitch);
+  }
+}
+
+.rs-tab.active {
+  background: var(--color-pitch);
+  border-color: var(--color-pitch);
+  color: var(--color-surface);
+}
+
+.rs-tab:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.rs-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 0.375rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.08);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.rs-tab.active .rs-tab-count {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Controls ────────────────────────────────────────────────────────────── */
+
+.rs-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.rs-search {
+  flex: 1;
+}
+
+/* ── Status (loading / error) ───────────────────────────────────────────── */
+
+.rs-status-card {
+  text-align: center;
+  color: var(--color-muted);
+}
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+
+.rs-table-wrap {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.rs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rs-table th {
+  background: var(--color-success-bg);
+  color: var(--color-pitch);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  text-align: left;
+  padding: 0.5rem 0.625rem;
+}
+
+.rs-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.rs-table td {
+  padding: 0.5rem 0.625rem;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  vertical-align: middle;
+}
+
+@media (hover: hover) {
+  .rs-table tr:hover td {
+    background: var(--color-surface-muted);
+  }
+}
+
+.rs-table-vacio {
+  text-align: center;
+  color: var(--color-muted);
+  padding: 2rem !important;
+}
+
+.rs-badge {
+  padding: 0.25rem 0.625rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rs-table-acciones {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+/* ── Modal de eliminar sanción (mismo patrón que MisTorneos .mt-modal-eliminar) ── */
+
+.rs-modal-eliminar p {
+  margin: 0 0 1rem;
+  color: var(--color-ink);
+  line-height: 1.5;
+}
+
+.rs-modal-eliminar-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (min-width: 768px) {
+  .rs-controls { flex-direction: row; align-items: flex-end; }
+  .rs-table th, .rs-table td { padding: 0.75rem 1rem; }
+  .rs-table td { font-size: 0.875rem; }
+}

@@ -21,6 +21,7 @@ import Arbitros from "./pages/Arbitros.jsx"
 import Canchas from "./pages/Canchas.jsx"
 import CrearCancha from "./pages/CrearCancha.jsx"
 import Jugadores from "./pages/Jugadores.jsx"
+import RegistroSanciones from "./pages/RegistroSanciones.jsx"
 import OlvidePassword from "./pages/OlvidePassword.jsx"
 import RestablecerPassword from "./pages/RestablecerPassword.jsx"
 
@@ -55,6 +56,7 @@ function App() {
         <Route path="/admin/canchas" element={<AdminRoute><Canchas /></AdminRoute>} />
         <Route path="/admin/canchas/nueva" element={<AdminRoute><CrearCancha /></AdminRoute>} />
         <Route path="/admin/jugadores" element={<AdminRoute><Jugadores /></AdminRoute>} />
+        <Route path="/admin/sanciones" element={<AdminRoute><RegistroSanciones /></AdminRoute>} />
 
         {/* 📂 Sección con layout: Gestor de Torneos */}
         <Route path="/gestorTorneos" element={<PrivateRoute><GestorTorneos /></PrivateRoute>}>

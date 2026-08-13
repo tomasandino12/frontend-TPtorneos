@@ -1,12 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { FiAward, FiList, FiPlusCircle, FiFlag, FiMapPin, FiUsers, FiLogOut, FiX } from "react-icons/fi";
+import { FiAward, FiList, FiPlusCircle, FiFlag, FiMapPin, FiUsers, FiSearch, FiAlertTriangle, FiLogOut, FiX } from "react-icons/fi";
 import Sheet from "./ui/Sheet.jsx";
 import "../styles/AdminDrawer.css";
 
 /**
- * Drawer lateral del panel admin (<1024px) — agrupa los 7 destinos con los
+ * Drawer lateral del panel admin (<1024px) — agrupa los destinos con los
  * mismos encabezados que hoy usan los dropdowns de escritorio ("Mis
- * Torneos", "Canchas") más los links directos (Arbitraje, Jugadores), y
+ * Torneos", "Canchas", "Sanciones") más el link directo (Arbitraje), y
  * "Cerrar sesión" al pie. Reemplaza visualmente los dropdowns
  * position:absolute de AdminHeader.jsx en este rango — por encima de 1024px
  * los dropdowns siguen intactos.
@@ -53,11 +53,20 @@ export default function AdminDrawer({ open, onClose, onLogout }) {
           </button>
         </div>
 
+        <div className="admin-drawer-group">
+          <span className="admin-drawer-group-label">
+            <FiUsers /> Sanciones
+          </span>
+          <button type="button" onClick={() => handleNavigate("/admin/jugadores")}>
+            <FiSearch /> Buscar Jugador
+          </button>
+          <button type="button" onClick={() => handleNavigate("/admin/sanciones")}>
+            <FiAlertTriangle /> Registro de Sanciones
+          </button>
+        </div>
+
         <button type="button" className="admin-drawer-link" onClick={() => handleNavigate("/admin/arbitros")}>
           <FiFlag /> Arbitraje
-        </button>
-        <button type="button" className="admin-drawer-link" onClick={() => handleNavigate("/admin/jugadores")}>
-          <FiUsers /> Jugadores
         </button>
       </nav>
 

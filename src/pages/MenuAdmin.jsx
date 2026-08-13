@@ -2,7 +2,7 @@ import "../styles/IndexStyle.css";
 import "../styles/MenuAdmin.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiAward, FiFlag, FiMapPin, FiUsers } from "react-icons/fi";
+import { FiAward, FiFlag, FiMapPin, FiAlertTriangle } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { Card, PageShell } from "../components/ui";
 
@@ -10,7 +10,7 @@ const ADMIN_CARDS = [
   { label: "Mis Torneos", icon: FiAward, path: "/admin/torneos" },
   { label: "Arbitraje", icon: FiFlag, path: "/admin/arbitros" },
   { label: "Canchas", icon: FiMapPin, path: "/admin/canchas" },
-  { label: "Jugadores", icon: FiUsers, path: "/admin/jugadores" },
+  { label: "Sanciones", icon: FiAlertTriangle, path: "/admin/sanciones" },
 ];
 
 function MenuAdmin() {
