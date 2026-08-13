@@ -15,6 +15,7 @@ function Registro() {
     email: "",
     fecha_nacimiento: "",
     posicion: "",
+    genero: "",
     contraseña: "",
     confirmarContraseña: "",
   });
@@ -46,6 +47,7 @@ function Registro() {
     /\S+@\S+\.\S+/.test(form.email) &&
     form.fecha_nacimiento !== "" &&
     form.posicion !== "" &&
+    form.genero !== "" &&
     form.contraseña.length >= 6 &&
     form.confirmarContraseña === form.contraseña &&
     form.confirmarContraseña !== "";
@@ -65,6 +67,7 @@ function Registro() {
           email: form.email,
           fechaNacimiento: form.fecha_nacimiento,
           posicion: form.posicion,
+          genero: form.genero,
           contraseña: form.contraseña,
         }),
       });
@@ -181,6 +184,29 @@ function Registro() {
                   <option value="Defensor">Defensor</option>
                   <option value="Mediocampista">Mediocampista</option>
                   <option value="Delantero">Delantero</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="ui-field">
+              <label className="ui-field-label" htmlFor="genero">
+                Género
+              </label>
+              <div className="ui-field-control">
+                <FiFlag className="ui-field-icon" />
+                <select
+                  id="genero"
+                  name="genero"
+                  className="ui-field-input"
+                  value={form.genero}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="" disabled>
+                    — Seleccionar género —
+                  </option>
+                  <option value="femenino">Femenino</option>
+                  <option value="masculino">Masculino</option>
                 </select>
               </div>
             </div>

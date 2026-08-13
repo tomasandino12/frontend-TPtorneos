@@ -35,7 +35,7 @@ function InicioSesion() {
   const [enviandoGoogle, setEnviandoGoogle] = useState(false);
   const [credentialPendiente, setCredentialPendiente] = useState(null);
   const [datosGooglePendiente, setDatosGooglePendiente] = useState(null);
-  const [datosFaltantes, setDatosFaltantes] = useState({ dni: "", fechaNacimiento: "", posicion: "" });
+  const [datosFaltantes, setDatosFaltantes] = useState({ dni: "", fechaNacimiento: "", posicion: "", genero: "" });
   const [datosFaltantesError, setDatosFaltantesError] = useState("");
 
   const handleSubmit = async (e) => {
@@ -173,6 +173,10 @@ function InicioSesion() {
     }
     if (!datosFaltantes.posicion) {
       setDatosFaltantesError("Elegí tu posición.");
+      return;
+    }
+    if (!datosFaltantes.genero) {
+      setDatosFaltantesError("Elegí tu género.");
       return;
     }
 
@@ -347,6 +351,28 @@ function InicioSesion() {
                 <option value="Defensor">Defensor</option>
                 <option value="Mediocampista">Mediocampista</option>
                 <option value="Delantero">Delantero</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="ui-field">
+            <label className="ui-field-label" htmlFor="genero-google">
+              Género
+            </label>
+            <div className="ui-field-control">
+              <FiFlag className="ui-field-icon" />
+              <select
+                id="genero-google"
+                className="ui-field-input"
+                value={datosFaltantes.genero}
+                onChange={(e) => setDatosFaltantes({ ...datosFaltantes, genero: e.target.value })}
+                required
+              >
+                <option value="" disabled>
+                  — Seleccionar género —
+                </option>
+                <option value="femenino">Femenino</option>
+                <option value="masculino">Masculino</option>
               </select>
             </div>
           </div>

@@ -130,10 +130,13 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
     if (equipoId) fetchEquipo();
   }, [equipoId]);
 
-  // Jugadores sin equipo, solo si el jugador logueado es capitán de este equipo
+  // Jugadores sin equipo, solo si el jugador logueado es capitán de este
+  // equipo — filtrados por el backend según género/edad para la categoría de
+  // ESTE equipo (antes traía todos los libres y acá solo se filtraba por
+  // nombre/posición; ver getJugadoresSinEquipo en jugador.controler.ts).
   useEffect(() => {
-    if (!esCapitanDeEsteEquipo) return;
-    apiFetch("/jugadores/sin-equipo")
+    if (!esCapitanDeEsteEquipo || !equipo?.categoria) return;
+    apiFetch(`/jugadores/sin-equipo?categoria=${encodeURIComponent(equipo.categoria)}`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data.data)) {
@@ -142,7 +145,7 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
         }
       })
       .catch((err) => console.error("Error cargando jugadores sin equipo:", err));
-  }, [esCapitanDeEsteEquipo]);
+  }, [esCapitanDeEsteEquipo, equipo?.categoria]);
 
   // Invitaciones ya enviadas por este equipo y todavía pendientes (para no
   // dejar invitar dos veces al mismo jugador desde el buscador)
