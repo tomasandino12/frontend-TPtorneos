@@ -1,13 +1,14 @@
 import "../styles/IndexStyle.css";
 import "../styles/Equipos.css";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FiUsers, FiPlus, FiMail, FiCheck, FiX, FiTag } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
 import EquipoInfo from "../components/EquipoInfo.jsx";
-import { CATEGORIAS } from "./CrearTorneo.jsx";
 
 function Equipos() {
+  const navigate = useNavigate();
   const [jugador, setJugador] = useState(null);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [nombreEquipo, setNombreEquipo] = useState("");
@@ -19,6 +20,9 @@ function Equipos() {
   const [salirFeedback, setSalirFeedback] = useState(null);
   const [invitaciones, setInvitaciones] = useState([]);
   const [invitacionesFeedback, setInvitacionesFeedback] = useState(null);
+  const [categoriasDisponibles, setCategoriasDisponibles] = useState([]);
+  const [generoIncompleto, setGeneroIncompleto] = useState(false);
+  const [categoriasCargando, setCategoriasCargando] = useState(true);
 
   // === Cargar jugador logueado ===
   useEffect(() => {
@@ -42,6 +46,23 @@ function Equipos() {
         if (Array.isArray(data.data)) setInvitaciones(data.data);
       })
       .catch((error) => console.error("Error al cargar invitaciones:", error));
+  }, [jugador]);
+
+  // === Categorías compatibles con el género/edad del jugador logueado, para
+  // el selector de "Crear equipo" (solo si todavía no tiene equipo) — la
+  // regla vive únicamente en el backend (validarJugadorParaCategoria), acá
+  // solo se pinta lo que devuelve. ===
+  useEffect(() => {
+    if (!jugador?.id || jugador.equipo?.id) return;
+    setCategoriasCargando(true);
+    apiFetch("/jugadores/me/categorias-disponibles")
+      .then((res) => res.json())
+      .then((data) => {
+        setCategoriasDisponibles(data.data?.categorias || []);
+        setGeneroIncompleto(!!data.data?.generoIncompleto);
+      })
+      .catch((error) => console.error("Error al cargar categorías disponibles:", error))
+      .finally(() => setCategoriasCargando(false));
   }, [jugador]);
 
   const handleResponderInvitacion = async (idInvitacion, estado) => {
@@ -204,10 +225,29 @@ function Equipos() {
 
       <Card as="section" className="crear-equipo-card">
         <h2>Crear Nuevo Equipo</h2>
-        <p>Formá tu propio equipo. Una vez creado, vas a poder sumar jugadores desde acá.</p>
-        <Button icon={<FiPlus />} onClick={() => setMostrarFormulario(true)}>
-          Crear Equipo
-        </Button>
+
+        {generoIncompleto ? (
+          <>
+            <p>Para crear un equipo primero necesitamos saber tu género, así podemos mostrarte solo las categorías que te corresponden.</p>
+            <Alert variant="warning">
+              Tu perfil todavía no tiene el género cargado. Completalo para poder crear un equipo.
+            </Alert>
+            <Button icon={<FiUsers />} onClick={() => navigate("/gestorTorneos/miPerfil")}>
+              Completar mi perfil
+            </Button>
+          </>
+        ) : (
+          <>
+            <p>Formá tu propio equipo. Una vez creado, vas a poder sumar jugadores desde acá.</p>
+            <Button
+              icon={<FiPlus />}
+              onClick={() => setMostrarFormulario(true)}
+              disabled={categoriasCargando}
+            >
+              Crear Equipo
+            </Button>
+          </>
+        )}
 
         {crearFeedback && !mostrarFormulario && (
           <div className="feedback-box">
@@ -215,7 +255,7 @@ function Equipos() {
           </div>
         )}
 
-        {mostrarFormulario && (
+        {mostrarFormulario && !generoIncompleto && (
           <div className="modal-crear-equipo">
             <form className="formulario-crear-equipo" onSubmit={handleSubmitEquipo}>
               <h3>Nuevo Equipo</h3>
@@ -239,7 +279,7 @@ function Equipos() {
                     required
                   >
                     <option value="" disabled>Seleccioná una categoría</option>
-                    {CATEGORIAS.map((c) => (
+                    {categoriasDisponibles.map((c) => (
                       <option key={c.value} value={c.value}>{c.label}</option>
                     ))}
                   </select>
