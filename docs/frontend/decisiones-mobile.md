@@ -33,9 +33,16 @@ Header compacto de 56px con logo y botón hamburguesa, por debajo de 1024px
 (no 768 — el panel admin ya tenía su propio quiebre de "modo compacto" en
 1024px antes de este trabajo, y se respetó esa convención existente en vez
 de introducir un cuarto breakpoint). El botón abre un drawer lateral
-(`AdminDrawer.jsx`) con los 7 destinos agrupados igual que hoy los dropdowns
-de escritorio ("Mis Torneos", "Canchas") más los links directos (Arbitraje,
-Jugadores), y "Cerrar sesión" al pie.
+(`AdminDrawer.jsx`) con los mismos destinos agrupados igual que hoy los
+dropdowns de escritorio, y "Cerrar sesión" al pie.
+
+**Actualizado**: la composición real de `AdminHeader.jsx` hoy es **3
+dropdowns** ("Mis Torneos", "Canchas", "Sanciones" — este último agrupa
+"Buscar Jugador" y "Sanciones", `/admin/jugadores` y `/admin/sanciones`) más
+**1 link directo** ("Arbitraje", `/admin/arbitros`) — no 2 dropdowns + 2
+links directos como decía esta página antes. "Jugadores" no es un link
+directo, vive dentro del dropdown "Sanciones". El total de 7 destinos sigue
+siendo el mismo por coincidencia numérica, pero la agrupación cambió.
 
 **Por qué:** 7 destinos en dos niveles de jerarquía no entran en una barra de
 pestañas tipo bottom-nav, y el panel de administración se usa sentado y con

@@ -10,13 +10,18 @@ Este documento describe cada pantalla del proyecto: para qué sirve, de qué dat
 /olvide-password               → OlvidePassword
 /restablecer-password          → RestablecerPassword
 /admin                         → InicioSesionAdmin (login de administrador)
-/menu-admin                    → MenuAdmin
-/admin/torneos                 → MisTorneos
-/admin/torneos/nuevo           → CrearTorneo
-/admin/torneos/:id/equipos     → InscribirEquipos
-/admin/arbitros                → Arbitros
+/menu-admin                    → MenuAdmin                    [AdminRoute]
+/admin/torneos                 → MisTorneos                   [AdminRoute]
+/admin/torneos/nuevo           → CrearTorneo                  [AdminRoute]
+/admin/torneos/:id/editar      → CrearTorneo (modo edición: árbitros, canchas, partidos, fixture) [AdminRoute]
+/admin/torneos/:id/equipos     → InscribirEquipos             [AdminRoute]
+/admin/arbitros                → Arbitros                     [AdminRoute]
+/admin/canchas                 → Canchas                      [AdminRoute]
+/admin/canchas/nueva           → CrearCancha                  [AdminRoute]
+/admin/jugadores               → Jugadores                    [AdminRoute]
+/admin/sanciones               → RegistroSanciones            [AdminRoute]
 
-/gestorTorneos                 → GestorTorneos (layout) + Navbar
+/gestorTorneos                 → GestorTorneos (layout) + Navbar   [PrivateRoute]
   ├── (index)                    → TablaPosiciones
   ├── /estadisticas               → Estadisticas
   ├── /fixture                    → FixtureTorneo
@@ -24,10 +29,10 @@ Este documento describe cada pantalla del proyecto: para qué sirve, de qué dat
   ├── /miPerfil                   → MiPerfil
   └── /inicio                     → Inicio
 
-/equipo/:id                    → EquipoDetalle (fuera del layout de arriba)
+/equipo/:id                    → EquipoDetalle (fuera del layout de arriba)   [PrivateRoute]
 ```
 
-Dos cosas para notar del mapa: primero, hay **dos guards distintos** — `PrivateRoute` (definido en `App.jsx`) protege las rutas de jugador (`/gestorTorneos/*` y `/equipo/:id`) chequeando `localStorage.getItem("token")`; las rutas de admin no pasan por `PrivateRoute`, cada pantalla admin valida `localStorage.getItem("admin")` en su propio `useEffect`. Segundo, `/equipo/:id` **no** está anidada bajo `/gestorTorneos` aunque visualmente se vea igual — ver la sección dedicada más abajo, es la parte más particular de la arquitectura de páginas.
+**Actualizado**: hay dos guards centralizados en `App.jsx`, no uno solo con excepciones — `PrivateRoute` (chequea `localStorage.getItem("token")`) envuelve las rutas de jugador (`/gestorTorneos/*` y `/equipo/:id`), y `AdminRoute` (chequea `localStorage.getItem("adminToken")`) envuelve **todas** las rutas `/admin/*` y `/menu-admin` por igual — el dato anterior de esta página (que las pantallas de admin no tenían guard centralizado y cada una validaba `localStorage.getItem("admin")` en su propio `useEffect`) ya no es así. `/equipo/:id` **no** está anidada bajo `/gestorTorneos` aunque visualmente se vea igual — ver la sección dedicada más abajo, es la parte más particular de la arquitectura de páginas.
 
 ---
 
@@ -200,13 +205,18 @@ Vive en `src/components/Navbar.jsx`, dentro de `.gt-nav-actions` — visible en 
 
 ## Panel de administrador
 
-El panel admin tiene su propio navbar (`AdminHeader.jsx`, distinto del `Navbar.jsx` de jugador) y su propia paleta de rutas, todas bajo `/admin/*` o `/menu-admin`. Ninguna pantalla admin comparte layout centralizado como `GestorTorneos` — cada una arma su `<div className="layout"><AdminHeader/>...</div>` a mano (y cada una repite su propio guard de `localStorage.getItem("admin")`, ver `README.md`).
+El panel admin tiene su propio navbar (`AdminHeader.jsx`, distinto del `Navbar.jsx` de jugador) y su propia paleta de rutas, todas bajo `/admin/*` o `/menu-admin`, protegidas por `AdminRoute` en `App.jsx` (guard centralizado, ver "Mapa de rutas" arriba). Ninguna pantalla admin comparte un componente de layout como `GestorTorneos` — cada una arma su propio `<div className="layout"><AdminHeader/>...</div>` inline (9 páginas hoy, ver `pendientes.md` ítem 9), pero el guard de acceso en sí ya no se repite por pantalla.
 
-- **`MenuAdmin.jsx`** (`/menu-admin`) — landing del panel admin, con accesos directos a "Mis Torneos", "Arbitraje", y dos placeholders sin implementar todavía ("Canchas", "Jugadores" — tienen `path: null` y quedan visualmente deshabilitados).
-- **`MisTorneos.jsx`** (`/admin/torneos`) — lista de todos los torneos creados por el admin logueado, con tabs de filtro por estado (Todos/En curso/Borradores/Finalizados), buscador, y una card por torneo con sus métricas y acciones (que cambian según el estado: "Equipos" si está en curso, "Agregar equipos" si es borrador, "Ver resumen" si está finalizado — las 3 llevan a `InscribirEquipos`, es la única vista de detalle que existe).
-- **`CrearTorneo.jsx`** (`/admin/torneos/nuevo`) — formulario de alta de torneo, con un panel de resumen en vivo al costado que se actualiza mientras se completa el formulario. Tiene dos botones de guardado: "Guardar borrador" (`estado: "borrador"`, vuelve al listado) y "Crear Torneo" (`estado: "en_curso"`, va directo a inscribir equipos) — los dos estados posibles que admite la entidad `Torneo` del backend además de `"finalizado"`.
+**Actualizado (13/08)** — son 9 pantallas de admin, no 5:
+
+- **`MenuAdmin.jsx`** (`/menu-admin`) — landing del panel admin, 4 cards (`ADMIN_CARDS`): "Mis Torneos", "Arbitraje", "Canchas", "Sanciones" — las 4 con `path` real, ninguna deshabilitada (los "2 placeholders sin implementar" que describía esta página antes ya no existen).
+- **`MisTorneos.jsx`** (`/admin/torneos`) — lista de todos los torneos creados por el admin logueado, con tabs de filtro por estado (Todos/En curso/Borradores/Finalizados), buscador, y una card por torneo con sus métricas y acciones (que cambian según el estado — llevan a `InscribirEquipos` para inscribir/quitar equipos, o a `CrearTorneo` en modo edición para todo lo demás).
+- **`CrearTorneo.jsx`** (`/admin/torneos/nuevo`, y `/admin/torneos/:id/editar` en modo edición) — formulario de alta de torneo, con un panel de resumen en vivo al costado. **Modo edición**: además de editar los datos del torneo, esta misma pantalla concentra la gestión de Árbitros, Canchas y Partidos de ese torneo puntual — asignación de árbitros/canchas (mínimo 3 de cada uno, con reasignación automática al sacar uno con partidos programados), generación del fixture, filtro de partidos por jornada, y carga/reedición de resultados con modal de confirmación. Esto se movió acá desde `InscribirEquipos.jsx` (ver más abajo).
 - **`Arbitros.jsx`** (`/admin/arbitros`) — CRUD simple de árbitros (tabla + modal de alta/edición).
-- **`InscribirEquipos.jsx`** (`/admin/torneos/:id/equipos`) — pantalla de detalle de un torneo puntual: a la izquierda, la lista de equipos disponibles de esa categoría para inscribir; a la derecha, un resumen con el botón de inscripción, y más abajo el formulario de "Generar Fixture" (fecha, hora, canchas, árbitros) que solo se muestra si el fixture todavía no fue generado (`torneo.estado !== "en_curso"`).
+- **`Canchas.jsx`** (`/admin/canchas`) — listado de canchas con estado (activa/mantenimiento/inactiva) y acciones; **`CrearCancha.jsx`** (`/admin/canchas/nueva`) — formulario de alta, pantalla separada en vez de modal (a diferencia de Árbitros).
+- **`Jugadores.jsx`** (`/admin/jugadores`) — búsqueda de jugadores por admin (a través de los torneos que organiza), con acciones de suspender/habilitar y ver historial de suspensiones por jugador.
+- **`RegistroSanciones.jsx`** (`/admin/sanciones`) — gestión de las sanciones ya creadas (vía `GET`/`DELETE /api/suspensiones`): tabs Activas/Levantadas/Todas, búsqueda por jugador, acción "Levantar" (llama a `PATCH /jugadores/:id/habilitar`, no a `/suspensiones` — el endpoint de crear/levantar una sanción vive en el módulo de Jugador, este router solo lista y borra) y eliminar definitivamente.
+- **`InscribirEquipos.jsx`** (`/admin/torneos/:id/equipos`) — **Actualizado**: hoy es *solo* inscripción/baja de equipos a un torneo puntual (lista de equipos disponibles de esa categoría a la izquierda, resumen + botón de inscripción a la derecha). Ya no tiene tabs de Árbitros/Canchas/Partidos ni el formulario de generar fixture — esa gestión se centralizó en `CrearTorneo.jsx` en modo edición (ver arriba).
 
 ## Componentes compartidos que no son pantallas
 

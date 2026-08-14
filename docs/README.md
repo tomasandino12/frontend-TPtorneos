@@ -6,7 +6,7 @@ Punto de entrada a toda la documentación del frontend. Ver también la document
 
 - **[`frontend/README.md`](./frontend/README.md)** — arquitectura completa: stack, estructura de carpetas, cómo se conecta con el backend, modelos tipados. Punto de partida recomendado para entender el código.
 - [`bitacora-avance.md`](./bitacora-avance.md) — registro de avance del proyecto por hitos, reconstruido a partir del historial real de commits de los dos repositorios.
-- [`frontend/sistema-de-diseno.md`](./frontend/sistema-de-diseno.md) — tokens de color/tipografía/espaciado y los componentes reutilizables (`Button`, `TextField`, `Card`, `Alert`, `PageShell`, `PageHero`, `Tabs`, `Modal`, `Toast`, `Sheet`), con ejemplos reales de uso.
+- [`frontend/sistema-de-diseno.md`](./frontend/sistema-de-diseno.md) — tokens de color/tipografía/espaciado y los componentes reutilizables (`Button`, `TextField`, `Card`, `Alert`, `PageShell`, `PageHero`, `Tabs`, `Modal`, `Toast`, `Sheet`, `ScrollableTable`), con ejemplos reales de uso.
 - [`frontend/paginas.md`](./frontend/paginas.md) — recorrido por cada pantalla de la app.
 - [`frontend/glosario.md`](./frontend/glosario.md) — conceptos técnicos no obvios del código, con ejemplos reales de este proyecto.
 - [`frontend/decisiones.md`](./frontend/decisiones.md) — por qué se tomó cada decisión de la migración de UI.

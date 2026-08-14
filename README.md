@@ -50,7 +50,7 @@ Levanta el servidor de desarrollo en `http://localhost:5173`.
 ## Estructura del proyecto
 
 - `src/pages/` — una pantalla por archivo, JSX.
-- `src/components/ui/` — sistema de diseño propio (Button, TextField, Modal, Alert, Card, Tabs, PageHero, PageShell), con tokens centralizados en `src/styles/tokens.css`.
+- `src/components/ui/` — sistema de diseño propio (Button, TextField, Modal, Alert, Card, Tabs, PageHero, PageShell, Toast, Sheet, ScrollableTable), con tokens centralizados en `src/styles/tokens.css`.
 - `src/models/` — modelos tipados en TypeScript (clases e interfaces) para los datos que van y vuelven de la API.
 - `src/utils/api.ts` — cliente único de acceso a la API (`ApiClient`), usado por todas las páginas.
 
