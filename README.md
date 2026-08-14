@@ -47,6 +47,8 @@ Levanta el servidor de desarrollo en `http://localhost:5173`.
 | `pnpm test:watch` | Tests unitarios en modo watch. |
 | `pnpm test:e2e` | Tests end-to-end (Playwright, usa Microsoft Edge — no hace falta instalar Chromium aparte). Requiere el backend corriendo. |
 
+Evidencia real de una corrida completa de las dos suites (8 tests, 100% en verde): [`docs/evidencia-tests.md`](./docs/evidencia-tests.md).
+
 ## Estructura del proyecto
 
 - `src/pages/` — una pantalla por archivo, JSX.

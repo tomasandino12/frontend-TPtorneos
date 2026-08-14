@@ -14,6 +14,7 @@ Punto de entrada a toda la documentación del frontend. Ver también la document
 - [`frontend/pendientes.md`](./frontend/pendientes.md) — lo que queda sin resolver, con el motivo concreto.
 - [`auditoria-ui.md`](./auditoria-ui.md) / [`auditoria-ui-cierre.md`](./auditoria-ui-cierre.md) — auditoría original de UI/UX (79 hallazgos) y su cierre.
 - [`frontend/auditoria-mobile.md`](./frontend/auditoria-mobile.md) — auditoría que dio origen al rediseño mobile.
+- [`evidencia-tests.md`](./evidencia-tests.md) — salida real de las suites de tests (unitarios + e2e), para la entrega de Aprobación Directa.
 
 ## Instalación y ejecución
 

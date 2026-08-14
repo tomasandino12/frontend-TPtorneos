@@ -17,7 +17,10 @@ test.describe('Login de jugador', () => {
     await page.click('button[type="submit"]');
 
     await page.waitForURL('**/gestorTorneos/**');
-    await expect(page.getByText('Mi Perfil')).toBeVisible();
+    // .first(): el rediseño mobile agregó una bottom-nav que también repite
+    // la etiqueta "Mi Perfil" (además del navbar de escritorio) — ambas
+    // coexisten en el DOM según el viewport, así que hay que desambiguar.
+    await expect(page.getByText('Mi Perfil').first()).toBeVisible();
   });
 
   test('con contraseña incorrecta muestra un error y no navega', async ({ page }) => {
