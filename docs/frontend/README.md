@@ -4,7 +4,7 @@ Esta carpeta explica cómo está armado el frontend del proyecto: su arquitectur
 
 ## Índice
 
-- [`sistema-de-diseno.md`](./sistema-de-diseno.md) — los tokens de color/tipografía/espaciado y los 8 componentes reutilizables (`Button`, `TextField`, `Card`, `Alert`, `PageShell`, `PageHero`, `Tabs`, `Modal`), con ejemplos reales de uso.
+- [`sistema-de-diseno.md`](./sistema-de-diseno.md) — los tokens de color/tipografía/espaciado y los componentes reutilizables (`Button`, `TextField`, `Card`, `Alert`, `PageShell`, `PageHero`, `Tabs`, `Modal`, más `Toast`, `Sheet` y `ScrollableTable` sumados en el rediseño mobile), con ejemplos reales de uso.
 - [`paginas.md`](./paginas.md) — recorrido por cada pantalla de la app: qué muestra, de qué datos depende, y cómo se relacionan entre sí. Incluye una sección dedicada a explicar por qué "la pantalla de equipo" está repartida en 3 archivos distintos (con su estructura de pestañas Plantel/Historial/Estrategia), y otra para la campanita de notificaciones del `Navbar`.
 - [`glosario.md`](./glosario.md) — explicación en criollo de los conceptos técnicos no obvios que aparecen en el código (CSS variables, barrel files, componentes contenedor vs. presentacionales, etc.), cada uno con el ejemplo real de este proyecto.
 - [`decisiones.md`](./decisiones.md) — bitácora breve de qué se decidió en cada fase de la migración de UI y por qué.
@@ -57,21 +57,16 @@ src/
 ├── styles/               # un .css por pantalla/componente, más los archivos
 │                         # transversales: tokens.css, IndexStyle.css
 └── utils/
-    └── api.js            # helpers de fetch hacia el backend
+    └── api.ts            # cliente único de acceso a la API (ApiClient, ver más abajo)
 ```
 
 La convención del proyecto es **un archivo `.jsx` por pantalla en `pages/`**, con su **CSS en un archivo separado en `styles/`** del mismo nombre (o compartido, cuando varias pantallas se parecen — ver `paginas.md`). No hay CSS-in-JS ni CSS Modules: los nombres de clase son globales, así que si dos archivos definen la misma clase, se pisan entre sí según el orden de import. Esto es intencional dado el tamaño del proyecto, pero es importante tenerlo en cuenta al agregar una clase nueva: conviene prefijarla o revisar que no colisione con otra pantalla.
 
 ### Cómo se conecta con el backend
 
-Todo pasa por `src/utils/api.js`, que define:
+**Actualizado** — desde que se agregó la capa de modelos tipados (ver más abajo), el acceso a la API pasó de `src/utils/api.js` a `src/utils/api.ts`, reorganizado como una clase `ApiClient` (patrón Facade + Singleton: concentra la construcción de headers, el manejo de 401 y las 3 formas de llamar a la API en un solo objeto, con una única instancia exportada — `export const apiClient = new ApiClient(API_BASE)`). Las funciones que ya usaban las páginas (`apiFetch`, `adminApiFetch`, `apiFetchFormData`, `getAuthHeaders`, `ASSETS_URL`) se mantuvieron exportadas con la misma firma, delegando a esa instancia — ningún `.jsx` necesitó cambiar.
 
-```js
-const API_URL = "http://localhost:3000/api";
-export const ASSETS_URL = "http://localhost:3000";
-```
-
-La URL base **está hardcodeada** (no usa variables de entorno) — si el backend corre en otro puerto o dominio, hay que cambiar esta constante a mano. Ese mismo archivo expone 3 funciones para hacer requests, según quién está logueado:
+La URL base **ya no está hardcodeada**: sale de `import.meta.env.VITE_API_URL` (`.env`, ver `README.md` de la raíz). Sigue el mismo comportamiento por función:
 
 | Función | Para quién | Token que usa | Qué hace si el token es inválido (401) |
 |---|---|---|---|
@@ -81,7 +76,23 @@ La URL base **está hardcodeada** (no usa variables de entorno) — si el backen
 
 Las 3 agregan automáticamente el header `Authorization: Bearer <token>`. El login (`InicioSesion.jsx`, `InicioSesionAdmin.jsx`) es la excepción: hace el primer `fetch` a mano (todavía no hay token) y recién después de un login exitoso guarda `token`/`jugador` (o `adminToken`/`admin`) en `localStorage`.
 
-Es decir: **hay dos "sesiones" completamente separadas** — la de jugador y la de administrador — cada una con su propio token y su propia info de usuario en `localStorage`, y cada una protegida por su propio guard:
+Es decir: **hay dos "sesiones" completamente separadas** — la de jugador y la de administrador — cada una con su propio token y su propia info de usuario en `localStorage`, y cada una protegida por su propio guard en `App.jsx`:
 
-- Jugador: `PrivateRoute` en `App.jsx` (redirige a `/` si no hay `token`).
-- Administrador: cada pantalla admin chequea `localStorage.getItem("admin")` en un `useEffect` propio (no hay un `PrivateRoute` de admin centralizado — es una de las cosas documentadas en `pendientes.md`/la auditoría original, aunque de bajo impacto).
+```js
+function PrivateRoute({ children }) {
+  const token = localStorage.getItem("token");
+  if (!token) return <Navigate to="/" replace />;
+  return children;
+}
+function AdminRoute({ children }) {
+  const adminToken = localStorage.getItem("adminToken");
+  if (!adminToken) return <Navigate to="/admin" replace />;
+  return children;
+}
+```
+
+**Actualizado**: sí hay un guard de admin centralizado (`AdminRoute`), envolviendo todas las rutas `/admin/*` — el dato anterior de esta página (que no existía) quedó desactualizado. Dentro de las pantallas de equipo, un tercer nivel de rol (capitán vs. jugador raso) se resuelve a nivel de componente, no de ruta: `EquipoInfo.jsx` calcula `esCapitanDeEsteEquipo` y lo usa para mostrar u ocultar acciones (invitar, expulsar, transferir capitanía, editar descripción), porque capitán y jugador comparten las mismas páginas.
+
+### Modelos tipados (`src/models/`)
+
+TypeScript conviviendo con `.jsx` (`allowJs: true`), acotado a esta carpeta y a `api.ts` — las páginas siguen sin type-checking. `Jugador.ts` y `Equipo.ts` son **clases** con métodos reales (`Jugador.nombreCompleto`, `Jugador.esCapitanDe(equipoId)`, `Equipo.tieneEscudo()`), no solo tipos planos; `types.ts` tiene las interfaces del resto de entidades (`TorneoDTO`, `PartidoDTO`, `CanchaDTO`, etc.). **Nota para quien trabaje sobre esto**: hoy nada en `src/pages`/`src/components` importa desde `src/models` — es una capa correctamente tipada pero todavía no conectada al resto de la app. Si se va a mostrar como parte de la entrega, conviene enganchar al menos un flujo real a estos modelos antes de la defensa.

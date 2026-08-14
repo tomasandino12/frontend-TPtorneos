@@ -38,11 +38,9 @@ Lo que quedó sin resolver después de las 5 fases de migración de UI y los aju
 
 **Por qué no se resolvió**: se decidió que este recordatorio se calcula **en el frontend**, no en el backend — comparando la fecha del próximo partido del equipo (ya disponible vía los endpoints que usa `FixtureTorneo.jsx`/`Estadisticas.jsx`) contra la fecha de hoy, en vez de que el backend tenga que generar y persistir una notificación de tipo nuevo para algo que es puramente una cuenta de días. Queda pendiente de construir: no forma parte de `NotificationBell.jsx` todavía, ni como notificación real ni como badge/aviso calculado aparte.
 
-## 7. `docs/backend/` no existe todavía
+## 7. ~~`docs/backend/` no existe todavía~~ — resuelto
 
-**Dónde**: no es un archivo del frontend — es la documentación que falta del lado del backend (entidades, rutas, contrato de cada endpoint). Hoy la única forma de conocer el contrato real de un endpoint es leyendo el código fuente del backend directamente (`Backend/src/**/*.controler.ts`, `*.routes.ts`, `*.entity.ts`), como se hizo para escribir este mismo directorio de documentación.
-
-**Por qué no se resolvió**: quedó fuera de alcance de las tareas de frontend que se fueron haciendo — cada vez que hizo falta confirmar un contrato (el shape exacto de `Notificacion`, los cupos por posición de `/formaciones`, el gating por JWT de `/jugadores/:id/expulsar`) se investigó puntualmente leyendo el backend, sin dejar esa investigación documentada en un lugar central y reusable. Un `docs/backend/` con la misma estructura que este directorio (sistema de entidades, recorrido por endpoints, decisiones, pendientes) evitaría tener que releer el código fuente cada vez que una tarea de frontend necesita confirmar un contrato.
+**Actualizado**: ya existe, con la misma estructura que este directorio (`entidades.md`, `endpoints.md`, `glosario.md`, `decisiones.md`, `pendientes.md`, más `bitacora.md`), en el repo del backend — ver [`backend-TPtorneos/docs/README.md`](https://github.com/tomasandino12/backend-TPtorneos/blob/master/docs/README.md). Se deja el ítem tachado en vez de borrarlo para que quede visible que la afirmación original ya no aplica.
 
 ---
 

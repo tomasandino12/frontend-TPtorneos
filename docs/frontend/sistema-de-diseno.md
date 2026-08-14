@@ -408,3 +408,39 @@ Ejemplo real con `actions` (`Estadisticas.jsx`):
 ```
 
 **Tabla de Posiciones es la única pantalla del patrón "hero" que no usa `PageHero`** — su título vive directamente dentro de la card blanca de contenido, nunca tuvo un recuadro hero separado. Es una decisión visible: el componente simplemente no se importa en `TablaPosiciones.jsx`, no hay una reimplementación alternativa.
+
+### `Toast`
+
+```jsx
+export default function Toast({ message, variant = "success", duration = 4000, onClose })
+// variant: "success" | "error" | "warning" | "info" — mismo criterio que Alert
+```
+
+Notificación de confirmación flotante (esquina inferior derecha), sumada en el rediseño mobile. Se autooculta sola después de `duration` ms y también se puede cerrar a mano con el botón "×". El padre es dueño del estado (`message`, típicamente `useState(null)`) — el componente no guarda nada, solo dispara `onClose` cuando corresponde a cerrarse (por timeout o por click).
+
+```jsx
+const [toast, setToast] = useState(null);
+// ...
+setToast({ message: "Cambios guardados", variant: "success" });
+// ...
+<Toast {...toast} onClose={() => setToast(null)} />
+```
+
+**Todavía no reemplaza los `alert()`/`confirm()` nativos** que quedan en `Arbitros.jsx`, `Canchas.jsx` y `EquipoInfo.jsx` — se agregó como infraestructura nueva, pero esa migración puntual no se hizo (ver `pendientes.md`).
+
+### `Sheet`
+
+```jsx
+export default function Sheet({ open, onClose, position = "bottom", ariaLabel, children, className = "" })
+// position: "bottom" (hoja inferior) | "right" (drawer lateral)
+```
+
+Overlay + panel deslizable genérico, mismo patrón de apertura/cierre que `Modal` (click afuera, tecla Escape) pero anclado a un borde de la pantalla en vez de centrado. Es la base de `AccountSheet.jsx` (hoja de cuenta en mobile) y `AdminDrawer.jsx` (drawer lateral del panel admin). No maneja devolución de foco al cerrar — cada pantalla que lo usa conoce su propio disparador (avatar, botón hamburguesa) y se lo devuelve en su propio `onClose`.
+
+### `ScrollableTable`
+
+```jsx
+export default function ScrollableTable({ children, ariaLabel, className = "" })
+```
+
+Envoltorio compartido para las tablas del proyecto con scroll horizontal en mobile. Usa dos contenedores anidados a propósito: el externo (`className`, normalmente la clase que ya traía la tabla) recorta las esquinas redondeadas con `overflow: hidden`; el interno agrega el scroll horizontal, foco por teclado (`tabIndex={0}`) y `role="region"` con `aria-label`. Separarlos en dos elementos es necesario porque `overflow-x: auto` en el mismo elemento que el `border-radius` fuerza el eje Y a `auto` y rompe el recorte de esquinas — el mismo tipo de detalle documentado en `decisiones-mobile.md` para el problema de *stacking context*.
