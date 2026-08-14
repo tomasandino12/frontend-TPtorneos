@@ -7,6 +7,7 @@ import { FiUsers, FiSearch, FiArrowLeft, FiCheck } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch, ASSETS_URL } from "../utils/api.js";
 import { Button, TextField, Alert, PageShell, PageHero } from "../components/ui";
+import { Equipo } from "../models";
 
 const LABEL_CATEGORIA = {
   sub15:     "Sub-15",
@@ -220,6 +221,11 @@ export default function InscribirEquipos() {
               {equiposFiltrados.map((equipo) => {
                 const yaInscripto = inscriptos.has(equipo.id);
                 const seleccionado = seleccionados.has(equipo.id);
+                // Modelo de dominio en vez de armar la URL del escudo a mano
+                // (ver src/models/Equipo.ts) — centraliza el caso "sin escudo"
+                // en un solo lugar en vez de repetir `${ASSETS_URL}${...}` por pantalla.
+                const equipoModel = new Equipo(equipo);
+                const escudoUrl = equipoModel.escudoUrlCompleta(ASSETS_URL);
                 return (
                   <div
                     key={equipo.id}
@@ -232,9 +238,9 @@ export default function InscribirEquipos() {
                       checked={yaInscripto || seleccionado}
                       disabled={yaInscripto}
                     />
-                    {equipo.escudoUrl ? (
+                    {equipoModel.tieneEscudo() ? (
                       <img
-                        src={`${ASSETS_URL}${equipo.escudoUrl}`}
+                        src={escudoUrl}
                         alt={`Escudo de ${equipo.nombreEquipo}`}
                         className="ie-color-dot"
                         style={{ objectFit: "cover" }}

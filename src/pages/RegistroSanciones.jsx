@@ -7,6 +7,7 @@ import { FiAlertTriangle, FiSearch, FiTrash2 } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, PageShell, PageHero, Modal, Alert, ScrollableTable } from "../components/ui";
+import { Jugador } from "../models";
 
 const ESTADO_CONFIG = {
   Activa: { badgeBg: "var(--color-success-bg)", badgeColor: "var(--color-pitch)" },
@@ -69,7 +70,9 @@ export default function RegistroSanciones() {
       activeTab === "Todas" ||
       (activeTab === "Activas" && s.activa) ||
       (activeTab === "Levantadas" && !s.activa);
-    const texto = `${s.jugador?.nombre ?? ""} ${s.jugador?.apellido ?? ""}`.toLowerCase();
+    // Jugador.nombreCompleto (src/models/Jugador.ts) en vez de concatenar
+    // nombre/apellido a mano.
+    const texto = (s.jugador ? new Jugador(s.jugador).nombreCompleto : "").toLowerCase();
     const matchSearch = !busquedaNormalizada || texto.includes(busquedaNormalizada);
     return matchTab && matchSearch;
   });
@@ -179,7 +182,7 @@ export default function RegistroSanciones() {
                       const cfg = ESTADO_CONFIG[estado];
                       return (
                         <tr key={s.id}>
-                          <td>{s.jugador?.nombre} {s.jugador?.apellido}</td>
+                          <td>{s.jugador ? new Jugador(s.jugador).nombreCompleto : "—"}</td>
                           <td>{s.torneo?.nombreTorneo ?? "—"}</td>
                           <td>{s.motivo}</td>
                           <td>{new Date(s.fecha).toLocaleDateString("es-AR")}</td>
@@ -228,8 +231,9 @@ export default function RegistroSanciones() {
         {suspensionAEliminar && (
           <div className="rs-modal-eliminar">
             <p>
-              ¿Eliminar la sanción de &quot;{suspensionAEliminar.jugador?.nombre}{" "}
-              {suspensionAEliminar.jugador?.apellido}&quot; en el torneo &quot;
+              ¿Eliminar la sanción de &quot;
+              {suspensionAEliminar.jugador ? new Jugador(suspensionAEliminar.jugador).nombreCompleto : ""}
+              &quot; en el torneo &quot;
               {suspensionAEliminar.torneo?.nombreTorneo}&quot;? Esta acción no se puede deshacer.
             </p>
             {errorEliminar && <Alert variant="error">{errorEliminar}</Alert>}
