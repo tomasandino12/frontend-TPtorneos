@@ -158,6 +158,8 @@
   .ie-equipo-row:hover { background: var(--color-surface-muted); }
 }
 .ie-equipo-row.inscripto { opacity: 0.55; cursor: default; }
+.ie-equipo-row.bloqueada { opacity: 0.45; cursor: not-allowed; }
+.ie-equipo-row.bloqueada input[type="checkbox"] { cursor: not-allowed; }
 .ie-equipo-row input[type="checkbox"] {
   width: 17px;
   height: 17px;

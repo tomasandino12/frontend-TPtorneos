@@ -95,8 +95,22 @@ export default function InscribirEquipos() {
     [equipos, search]
   );
 
+  // Cupos restantes: se recalcula acá (además de en el resumen del sidebar)
+  // porque toggleEquipo() lo necesita para bloquear la selección una vez
+  // alcanzado el límite — number siempre que el torneo ya cargó, Infinity
+  // mientras tanto (no debe bloquear nada antes de tener datos reales).
+  const totalInscriptos = torneo?.participaciones?.length ?? inscriptos.size;
+  const cuposRestantes = torneo ? torneo.cantidadEquipos - totalInscriptos : Infinity;
+  const cupoAgotado = seleccionados.size >= cuposRestantes;
+  // Defensivo (ej. otra pestaña/otro admin inscribió equipos, o bajaron
+  // cantidadEquipos del torneo con más equipos ya inscriptos de los que
+  // ahora entran): el checkbox ya no debería dejar llegar acá en el uso
+  // normal, pero si pasara, el botón se bloquea igual.
+  const cupoExcedido = seleccionados.size > cuposRestantes;
+
   function toggleEquipo(id) {
     if (inscriptos.has(id)) return;
+    if (!seleccionados.has(id) && cupoAgotado) return;
     setSeleccionados((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
@@ -160,8 +174,6 @@ export default function InscribirEquipos() {
     </div>
   );
 
-  const totalInscriptos = torneo?.participaciones?.length ?? inscriptos.size;
-  const cuposRestantes = torneo ? (torneo.cantidadEquipos - totalInscriptos) : "—";
   const categoriaLabel = LABEL_CATEGORIA[torneo?.categoria] ?? torneo?.categoria ?? "—";
 
   return (
@@ -221,6 +233,9 @@ export default function InscribirEquipos() {
               {equiposFiltrados.map((equipo) => {
                 const yaInscripto = inscriptos.has(equipo.id);
                 const seleccionado = seleccionados.has(equipo.id);
+                // No seleccionado y ya se llegó al cupo: fila bloqueada (no
+                // clickeable, atenuada) hasta que se destilde algún otro equipo.
+                const bloqueadaPorCupo = !yaInscripto && !seleccionado && cupoAgotado;
                 // Modelo de dominio en vez de armar la URL del escudo a mano
                 // (ver src/models/Equipo.ts) — centraliza el caso "sin escudo"
                 // en un solo lugar en vez de repetir `${ASSETS_URL}${...}` por pantalla.
@@ -229,14 +244,14 @@ export default function InscribirEquipos() {
                 return (
                   <div
                     key={equipo.id}
-                    className={`ie-equipo-row${yaInscripto ? " inscripto" : ""}`}
+                    className={`ie-equipo-row${yaInscripto ? " inscripto" : ""}${bloqueadaPorCupo ? " bloqueada" : ""}`}
                     onClick={() => toggleEquipo(equipo.id)}
                   >
                     <input
                       type="checkbox"
                       readOnly
                       checked={yaInscripto || seleccionado}
-                      disabled={yaInscripto}
+                      disabled={yaInscripto || bloqueadaPorCupo}
                     />
                     {equipoModel.tieneEscudo() ? (
                       <img
@@ -290,12 +305,19 @@ export default function InscribirEquipos() {
                 ))}
               </div>
 
+              {cupoExcedido && (
+                <Alert variant="warning" className="ie-alert">
+                  {cuposRestantes <= 0
+                    ? "Este torneo ya alcanzó su cupo máximo, no se pueden agregar más equipos."
+                    : `Solo podés seleccionar hasta ${cuposRestantes} equipo(s) más.`}
+                </Alert>
+              )}
               {errorInscripcion && <Alert variant="error" className="ie-alert">{errorInscripcion}</Alert>}
               {okInscripcion && <Alert variant="success" className="ie-alert">{okInscripcion}</Alert>}
 
               <Button
                 className="ie-btn-block"
-                disabled={seleccionados.size === 0 || loadingInscripcion}
+                disabled={seleccionados.size === 0 || cupoExcedido || loadingInscripcion}
                 onClick={handleInscribir}
               >
                 {loadingInscripcion ? "Inscribiendo..." : `Inscribir ${seleccionados.size > 0 ? seleccionados.size : ""} equipo(s)`}

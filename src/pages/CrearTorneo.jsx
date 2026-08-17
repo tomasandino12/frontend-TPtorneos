@@ -212,6 +212,21 @@ export default function CrearTorneo() {
     if (!form.fechaFin)      { setError("La fecha de fin es obligatoria."); return; }
     if (Number(form.cantEquipos) < 2) { setError("Se necesitan al menos 2 equipos."); return; }
 
+    // Regla 3 (duración mínima = 7 días × cantidad de equipos), chequeada acá
+    // contra cantEquipos solo para feedback inmediato — el backend vuelve a
+    // validar esto mismo (POST /torneo) y es el que manda, esto no lo saltea.
+    const cantEquiposNum = Number(form.cantEquipos);
+    const diasDuracion = Math.round(
+      (new Date(form.fechaFin).getTime() - new Date(form.fechaInicio).getTime()) / (24 * 60 * 60 * 1000)
+    );
+    const minimoRequerido = 7 * cantEquiposNum;
+    if (diasDuracion < minimoRequerido) {
+      setError(
+        `Para ${cantEquiposNum} equipos necesitás una duración mínima de ${minimoRequerido} días. La duración actual es de ${diasDuracion} días.`
+      );
+      return;
+    }
+
     setLoading(true);
     try {
       const body = {
