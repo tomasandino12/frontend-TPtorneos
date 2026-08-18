@@ -52,6 +52,29 @@ function calcularPartidos(n, formato) {
   return 0;
 }
 
+// Espejo del mínimo entre jornadas que ya exige el backend (shared/constants.ts,
+// DIAS_MIN_ENTRE_JORNADAS) — Regla 3.
+const DIAS_MIN_ENTRE_JORNADAS = 4;
+
+// Mismo cálculo round-robin que generarRondas()/calcularCantidadJornadas()
+// en el backend (torneo.controler.ts): con cantidad de equipos impar se
+// completa con un "bye", entonces son (N par - 1) jornadas de ida,
+// duplicado si es "idayvuelta". `formato` acá es el valor de backend
+// ('ida' | 'idayvuelta'), no la etiqueta de UI ("Solo ida"/"Ida y vuelta").
+function calcularJornadas(cantidadEquipos, formatoBackend) {
+  const eq = Math.max(0, parseInt(cantidadEquipos) || 0);
+  if (eq < 2) return 0;
+  const par = eq % 2 !== 0 ? eq + 1 : eq;
+  const jornadasIda = par - 1;
+  return formatoBackend === "idayvuelta" ? jornadasIda * 2 : jornadasIda;
+}
+
+// Regla 3: duración mínima = (cantidad de jornadas - 1) × DIAS_MIN_ENTRE_JORNADAS.
+function calcularDuracionMinimaDias(cantidadEquipos, formatoBackend) {
+  const jornadas = calcularJornadas(cantidadEquipos, formatoBackend);
+  return Math.max(0, jornadas - 1) * DIAS_MIN_ENTRE_JORNADAS;
+}
+
 const FORM_VACIO = {
   nombre:         "",
   fechaInicio:    "",
@@ -116,7 +139,6 @@ export default function CrearTorneo() {
   const [toastMsg, setToastMsg] = useState(null); // confirmación de resultado guardado
   const [fechaBase, setFechaBase] = useState("");
   const [horaBase, setHoraBase] = useState("15:00");
-  const [diasEntreJornadas, setDiasEntreJornadas] = useState(7);
   const [loadingFixture, setLoadingFixture] = useState(false);
   const [errorFixture, setErrorFixture] = useState("");
   const [okFixture, setOkFixture] = useState("");
@@ -212,17 +234,22 @@ export default function CrearTorneo() {
     if (!form.fechaFin)      { setError("La fecha de fin es obligatoria."); return; }
     if (Number(form.cantEquipos) < 2) { setError("Se necesitan al menos 2 equipos."); return; }
 
-    // Regla 3 (duración mínima = 7 días × cantidad de equipos), chequeada acá
+    // Regla 3 (duración mínima = (jornadas - 1) × 4 días), chequeada acá
     // contra cantEquipos solo para feedback inmediato — el backend vuelve a
     // validar esto mismo (POST /torneo) y es el que manda, esto no lo saltea.
     const cantEquiposNum = Number(form.cantEquipos);
+    const formatoBackend = form.formato === "Ida y vuelta" ? "idayvuelta" : "ida";
     const diasDuracion = Math.round(
       (new Date(form.fechaFin).getTime() - new Date(form.fechaInicio).getTime()) / (24 * 60 * 60 * 1000)
     );
-    const minimoRequerido = 7 * cantEquiposNum;
+    const jornadas = calcularJornadas(cantEquiposNum, formatoBackend);
+    const minimoRequerido = calcularDuracionMinimaDias(cantEquiposNum, formatoBackend);
     if (diasDuracion < minimoRequerido) {
+      const formatoLabel = formatoBackend === "idayvuelta" ? "ida y vuelta" : "solo ida";
       setError(
-        `Para ${cantEquiposNum} equipos necesitás una duración mínima de ${minimoRequerido} días. La duración actual es de ${diasDuracion} días.`
+        `Este torneo necesita al menos ${jornadas} jornada(s) para ${cantEquiposNum} equipos (formato ${formatoLabel}). `
+        + `Con un mínimo de ${DIAS_MIN_ENTRE_JORNADAS} días entre jornadas, la duración mínima requerida es de ${minimoRequerido} días. `
+        + `La duración actual es de ${diasDuracion} días.`
       );
       return;
     }
@@ -236,7 +263,7 @@ export default function CrearTorneo() {
         estado,
         categoria:       form.categoria,
         cantidadEquipos: Number(form.cantEquipos),
-        formato:         form.formato === "Ida y vuelta" ? "idayvuelta" : "ida",
+        formato:         formatoBackend,
         adminTorneo:     admin.id,
       };
 
@@ -376,6 +403,20 @@ export default function CrearTorneo() {
   // ── Árbitros / Canchas / Partidos (movido tal cual desde InscribirEquipos.jsx) ──
 
   const totalInscriptosTorneo = torneoOriginal?.participaciones?.length ?? 0;
+
+  // "Días entre jornadas" ya no lo elige el admin — se muestra como dato
+  // informativo, calculado igual que lo hace el backend (generarFixture):
+  // la duración real del torneo repartida en partes iguales entre las
+  // jornadas que van después de la primera.
+  const jornadasTorneo = calcularJornadas(totalInscriptosTorneo, torneoOriginal?.formato);
+  const duracionRealTorneoDias = torneoOriginal
+    ? Math.round(
+        (new Date(torneoOriginal.fechaFin).getTime() - new Date(torneoOriginal.fechaInicio).getTime())
+          / (24 * 60 * 60 * 1000)
+      )
+    : 0;
+  const diasEntreJornadasCalculado =
+    jornadasTorneo > 1 ? Math.floor(duracionRealTorneoDias / (jornadasTorneo - 1)) : null;
   // Antes usaba torneoOriginal?.estado === "en_curso" — un torneo puede llegar
   // a en_curso sin tener partidos, así que la única fuente confiable es si
   // hay Partidos de verdad.
@@ -490,11 +531,7 @@ export default function CrearTorneo() {
     try {
       const res = await adminApiFetch(`/torneo/${id}/generar-fixture`, {
         method: "POST",
-        body: JSON.stringify({
-          fechaBase,
-          horaBase,
-          diasEntreJornadas: Number(diasEntreJornadas),
-        }),
+        body: JSON.stringify({ fechaBase, horaBase }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Error al generar el fixture");
@@ -831,13 +868,14 @@ export default function CrearTorneo() {
                           onChange={(e) => setHoraBase(e.target.value)}
                           className="ie-fixture-field"
                         />
-                        <TextField
-                          label="Días entre jornadas"
-                          type="number" min={1} max={30}
-                          value={diasEntreJornadas}
-                          onChange={(e) => setDiasEntreJornadas(e.target.value)}
-                          className="ie-fixture-field"
-                        />
+                        <div className="ie-fixture-field">
+                          <label>Días entre jornadas</label>
+                          <p className="ie-fixture-asignados">
+                            {diasEntreJornadasCalculado != null
+                              ? `${diasEntreJornadasCalculado} (calculado automáticamente según la duración del torneo)`
+                              : "Se calcula automáticamente al generar el fixture"}
+                          </p>
+                        </div>
 
                         <p className="ie-fixture-asignados">
                           {arbitrosTorneoIds.size} árbitro(s) y {canchasTorneoIds.size} cancha(s) asignados a este torneo.
