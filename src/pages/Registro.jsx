@@ -22,8 +22,24 @@ function Registro() {
 
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [fechaError, setFechaError] = useState("");
   const [confirmarError, setConfirmarError] = useState("");
   const [exito, setExito] = useState("");
+
+  // Misma regla que valida el backend (register(), jugador.controler.ts):
+  // no vacía, no futura, edad entre 5 y 100 años.
+  function validarFechaNacimiento(valor) {
+    if (!valor) return "";
+    const fecha = new Date(valor);
+    if (Number.isNaN(fecha.getTime())) return "La fecha de nacimiento no es válida";
+    if (fecha.getTime() > Date.now()) return "La fecha de nacimiento no puede ser una fecha futura";
+    const hoy = new Date();
+    let edad = hoy.getFullYear() - fecha.getFullYear();
+    const mesDiff = hoy.getMonth() - fecha.getMonth();
+    if (mesDiff < 0 || (mesDiff === 0 && hoy.getDate() < fecha.getDate())) edad--;
+    if (edad < 5 || edad > 100) return "La edad resultante está fuera de un rango razonable";
+    return "";
+  }
 
   const handleChange = (e) => {
     const updated = { ...form, [e.target.name]: e.target.value };
@@ -31,6 +47,9 @@ function Registro() {
     if (e.target.name === "email") {
       if (!/\S+@\S+\.\S+/.test(e.target.value)) setEmailError("El email no es válido");
       else setEmailError("");
+    }
+    if (e.target.name === "fecha_nacimiento") {
+      setFechaError(validarFechaNacimiento(e.target.value));
     }
     if (e.target.name === "contraseña" || e.target.name === "confirmarContraseña") {
       const nueva = e.target.name === "contraseña" ? e.target.value : updated.contraseña;
@@ -46,6 +65,7 @@ function Registro() {
     /^\d{7,9}$/.test(form.dni) &&
     /\S+@\S+\.\S+/.test(form.email) &&
     form.fecha_nacimiento !== "" &&
+    !fechaError &&
     form.posicion !== "" &&
     form.genero !== "" &&
     form.contraseña.length >= 6 &&
@@ -160,6 +180,7 @@ function Registro() {
               name="fecha_nacimiento"
               value={form.fecha_nacimiento}
               onChange={handleChange}
+              error={fechaError}
               required
             />
 
