@@ -1,9 +1,37 @@
 import "../styles/IndexStyle.css";
 import "../styles/MiPerfil.css";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { FiUser, FiEdit2 } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
 import { Button, TextField, Alert, PageShell, PageHero } from "../components/ui";
+
+const FORM_VACIO = {
+  nombre: "",
+  apellido: "",
+  fechaNacimiento: "",
+  posicion: "",
+  email: "",
+  descripcion: "",
+};
+
+// nombre/apellido: mismo criterio que Registro.jsx (mínimo 2 caracteres).
+// email: mismo regex/mensaje que Registro.jsx.
+// fechaNacimiento/posicion/descripcion: el HTML original no tenía `required`
+// en ninguno de los tres, así que no se agrega ninguna regla nueva ahí — a
+// diferencia de nro_matricula (Arbitros) o capacidad/precioPorHora (cancha),
+// ninguno de estos es un campo numérico en el backend, así que no hay riesgo
+// real de mismatch de tipos y no hace falta z.coerce.string().
+const miPerfilSchema = z.object({
+  nombre: z.string().refine((v) => v.trim().length >= 2, "El nombre debe tener al menos 2 caracteres."),
+  apellido: z.string().refine((v) => v.trim().length >= 2, "El apellido debe tener al menos 2 caracteres."),
+  fechaNacimiento: z.string(),
+  posicion: z.string(),
+  email: z.string().regex(/\S+@\S+\.\S+/, "El email no es válido"),
+  descripcion: z.string(),
+});
 
 function MiPerfil() {
   const [jugador, setJugador] = useState(null);
@@ -11,13 +39,15 @@ function MiPerfil() {
   const [editando, setEditando] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState(null);
-  const [form, setForm] = useState({
-    nombre: "",
-    apellido: "",
-    fechaNacimiento: "",
-    posicion: "",
-    email: "",
-    descripcion: "",
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(miPerfilSchema),
+    defaultValues: FORM_VACIO,
   });
 
   useEffect(() => {
@@ -45,7 +75,7 @@ function MiPerfil() {
   }, []);
 
   const handleEmpezarEdicion = () => {
-    setForm({
+    reset({
       nombre: jugador.nombre || "",
       apellido: jugador.apellido || "",
       fechaNacimiento: jugador.fechaNacimiento || "",
@@ -62,19 +92,14 @@ function MiPerfil() {
     setError(null);
   };
 
-  const handleChangeForm = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleGuardar = async (e) => {
-    e.preventDefault();
+  const onGuardar = async (values) => {
     setGuardando(true);
     setError(null);
 
     try {
       const response = await apiFetch(`/jugadores/${jugador.id}`, {
         method: "PUT",
-        body: JSON.stringify(form),
+        body: JSON.stringify(values),
       });
 
       const data = await response.json();
@@ -86,7 +111,7 @@ function MiPerfil() {
         throw new Error(data.message || "Error al actualizar el perfil.");
       }
 
-      const actualizado = { ...jugador, ...form };
+      const actualizado = { ...jugador, ...values };
       setJugador(actualizado);
       localStorage.setItem("jugador", JSON.stringify(actualizado));
       setEditando(false);
@@ -108,7 +133,7 @@ function MiPerfil() {
   return (
     <PageShell>
       <PageHero icon={<FiUser />} title="Mi Perfil" subtitle="Gestiona tu información y estadísticas">
-      <form className="perfil-seccion" onSubmit={handleGuardar}>
+      <form className="perfil-seccion" onSubmit={handleSubmit(onGuardar)} noValidate>
           <div className="perfil-seccion-header">
             <div>
               <h2>Información Personal</h2>
@@ -164,17 +189,13 @@ function MiPerfil() {
               <div className="perfil-campo">
                 <TextField
                   label="Nombre"
-                  name="nombre"
-                  value={form.nombre}
-                  onChange={handleChangeForm}
-                  required
+                  error={errors.nombre?.message}
+                  {...register("nombre")}
                 />
                 <TextField
                   label="Apellido"
-                  name="apellido"
-                  value={form.apellido}
-                  onChange={handleChangeForm}
-                  required
+                  error={errors.apellido?.message}
+                  {...register("apellido")}
                 />
               </div>
 
@@ -182,9 +203,8 @@ function MiPerfil() {
                 <TextField
                   label="Fecha de Nacimiento"
                   type="date"
-                  name="fechaNacimiento"
-                  value={form.fechaNacimiento}
-                  onChange={handleChangeForm}
+                  error={errors.fechaNacimiento?.message}
+                  {...register("fechaNacimiento")}
                 />
                 <div className="ui-field">
                   <label className="ui-field-label" htmlFor="posicion">
@@ -193,10 +213,8 @@ function MiPerfil() {
                   <div className="ui-field-control">
                     <select
                       id="posicion"
-                      name="posicion"
                       className="ui-field-input"
-                      value={form.posicion}
-                      onChange={handleChangeForm}
+                      {...register("posicion")}
                     >
                       <option value="">Seleccionar...</option>
                       <option value="Arquero">Arquero</option>
@@ -212,10 +230,8 @@ function MiPerfil() {
                 <TextField
                   label="Email"
                   type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChangeForm}
-                  required
+                  error={errors.email?.message}
+                  {...register("email")}
                 />
               </div>
 
@@ -223,10 +239,8 @@ function MiPerfil() {
                 <div className="input-grupo">
                   <label>Descripción</label>
                   <textarea
-                    name="descripcion"
                     placeholder="Ej: Volante ofensivo por la derecha, prefiero el juego creativo..."
-                    value={form.descripcion}
-                    onChange={handleChangeForm}
+                    {...register("descripcion")}
                   />
                 </div>
               </div>

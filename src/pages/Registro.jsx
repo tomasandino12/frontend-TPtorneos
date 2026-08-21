@@ -2,78 +2,91 @@ import "../styles/InicioSesion.css";
 import "../styles/Registro.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { FiUser, FiCreditCard, FiMail, FiCalendar, FiFlag, FiLock } from "react-icons/fi";
 import { Button, TextField, Card, Alert } from "../components/ui";
+
+// nombre/apellido/dni/posicion/genero/contraseña nunca mostraron un mensaje
+// propio (solo alimentaban el booleano `valido` para deshabilitar el botón)
+// — esos mensajes existen acá porque zod los pide, pero no se conectan a
+// ningún TextField. email/fecha_nacimiento/confirmarContraseña sí mostraban
+// texto, y son los únicos con `error=` en el JSX.
+const registroSchema = z
+  .object({
+    // .refine en vez de z.string().trim() como transform: el chequeo original
+    // usa el nombre recortado, pero lo que se manda al backend es el valor
+    // tal cual se tipeó (sin recortar) — no hay que alterar el valor acá.
+    nombre: z.string().refine((v) => v.trim().length >= 2, "El nombre debe tener al menos 2 caracteres."),
+    apellido: z.string().refine((v) => v.trim().length >= 2, "El apellido debe tener al menos 2 caracteres."),
+    dni: z.string().regex(/^\d{7,9}$/, "El DNI no es válido."),
+    email: z.string().regex(/\S+@\S+\.\S+/, "El email no es válido"),
+    fecha_nacimiento: z.string(),
+    posicion: z.string().min(1, "Elegí tu posición."),
+    genero: z.string().min(1, "Elegí tu género."),
+    contraseña: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
+    confirmarContraseña: z.string(),
+  })
+  // fecha_nacimiento y confirmarContraseña necesitan mirar el resto del
+  // objeto (validarFechaNacimiento no depende de otros campos, pero se
+  // valida acá igual por consistencia) — un campo vacío nunca mostró texto
+  // (mensaje "", TextField no lo pinta), solo bloqueaba el submit vía
+  // `valido`; con datos, sí se valida y se muestra el mensaje real.
+  .superRefine((data, ctx) => {
+    if (data.fecha_nacimiento === "") {
+      ctx.addIssue({ code: "custom", message: "", path: ["fecha_nacimiento"] });
+    } else {
+      const fecha = new Date(data.fecha_nacimiento);
+      if (Number.isNaN(fecha.getTime())) {
+        ctx.addIssue({ code: "custom", message: "La fecha de nacimiento no es válida", path: ["fecha_nacimiento"] });
+      } else if (fecha.getTime() > Date.now()) {
+        ctx.addIssue({ code: "custom", message: "La fecha de nacimiento no puede ser una fecha futura", path: ["fecha_nacimiento"] });
+      } else {
+        const hoy = new Date();
+        let edad = hoy.getFullYear() - fecha.getFullYear();
+        const mesDiff = hoy.getMonth() - fecha.getMonth();
+        if (mesDiff < 0 || (mesDiff === 0 && hoy.getDate() < fecha.getDate())) edad--;
+        if (edad < 5 || edad > 100) {
+          ctx.addIssue({ code: "custom", message: "La edad resultante está fuera de un rango razonable", path: ["fecha_nacimiento"] });
+        }
+      }
+    }
+
+    if (data.confirmarContraseña === "") {
+      ctx.addIssue({ code: "custom", message: "", path: ["confirmarContraseña"] });
+    } else if (data.confirmarContraseña !== data.contraseña) {
+      ctx.addIssue({ code: "custom", message: "Las contraseñas no coinciden", path: ["confirmarContraseña"] });
+    }
+  });
 
 function Registro() {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    nombre: "",
-    apellido: "",
-    dni: "",
-    email: "",
-    fecha_nacimiento: "",
-    posicion: "",
-    genero: "",
-    contraseña: "",
-    confirmarContraseña: "",
-  });
-
   const [error, setError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [fechaError, setFechaError] = useState("");
-  const [confirmarError, setConfirmarError] = useState("");
   const [exito, setExito] = useState("");
 
-  // Misma regla que valida el backend (register(), jugador.controler.ts):
-  // no vacía, no futura, edad entre 5 y 100 años.
-  function validarFechaNacimiento(valor) {
-    if (!valor) return "";
-    const fecha = new Date(valor);
-    if (Number.isNaN(fecha.getTime())) return "La fecha de nacimiento no es válida";
-    if (fecha.getTime() > Date.now()) return "La fecha de nacimiento no puede ser una fecha futura";
-    const hoy = new Date();
-    let edad = hoy.getFullYear() - fecha.getFullYear();
-    const mesDiff = hoy.getMonth() - fecha.getMonth();
-    if (mesDiff < 0 || (mesDiff === 0 && hoy.getDate() < fecha.getDate())) edad--;
-    if (edad < 5 || edad > 100) return "La edad resultante está fuera de un rango razonable";
-    return "";
-  }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm({
+    resolver: zodResolver(registroSchema),
+    mode: "onChange",
+    defaultValues: {
+      nombre: "",
+      apellido: "",
+      dni: "",
+      email: "",
+      fecha_nacimiento: "",
+      posicion: "",
+      genero: "",
+      contraseña: "",
+      confirmarContraseña: "",
+    },
+  });
 
-  const handleChange = (e) => {
-    const updated = { ...form, [e.target.name]: e.target.value };
-    setForm(updated);
-    if (e.target.name === "email") {
-      if (!/\S+@\S+\.\S+/.test(e.target.value)) setEmailError("El email no es válido");
-      else setEmailError("");
-    }
-    if (e.target.name === "fecha_nacimiento") {
-      setFechaError(validarFechaNacimiento(e.target.value));
-    }
-    if (e.target.name === "contraseña" || e.target.name === "confirmarContraseña") {
-      const nueva = e.target.name === "contraseña" ? e.target.value : updated.contraseña;
-      const confirmar = e.target.name === "confirmarContraseña" ? e.target.value : updated.confirmarContraseña;
-      if (confirmar && nueva !== confirmar) setConfirmarError("Las contraseñas no coinciden");
-      else setConfirmarError("");
-    }
-  };
-
-  const valido =
-    form.nombre.trim().length >= 2 &&
-    form.apellido.trim().length >= 2 &&
-    /^\d{7,9}$/.test(form.dni) &&
-    /\S+@\S+\.\S+/.test(form.email) &&
-    form.fecha_nacimiento !== "" &&
-    !fechaError &&
-    form.posicion !== "" &&
-    form.genero !== "" &&
-    form.contraseña.length >= 6 &&
-    form.confirmarContraseña === form.contraseña &&
-    form.confirmarContraseña !== "";
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmitRegistro = async (values) => {
     setError("");
 
     try {
@@ -81,14 +94,14 @@ function Registro() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nombre: form.nombre,
-          apellido: form.apellido,
-          dni: form.dni,
-          email: form.email,
-          fechaNacimiento: form.fecha_nacimiento,
-          posicion: form.posicion,
-          genero: form.genero,
-          contraseña: form.contraseña,
+          nombre: values.nombre,
+          apellido: values.apellido,
+          dni: values.dni,
+          email: values.email,
+          fechaNacimiento: values.fecha_nacimiento,
+          posicion: values.posicion,
+          genero: values.genero,
+          contraseña: values.contraseña,
         }),
       });
 
@@ -102,10 +115,10 @@ function Registro() {
       localStorage.setItem("token", data.token);
       const nuevoJugador = {
         id: data.id || null,
-        nombre: form.nombre,
-        apellido: form.apellido,
-        email: form.email,
-        posicion: form.posicion,
+        nombre: values.nombre,
+        apellido: values.apellido,
+        email: values.email,
+        posicion: values.posicion,
         equipo: null,
         esCapitan: false,
       };
@@ -129,59 +142,44 @@ function Registro() {
           <p className="auth-subtitle">Completá tus datos para crear tu cuenta</p>
         </div>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form className="auth-form" onSubmit={handleSubmit(onSubmitRegistro)} noValidate>
           <div className="auth-grid-2">
             <TextField
               label="Nombre"
               icon={<FiUser />}
-              name="nombre"
-              value={form.nombre}
-              onChange={handleChange}
               placeholder="Juan"
-              required
+              {...register("nombre")}
             />
 
             <TextField
               label="Apellido"
               icon={<FiUser />}
-              name="apellido"
-              value={form.apellido}
-              onChange={handleChange}
               placeholder="Pérez"
-              required
+              {...register("apellido")}
             />
 
             <TextField
               label="DNI"
               icon={<FiCreditCard />}
-              name="dni"
-              value={form.dni}
-              onChange={handleChange}
               placeholder="40111222"
-              required
+              {...register("dni")}
             />
 
             <TextField
               label="Email"
               type="email"
               icon={<FiMail />}
-              name="email"
-              value={form.email}
-              onChange={handleChange}
               placeholder="juanperez@email.com"
-              error={emailError}
-              required
+              error={errors.email?.message}
+              {...register("email")}
             />
 
             <TextField
               label="Fecha de nacimiento"
               type="date"
               icon={<FiCalendar />}
-              name="fecha_nacimiento"
-              value={form.fecha_nacimiento}
-              onChange={handleChange}
-              error={fechaError}
-              required
+              error={errors.fecha_nacimiento?.message}
+              {...register("fecha_nacimiento")}
             />
 
             <div className="ui-field">
@@ -192,11 +190,8 @@ function Registro() {
                 <FiFlag className="ui-field-icon" />
                 <select
                   id="posicion"
-                  name="posicion"
                   className="ui-field-input"
-                  value={form.posicion}
-                  onChange={handleChange}
-                  required
+                  {...register("posicion")}
                 >
                   <option value="" disabled>
                     — Seleccionar posición —
@@ -217,11 +212,8 @@ function Registro() {
                 <FiFlag className="ui-field-icon" />
                 <select
                   id="genero"
-                  name="genero"
                   className="ui-field-input"
-                  value={form.genero}
-                  onChange={handleChange}
-                  required
+                  {...register("genero")}
                 >
                   <option value="" disabled>
                     — Seleccionar género —
@@ -236,29 +228,23 @@ function Registro() {
               label="Contraseña"
               type="password"
               icon={<FiLock />}
-              name="contraseña"
-              value={form.contraseña}
-              onChange={handleChange}
               placeholder="••••••••"
               className="auth-field-full"
-              required
+              {...register("contraseña")}
             />
 
             <TextField
               label="Confirmar contraseña"
               type="password"
               icon={<FiLock />}
-              name="confirmarContraseña"
-              value={form.confirmarContraseña}
-              onChange={handleChange}
               placeholder="••••••••"
-              error={confirmarError}
+              error={errors.confirmarContraseña?.message}
               className="auth-field-full"
-              required
+              {...register("confirmarContraseña")}
             />
           </div>
 
-          <Button type="submit" disabled={!valido}>
+          <Button type="submit" disabled={!isValid}>
             Registrarse
           </Button>
 

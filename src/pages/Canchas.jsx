@@ -3,6 +3,8 @@ import "../styles/MenuAdmin.css";
 import "../styles/Canchas.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   FiMapPin,
   FiSearch,
@@ -16,6 +18,7 @@ import {
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
+import { canchaSchema } from "../schemas/cancha.js";
 
 const ESTADOS = [
   { value: "activa", label: "Activa" },
@@ -69,9 +72,18 @@ export default function Canchas() {
   const [search, setSearch] = useState("");
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [canchaEditando, setCanchaEditando] = useState(null);
-  const [form, setForm] = useState(FORM_VACIO);
   const [guardando, setGuardando] = useState(false);
   const [errorForm, setErrorForm] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(canchaSchema),
+    defaultValues: FORM_VACIO,
+  });
 
   useEffect(() => {
     const stored = localStorage.getItem("admin");
@@ -109,7 +121,7 @@ export default function Canchas() {
 
   const handleAbrirEditar = (cancha) => {
     setCanchaEditando(cancha);
-    setForm({
+    reset({
       nombre: cancha.nombre || "",
       direccion: cancha.direccion || "",
       tipoSuperficie: cancha.tipoSuperficie || "",
@@ -127,12 +139,7 @@ export default function Canchas() {
     setCanchaEditando(null);
   };
 
-  const handleChangeForm = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleGuardar = async (e) => {
-    e.preventDefault();
+  const onGuardar = async (values) => {
     setGuardando(true);
     setErrorForm("");
 
@@ -140,10 +147,10 @@ export default function Canchas() {
       const res = await adminApiFetch(`/canchas/${canchaEditando.id}`, {
         method: "PUT",
         body: JSON.stringify({
-          ...form,
-          capacidad: Number(form.capacidad),
-          precioPorHora: Number(form.precioPorHora),
-          iluminacion: !!form.iluminacion,
+          ...values,
+          capacidad: Number(values.capacidad),
+          precioPorHora: Number(values.precioPorHora),
+          iluminacion: !!values.iluminacion,
         }),
       });
       const data = await res.json();
@@ -324,40 +331,32 @@ export default function Canchas() {
 
       {mostrarFormulario && (
         <div className="cn-modal-overlay">
-          <form className="cn-modal" onSubmit={handleGuardar}>
+          <form className="cn-modal" onSubmit={handleSubmit(onGuardar)} noValidate>
             <h3>Editar cancha</h3>
 
             {errorForm && <Alert variant="error">{errorForm}</Alert>}
 
             <TextField
               label="Nombre"
-              name="nombre"
-              value={form.nombre}
-              onChange={handleChangeForm}
-              required
+              error={errors.nombre?.message}
+              {...register("nombre")}
             />
             <TextField
               label="Dirección"
-              name="direccion"
-              value={form.direccion}
-              onChange={handleChangeForm}
-              required
+              error={errors.direccion?.message}
+              {...register("direccion")}
             />
             <TextField
               label="Tipo de superficie"
-              name="tipoSuperficie"
-              value={form.tipoSuperficie}
-              onChange={handleChangeForm}
-              required
+              error={errors.tipoSuperficie?.message}
+              {...register("tipoSuperficie")}
             />
             <TextField
               label="Capacidad"
               type="number"
-              name="capacidad"
               min={0}
-              value={form.capacidad}
-              onChange={handleChangeForm}
-              required
+              error={errors.capacidad?.message}
+              {...register("capacidad")}
             />
 
             <div className="ui-field">
@@ -366,9 +365,7 @@ export default function Canchas() {
                 <select
                   id="cn-estado"
                   className="ui-field-input"
-                  name="estado"
-                  value={form.estado}
-                  onChange={handleChangeForm}
+                  {...register("estado")}
                 >
                   {ESTADOS.map((e) => (
                     <option key={e.value} value={e.value}>{e.label}</option>
@@ -380,19 +377,13 @@ export default function Canchas() {
             <TextField
               label="Precio por hora"
               type="number"
-              name="precioPorHora"
               min={0}
-              value={form.precioPorHora}
-              onChange={handleChangeForm}
-              required
+              error={errors.precioPorHora?.message}
+              {...register("precioPorHora")}
             />
 
             <label className="cn-checkbox-label">
-              <input
-                type="checkbox"
-                checked={form.iluminacion}
-                onChange={(e) => setForm({ ...form, iluminacion: e.target.checked })}
-              />
+              <input type="checkbox" {...register("iluminacion")} />
               Tiene iluminación
             </label>
 

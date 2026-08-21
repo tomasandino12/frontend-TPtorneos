@@ -1,36 +1,49 @@
 import "../styles/InicioSesion.css";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { FiLock } from "react-icons/fi";
 import { Button, TextField, Card, Alert } from "../components/ui";
+
+const restablecerSchema = z
+  .object({
+    nuevaContraseña: z.string().min(6, "La contraseña debe tener al menos 6 caracteres."),
+    confirmar: z.string(),
+  })
+  .refine((data) => data.nuevaContraseña === data.confirmar, {
+    message: "Las contraseñas no coinciden.",
+    path: ["confirmar"],
+  });
 
 function RestablecerPassword() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token") || "";
 
-  const [nuevaContraseña, setNuevaContraseña] = useState("");
-  const [confirmar, setConfirmar] = useState("");
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
   const [exito, setExito] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(restablecerSchema),
+    defaultValues: { nuevaContraseña: "", confirmar: "" },
+  });
+
+  // Mismo Alert genérico único que antes (no por campo) — cubre tanto la
+  // validación de zod como el chequeo de token, que no es un campo del form.
+  const mensajeValidacion = errors.nuevaContraseña?.message || errors.confirmar?.message;
+
+  const onSubmit = async ({ nuevaContraseña }) => {
     setError("");
 
     if (!token) {
       setError("El enlace no es válido. Solicitá uno nuevo.");
-      return;
-    }
-
-    if (nuevaContraseña.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
-      return;
-    }
-
-    if (nuevaContraseña !== confirmar) {
-      setError("Las contraseñas no coinciden.");
       return;
     }
 
@@ -71,15 +84,13 @@ function RestablecerPassword() {
             </Button>
           </div>
         ) : (
-          <form className="auth-form" onSubmit={handleSubmit}>
+          <form className="auth-form" onSubmit={handleSubmit(onSubmit)} noValidate>
             <TextField
               label="Nueva contraseña"
               type="password"
               icon={<FiLock />}
               placeholder="••••••••"
-              value={nuevaContraseña}
-              onChange={(e) => setNuevaContraseña(e.target.value)}
-              required
+              {...register("nuevaContraseña")}
             />
 
             <TextField
@@ -87,12 +98,10 @@ function RestablecerPassword() {
               type="password"
               icon={<FiLock />}
               placeholder="••••••••"
-              value={confirmar}
-              onChange={(e) => setConfirmar(e.target.value)}
-              required
+              {...register("confirmar")}
             />
 
-            {error && <Alert variant="error">{error}</Alert>}
+            {(error || mensajeValidacion) && <Alert variant="error">{error || mensajeValidacion}</Alert>}
 
             <Button type="submit" disabled={guardando}>
               {guardando ? "Guardando..." : "Guardar nueva contraseña"}

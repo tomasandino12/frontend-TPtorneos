@@ -3,12 +3,28 @@ import "../styles/MenuAdmin.css";
 import "../styles/Arbitros.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { FiFlag, FiSearch, FiEdit2, FiTrash2 } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert, PageShell, PageHero, ScrollableTable } from "../components/ui";
 
 const FORM_VACIO = { nombre: "", apellido: "", nro_matricula: "", email: "" };
+
+// nombre/apellido: mismo criterio que Registro.jsx (mínimo 2 caracteres).
+// email: mismo regex/mensaje que Registro.jsx.
+// nro_matricula: z.coerce.string() (no z.string() a secas) — al editar, el
+// valor sale del backend y no sabemos con certeza si ahí es número o string;
+// coerce lo normaliza a string en los dos casos, evitando el mismatch de
+// tipos del bug de cantEquipos en CrearTorneo.
+const arbitroSchema = z.object({
+  nombre: z.string().refine((v) => v.trim().length >= 2, "El nombre debe tener al menos 2 caracteres."),
+  apellido: z.string().refine((v) => v.trim().length >= 2, "El apellido debe tener al menos 2 caracteres."),
+  nro_matricula: z.coerce.string().min(1, "El número de matrícula es obligatorio."),
+  email: z.string().regex(/\S+@\S+\.\S+/, "El email no es válido"),
+});
 
 export default function Arbitros() {
   const navigate = useNavigate();
@@ -19,9 +35,18 @@ export default function Arbitros() {
   const [search, setSearch] = useState("");
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [arbitroEditando, setArbitroEditando] = useState(null);
-  const [form, setForm] = useState(FORM_VACIO);
   const [guardando, setGuardando] = useState(false);
   const [errorForm, setErrorForm] = useState("");
+
+  const {
+    register: registerArbitro,
+    handleSubmit: handleSubmitArbitro,
+    reset: resetArbitro,
+    formState: { errors: erroresArbitro },
+  } = useForm({
+    resolver: zodResolver(arbitroSchema),
+    defaultValues: FORM_VACIO,
+  });
 
   useEffect(() => {
     const stored = localStorage.getItem("admin");
@@ -59,14 +84,14 @@ export default function Arbitros() {
 
   const handleAbrirNuevo = () => {
     setArbitroEditando(null);
-    setForm(FORM_VACIO);
+    resetArbitro(FORM_VACIO);
     setErrorForm("");
     setMostrarFormulario(true);
   };
 
   const handleAbrirEditar = (arbitro) => {
     setArbitroEditando(arbitro);
-    setForm({
+    resetArbitro({
       nombre: arbitro.nombre || "",
       apellido: arbitro.apellido || "",
       nro_matricula: arbitro.nro_matricula || "",
@@ -81,12 +106,7 @@ export default function Arbitros() {
     setArbitroEditando(null);
   };
 
-  const handleChangeForm = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleGuardar = async (e) => {
-    e.preventDefault();
+  const onGuardarArbitro = async (values) => {
     setGuardando(true);
     setErrorForm("");
 
@@ -95,7 +115,7 @@ export default function Arbitros() {
       const method = arbitroEditando ? "PUT" : "POST";
       const res = await adminApiFetch(endpoint, {
         method,
-        body: JSON.stringify(form),
+        body: JSON.stringify(values),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Error al guardar el árbitro");
@@ -208,39 +228,31 @@ export default function Arbitros() {
 
       {mostrarFormulario && (
         <div className="ar-modal-overlay">
-          <form className="ar-modal" onSubmit={handleGuardar}>
+          <form className="ar-modal" onSubmit={handleSubmitArbitro(onGuardarArbitro)} noValidate>
             <h3>{arbitroEditando ? "Editar árbitro" : "Nuevo árbitro"}</h3>
 
             {errorForm && <Alert variant="error">{errorForm}</Alert>}
 
             <TextField
               label="Nombre"
-              name="nombre"
-              value={form.nombre}
-              onChange={handleChangeForm}
-              required
+              error={erroresArbitro.nombre?.message}
+              {...registerArbitro("nombre")}
             />
             <TextField
               label="Apellido"
-              name="apellido"
-              value={form.apellido}
-              onChange={handleChangeForm}
-              required
+              error={erroresArbitro.apellido?.message}
+              {...registerArbitro("apellido")}
             />
             <TextField
               label="Nº de matrícula"
-              name="nro_matricula"
-              value={form.nro_matricula}
-              onChange={handleChangeForm}
-              required
+              error={erroresArbitro.nro_matricula?.message}
+              {...registerArbitro("nro_matricula")}
             />
             <TextField
               label="Email"
               type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChangeForm}
-              required
+              error={erroresArbitro.email?.message}
+              {...registerArbitro("email")}
             />
 
             <div className="ar-modal-botones">

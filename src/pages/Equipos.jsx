@@ -2,20 +2,33 @@ import "../styles/IndexStyle.css";
 import "../styles/Equipos.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { FiUsers, FiPlus, FiMail, FiCheck, FiX, FiTag } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
 import EquipoInfo from "../components/EquipoInfo.jsx";
 
+// Mensaje único (no por campo): así se muestra hoy, un solo Alert genérico
+// sin importar cuál de los campos falte. colorPrimario/colorSecundario son
+// <input type="color"> nativos que en la práctica siempre traen un valor (el
+// picker no permite dejarlos vacíos) — se validan igual, por paridad con el
+// chequeo original (`!nombreEquipo || !colorPrimario || !colorSecundario || !categoria`).
+const MENSAJE_EQUIPO_INCOMPLETO = "Completá todos los campos, incluida la categoría.";
+
+const equipoSchema = z.object({
+  nombreEquipo: z.string().trim().min(1, MENSAJE_EQUIPO_INCOMPLETO),
+  colorPrimario: z.string().min(1, MENSAJE_EQUIPO_INCOMPLETO),
+  colorSecundario: z.string().min(1, MENSAJE_EQUIPO_INCOMPLETO),
+  categoria: z.string().min(1, MENSAJE_EQUIPO_INCOMPLETO),
+  descripcion: z.string().optional(),
+});
+
 function Equipos() {
   const navigate = useNavigate();
   const [jugador, setJugador] = useState(null);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [nombreEquipo, setNombreEquipo] = useState("");
-  const [colorPrimario, setColorPrimario] = useState("#ffffff");
-  const [colorSecundario, setColorSecundario] = useState("#000000");
-  const [categoria, setCategoria] = useState("");
-  const [descripcion, setDescripcion] = useState("");
   const [crearFeedback, setCrearFeedback] = useState(null);
   const [salirFeedback, setSalirFeedback] = useState(null);
   const [invitaciones, setInvitaciones] = useState([]);
@@ -90,14 +103,29 @@ function Equipos() {
     }
   };
 
-  const handleSubmitEquipo = async (e) => {
-    e.preventDefault();
+  const {
+    register: registerEquipo,
+    handleSubmit: handleSubmitEquipoForm,
+    reset: resetEquipo,
+    formState: { errors: erroresEquipo },
+  } = useForm({
+    resolver: zodResolver(equipoSchema),
+    defaultValues: {
+      nombreEquipo: "",
+      colorPrimario: "#ffffff",
+      colorSecundario: "#000000",
+      categoria: "",
+      descripcion: "",
+    },
+  });
 
-    if (!nombreEquipo || !colorPrimario || !colorSecundario || !categoria) {
-      setCrearFeedback({ variant: "error", text: "Completá todos los campos, incluida la categoría." });
-      return;
-    }
+  const mensajeCamposIncompletos =
+    erroresEquipo.nombreEquipo?.message
+    || erroresEquipo.categoria?.message
+    || erroresEquipo.colorPrimario?.message
+    || erroresEquipo.colorSecundario?.message;
 
+  const onSubmitEquipo = async (values) => {
     if (!jugador || !jugador.id) {
       setCrearFeedback({
         variant: "error",
@@ -109,32 +137,27 @@ function Equipos() {
     try {
       const response = await apiFetch("/equipos", {
         method: "POST",
-        body: JSON.stringify({
-          nombreEquipo,
-          colorPrimario,
-          colorSecundario,
-          categoria,
-          descripcion,
-          idJugador: jugador.id,
-        }),
+        body: JSON.stringify({ ...values, idJugador: jugador.id }),
       });
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Error al crear equipo");
+      const respData = await response.json();
+      if (!response.ok) throw new Error(respData.message || "Error al crear equipo");
 
       const jugadorActualizado = {
         ...jugador,
-        equipo: data.data,
+        equipo: respData.data,
         esCapitan: true,
       };
 
       localStorage.setItem("jugador", JSON.stringify(jugadorActualizado));
       setJugador(jugadorActualizado);
-      setNombreEquipo("");
-      setColorPrimario("#ffffff");
-      setColorSecundario("#000000");
-      setCategoria("");
-      setDescripcion("");
+      resetEquipo({
+        nombreEquipo: "",
+        colorPrimario: "#ffffff",
+        colorSecundario: "#000000",
+        categoria: "",
+        descripcion: "",
+      });
       setMostrarFormulario(false);
       setCrearFeedback({ variant: "success", text: "Equipo creado con éxito." });
     } catch (error) {
@@ -257,14 +280,12 @@ function Equipos() {
 
         {mostrarFormulario && !generoIncompleto && (
           <div className="modal-crear-equipo">
-            <form className="formulario-crear-equipo" onSubmit={handleSubmitEquipo}>
+            <form className="formulario-crear-equipo" onSubmit={handleSubmitEquipoForm(onSubmitEquipo)} noValidate>
               <h3>Nuevo Equipo</h3>
 
               <TextField
                 label="Nombre del Equipo"
-                value={nombreEquipo}
-                onChange={(e) => setNombreEquipo(e.target.value)}
-                required
+                {...registerEquipo("nombreEquipo")}
               />
 
               <div className="ui-field">
@@ -274,9 +295,7 @@ function Equipos() {
                   <select
                     id="eq-categoria"
                     className="ui-field-input"
-                    value={categoria}
-                    onChange={(e) => setCategoria(e.target.value)}
-                    required
+                    {...registerEquipo("categoria")}
                   >
                     <option value="" disabled>Seleccioná una categoría</option>
                     {categoriasDisponibles.map((c) => (
@@ -289,30 +308,24 @@ function Equipos() {
               <div className="color-pickers-grupo">
                 <div className="color-picker-item">
                   <label>Color Primario</label>
-                  <input
-                    type="color"
-                    value={colorPrimario}
-                    onChange={(e) => setColorPrimario(e.target.value)}
-                  />
+                  <input type="color" {...registerEquipo("colorPrimario")} />
                 </div>
                 <div className="color-picker-item">
                   <label>Color Secundario</label>
-                  <input
-                    type="color"
-                    value={colorSecundario}
-                    onChange={(e) => setColorSecundario(e.target.value)}
-                  />
+                  <input type="color" {...registerEquipo("colorSecundario")} />
                 </div>
               </div>
 
               <label>Descripción</label>
               <textarea
                 placeholder="Ej: Equipo de amigos, buena onda, nos gusta el juego asociado..."
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
+                {...registerEquipo("descripcion")}
               />
 
               {crearFeedback && <Alert variant={crearFeedback.variant}>{crearFeedback.text}</Alert>}
+              {!crearFeedback && mensajeCamposIncompletos && (
+                <Alert variant="error">{mensajeCamposIncompletos}</Alert>
+              )}
 
               <div className="formulario-botones">
                 <Button type="submit">Crear</Button>

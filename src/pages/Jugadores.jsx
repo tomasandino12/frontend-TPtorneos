@@ -3,6 +3,9 @@ import "../styles/MenuAdmin.css";
 import "../styles/Jugadores.css";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { FiUsers, FiSearch, FiX } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
@@ -10,6 +13,10 @@ import { Card, TextField, Button, Alert, PageShell, PageHero, ScrollableTable } 
 
 const MIN_CARACTERES_BUSQUEDA = 3;
 const MAX_BUSQUEDAS_RECIENTES = 6;
+
+const suspensionSchema = z.object({
+  motivo: z.string().trim().min(1, "El motivo es obligatorio."),
+});
 
 function recientesKey(adminId) {
   return `jugadoresBusquedasRecientes_${adminId}`;
@@ -101,12 +108,21 @@ export default function Jugadores() {
   const [torneoActivoJugador, setTorneoActivoJugador] = useState(null);
   const [modalCargando, setModalCargando] = useState(false);
   const [modalError, setModalError] = useState("");
-  const [motivoSuspension, setMotivoSuspension] = useState("");
   const [guardandoAccion, setGuardandoAccion] = useState(false);
+
+  const {
+    register: registerSuspension,
+    handleSubmit: handleSubmitSuspension,
+    reset: resetSuspension,
+    formState: { errors: erroresSuspension },
+  } = useForm({
+    resolver: zodResolver(suspensionSchema),
+    defaultValues: { motivo: "" },
+  });
 
   const handleAbrirModalJugador = async (jugador) => {
     setJugadorSeleccionado(jugador);
-    setMotivoSuspension("");
+    resetSuspension({ motivo: "" });
     setModalError("");
     setModalCargando(true);
     try {
@@ -128,22 +144,18 @@ export default function Jugadores() {
     setTorneoActivoJugador(null);
   };
 
-  const handleSuspender = async () => {
-    if (!motivoSuspension.trim()) {
-      setModalError("El motivo es obligatorio.");
-      return;
-    }
+  const onSuspender = async ({ motivo }) => {
     setGuardandoAccion(true);
     setModalError("");
     try {
       const res = await adminApiFetch(`/jugadores/${jugadorSeleccionado.id}/suspender`, {
         method: "PATCH",
-        body: JSON.stringify({ motivo: motivoSuspension.trim() }),
+        body: JSON.stringify({ motivo }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Error al suspender al jugador");
       setSuspensionesJugador((prev) => [data.data, ...prev]);
-      setMotivoSuspension("");
+      resetSuspension({ motivo: "" });
     } catch (e) {
       setModalError(e.message);
     } finally {
@@ -331,20 +343,32 @@ export default function Jugadores() {
                   }
 
                   return (
-                    <div className="jg-modal-suspender">
-                      <TextField
-                        label="Motivo de la suspensión"
-                        value={motivoSuspension}
-                        onChange={(e) => setMotivoSuspension(e.target.value)}
-                        placeholder="Ej: Conducta antideportiva en el partido del 12/07"
-                        disabled={!torneoActivoJugador}
-                      />
-                      {!torneoActivoJugador && (
-                        <Alert variant="info">
-                          No se puede suspender: el equipo de este jugador no participa en ningún torneo activo.
-                        </Alert>
-                      )}
-                    </div>
+                    // display:contents: el botón "Suspender" vive afuera de este
+                    // <form> (en .jg-modal-botones, más abajo) y se asocia por
+                    // form="jg-form-suspender" — este wrapper no debe aparecer
+                    // en el flex layout de .jg-modal, solo darle un <form> real
+                    // a react-hook-form para el submit.
+                    <form
+                      id="jg-form-suspender"
+                      onSubmit={handleSubmitSuspension(onSuspender)}
+                      style={{ display: "contents" }}
+                      noValidate
+                    >
+                      <div className="jg-modal-suspender">
+                        <TextField
+                          label="Motivo de la suspensión"
+                          {...registerSuspension("motivo")}
+                          error={erroresSuspension.motivo?.message}
+                          placeholder="Ej: Conducta antideportiva en el partido del 12/07"
+                          disabled={!torneoActivoJugador}
+                        />
+                        {!torneoActivoJugador && (
+                          <Alert variant="info">
+                            No se puede suspender: el equipo de este jugador no participa en ningún torneo activo.
+                          </Alert>
+                        )}
+                      </div>
+                    </form>
                   );
                 })()}
 
@@ -367,9 +391,9 @@ export default function Jugadores() {
                     }
                     return (
                       <Button
-                        type="button"
+                        type="submit"
+                        form="jg-form-suspender"
                         variant="danger"
-                        onClick={handleSuspender}
                         disabled={guardandoAccion || !torneoActivoJugador}
                       >
                         {guardandoAccion ? "Suspendiendo..." : "Suspender"}

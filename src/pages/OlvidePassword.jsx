@@ -1,18 +1,33 @@
 import "../styles/InicioSesion.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { FiMail } from "react-icons/fi";
 import { Button, TextField, Card, Alert } from "../components/ui";
 
+// Mismo regex y mismo mensaje que Registro.jsx (email) — reusado, no inventado.
+const olvidePasswordSchema = z.object({
+  email: z.string().regex(/\S+@\S+\.\S+/, "El email no es válido"),
+});
+
 function OlvidePassword() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(olvidePasswordSchema),
+    defaultValues: { email: "" },
+  });
+
+  const onSubmit = async ({ email }) => {
     setError("");
     setEnviando(true);
 
@@ -60,15 +75,14 @@ function OlvidePassword() {
             </Button>
           </div>
         ) : (
-          <form className="auth-form" onSubmit={handleSubmit}>
+          <form className="auth-form" onSubmit={handleSubmit(onSubmit)} noValidate>
             <TextField
               label="Email"
               type="email"
               icon={<FiMail />}
               placeholder="juanperez@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              error={errors.email?.message}
+              {...register("email")}
             />
 
             {error && <Alert variant="error">{error}</Alert>}

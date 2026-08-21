@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useId, useState, forwardRef } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import "./TextField.css";
 
@@ -12,16 +12,13 @@ import "./TextField.css";
  *   justo el bug detectado en la auditoría (un campo sin el botón, otro que no alternaba el ícono).
  * - Cualquier otra prop (value, onChange, name, placeholder, required, disabled, autoComplete,
  *   aria-label, ...) se pasa directo al <input>.
+ * - forwardRef: reenvía el ref al <input> interno — lo necesita react-hook-form (register()
+ *   engancha el input directo por ref, sin esto el campo queda no controlado por RHF).
  */
-export default function TextField({
-  label,
-  type = "text",
-  icon = null,
-  error = "",
-  id,
-  className = "",
-  ...rest
-}) {
+const TextField = forwardRef(function TextField(
+  { label, type = "text", icon = null, error = "", id, className = "", ...rest },
+  ref
+) {
   const autoId = useId();
   const inputId = id || autoId;
   const isPassword = type === "password";
@@ -39,7 +36,7 @@ export default function TextField({
       <div className="ui-field-control">
         {icon && <span className="ui-field-icon">{icon}</span>}
 
-        <input id={inputId} type={resolvedType} className="ui-field-input" {...rest} />
+        <input id={inputId} ref={ref} type={resolvedType} className="ui-field-input" {...rest} />
 
         {isPassword && (
           <button
@@ -60,4 +57,6 @@ export default function TextField({
       )}
     </div>
   );
-}
+});
+
+export default TextField;

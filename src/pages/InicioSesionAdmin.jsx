@@ -1,19 +1,39 @@
 import "../styles/InicioSesion.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { FiMail, FiLock } from "react-icons/fi";
 import { Button, TextField, Card, Alert } from "../components/ui";
+
+// Email: mismo regex/mensaje que Registro.jsx (reusado).
+// Contraseña: es un LOGIN, no una alta — acá solo se valida "no vacía",
+// nunca un largo mínimo. Poner un mínimo de caracteres rechazaría a un
+// usuario real cuya contraseña ya existente sea más corta que ese mínimo
+// (el backend es quien decide si las credenciales son válidas o no, esto
+// solo evita mandar el form vacío).
+const loginAdminSchema = z.object({
+  email: z.string().regex(/\S+@\S+\.\S+/, "El email no es válido"),
+  contrasena: z.string().min(1, "La contraseña es obligatoria."),
+});
 
 function InicioSesionAdmin() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [contrasena, setContrasena] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginAdminSchema),
+    defaultValues: { email: "", contrasena: "" },
+  });
+
+  const onSubmit = async ({ email, contrasena }) => {
     setError("");
     setIsLoading(true);
 
@@ -58,15 +78,14 @@ function InicioSesionAdmin() {
           <p className="auth-subtitle">Accedé al panel de gestión de torneos</p>
         </div>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form className="auth-form" onSubmit={handleSubmit(onSubmit)} noValidate>
           <TextField
             label="Email"
             type="email"
             icon={<FiMail />}
             placeholder="admin@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            error={errors.email?.message}
+            {...register("email")}
           />
 
           <TextField
@@ -74,9 +93,8 @@ function InicioSesionAdmin() {
             type="password"
             icon={<FiLock />}
             placeholder="********"
-            value={contrasena}
-            onChange={(e) => setContrasena(e.target.value)}
-            required
+            error={errors.contrasena?.message}
+            {...register("contrasena")}
           />
 
           {error && <Alert variant="error">{error}</Alert>}

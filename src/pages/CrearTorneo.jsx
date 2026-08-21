@@ -4,6 +4,9 @@ import "../styles/CrearTorneo.css";
 import "../styles/InscribirEquipos.css";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { FiAward, FiTag, FiUser, FiMapPin, FiCalendar, FiClock, FiZap, FiEdit2 } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
@@ -75,6 +78,139 @@ function calcularDuracionMinimaDias(cantidadEquipos, formatoBackend) {
   return Math.max(0, jornadas - 1) * DIAS_MIN_ENTRE_JORNADAS;
 }
 
+const fixtureSchema = z.object({
+  fechaBase: z.string().min(1, "Ingresá la fecha de inicio del fixture."),
+  horaBase: z.string().min(1, "Ingresá la hora de inicio."),
+});
+
+const programacionSchema = z.object({
+  fecha_partido: z.string().min(1, "Completá fecha y horario."),
+  hora_partido: z.string().min(1, "Completá fecha y horario."),
+});
+
+// Antes esto solo lo bloqueaba el min=0 nativo del <input> (tooltip en
+// inglés, ver noValidate más abajo) — sin mensaje propio, porque el chequeo
+// nunca se mostraba en ningún lado más que ese tooltip. Con noValidate hay
+// que darle un mensaje en español acá, que ahora sí se muestra (ver
+// PartidoResultadoForm, onErrorValidacion → reutiliza el Alert de errorPartidos).
+const resultadoSchema = z.object({
+  goles_local: z.coerce.number({ error: "Ingresá un número válido de goles." }).min(0, "Los goles no pueden ser negativos."),
+  goles_visitante: z.coerce.number({ error: "Ingresá un número válido de goles." }).min(0, "Los goles no pueden ser negativos."),
+});
+
+// Puntos por victoria/empate/derrota: siempre editables, en los 3 modos (a
+// diferencia del resto de los campos, nunca quedan `disabled`) — nunca se
+// mandan al backend ni se validaban antes (ni con JS ni con el `error` de
+// TextField), solo con el min/max nativo del HTML. z.coerce.number() acepta
+// tanto el string que tipea el usuario como el number con el que arranca
+// FORM_VACIO, evitando el mismatch de tipos del bug de cantEquipos (ver
+// abajo). "Ingresá un número válido." cubre el caso de que llegue algo no
+// numérico — sin esto, un valor no numérico haría fallar el chequeo interno
+// de tipo de zod y mostraría su mensaje en inglés por default.
+const puntosSchema = {
+  puntosVictoria: z.coerce
+    .number({ error: "Ingresá un número válido." })
+    .min(0, "Los puntos deben estar entre 0 y 10.")
+    .max(10, "Los puntos deben estar entre 0 y 10."),
+  puntosEmpate: z.coerce
+    .number({ error: "Ingresá un número válido." })
+    .min(0, "Los puntos deben estar entre 0 y 10.")
+    .max(10, "Los puntos deben estar entre 0 y 10."),
+  puntosDerrota: z.coerce
+    .number({ error: "Ingresá un número válido." })
+    .min(0, "Los puntos deben estar entre 0 y 10.")
+    .max(10, "Los puntos deben estar entre 0 y 10."),
+};
+
+const MSG_FECHA_FIN_ANTERIOR = "La fecha de fin no puede ser anterior a la fecha de inicio.";
+
+// "Datos del Torneo" — el shape cambia según el modo, igual que antes
+// cambiaba qué if corría en cada handler:
+// - crear: todo obligatorio + Regla 3 (nunca se validaba en edición).
+// - editar sin en_curso: los mismos campos, pero SIN Regla 3 (esta pantalla
+//   jamás la chequeó del lado edición — el backend la valida ahí distinto,
+//   contra participaciones reales, no contra el cupo declarado).
+// - editar con en_curso: solo nombre/fechaFin importan (el resto queda
+//   disabled en el form) — categoria/cantEquipos/formato ni se incluyen en
+//   el shape, zod los descarta solos (comportamiento "strip" por default).
+//
+// `fechaInicioOriginal` (solo se usa en modo en_curso, donde fechaInicio no
+// es un campo del form): es la fecha de inicio ya persistida, para poder
+// seguir bloqueando "fecha de fin anterior a la de inicio" ahí también —
+// antes lo hacía el atributo `min` nativo del <input date>, que dejamos de
+// usar para validar (ver noValidate en el <form>, bug de tooltips en inglés).
+function crearTorneoSchema(modoEdicion, estadoEnCurso, fechaInicioOriginal) {
+  if (modoEdicion && estadoEnCurso) {
+    return z
+      .object({
+        nombre: z.string().refine((v) => v.trim().length > 0, "El nombre del torneo es obligatorio."),
+        fechaFin: z.string().min(1, "La fecha de fin es obligatoria."),
+        ...puntosSchema,
+      })
+      .superRefine((data, ctx) => {
+        if (fechaInicioOriginal && data.fechaFin && data.fechaFin < fechaInicioOriginal) {
+          ctx.addIssue({ code: "custom", path: ["fechaFin"], message: MSG_FECHA_FIN_ANTERIOR });
+        }
+      });
+  }
+
+  // cantEquipos: z.coerce.number() (antes era z.string()) — con el schema
+  // como string, el primer submit en modo edición fallaba con el mensaje
+  // crudo de zod "Invalid input: expected string, received number", porque
+  // resetTorneo() carga t.cantidadEquipos tal cual viene del backend (number),
+  // y ese valor nunca pasaba por el onChange del input (que sí da string) si
+  // el usuario no tocaba el campo. z.coerce.number() acepta los dos tipos por
+  // igual, así que ya no importa de dónde vino el valor.
+  const base = z
+    .object({
+      nombre: z.string().refine((v) => v.trim().length > 0, "El nombre del torneo es obligatorio."),
+      fechaInicio: z.string().min(1, "La fecha de inicio es obligatoria."),
+      fechaFin: z.string().min(1, "La fecha de fin es obligatoria."),
+      categoria: z.string(),
+      cantEquipos: z.coerce
+        .number({ error: "Ingresá un número válido de equipos." })
+        .min(2, "Se necesitan al menos 2 equipos.")
+        .max(30, "El máximo permitido es 30 equipos."),
+      formato: z.string(),
+      ...puntosSchema,
+    })
+    .superRefine((data, ctx) => {
+      if (data.fechaInicio && data.fechaFin && data.fechaFin < data.fechaInicio) {
+        ctx.addIssue({ code: "custom", path: ["fechaFin"], message: MSG_FECHA_FIN_ANTERIOR });
+      }
+    });
+
+  if (modoEdicion) return base;
+
+  // Crear: además, Regla 3 — misma fórmula y mismo mensaje que ya arma
+  // calcularJornadas()/calcularDuracionMinimaDias() más arriba en este
+  // archivo (espejo de torneo.controler.ts, validarDuracionMinima). Se
+  // adjunta al path de fechaFin: si fechaFin es anterior a fechaInicio, el
+  // superRefine de arriba ya dejó su propio mensaje (más claro) en ese mismo
+  // path — igual corre este cálculo, pero con fechaFin-fechaInicio negativo
+  // el `if` de abajo también dispara, así que puede haber dos issues en el
+  // mismo path; zodResolver se queda con la primera, que es la más clara.
+  return base.superRefine((data, ctx) => {
+    const formatoBackend = data.formato === "Ida y vuelta" ? "idayvuelta" : "ida";
+    const diasDuracion = Math.round(
+      (new Date(data.fechaFin).getTime() - new Date(data.fechaInicio).getTime()) / (24 * 60 * 60 * 1000)
+    );
+    const jornadas = calcularJornadas(data.cantEquipos, formatoBackend);
+    const minimoRequerido = calcularDuracionMinimaDias(data.cantEquipos, formatoBackend);
+    if (diasDuracion < minimoRequerido) {
+      const formatoLabel = formatoBackend === "idayvuelta" ? "ida y vuelta" : "solo ida";
+      ctx.addIssue({
+        code: "custom",
+        path: ["fechaFin"],
+        message:
+          `Este torneo necesita al menos ${jornadas} jornada(s) para ${data.cantEquipos} equipos (formato ${formatoLabel}). `
+          + `Con un mínimo de ${DIAS_MIN_ENTRE_JORNADAS} días entre jornadas, la duración mínima requerida es de ${minimoRequerido} días. `
+          + `La duración actual es de ${diasDuracion} días.`,
+      });
+    }
+  });
+}
+
 const FORM_VACIO = {
   nombre:         "",
   fechaInicio:    "",
@@ -86,6 +222,68 @@ const FORM_VACIO = {
   puntosEmpate:   1,
   puntosDerrota:  0,
 };
+
+// Carga de resultado de UN partido — se renderiza una vez por fila dentro de
+// un .map(), y cada fila necesita su propia instancia de useForm (todas las
+// filas están visibles y son editables a la vez, a diferencia del editor de
+// programación de arriba, donde solo hay uno abierto por vez) — por regla de
+// los hooks, eso significa que esta lógica no puede vivir como más useForm()
+// sueltos dentro del .map() de CrearTorneo, tiene que ser su propio componente.
+function PartidoResultadoForm({ partido, onGuardar, onAbrirReedicion, onErrorValidacion }) {
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm({
+    resolver: zodResolver(resultadoSchema),
+    defaultValues: {
+      goles_local: partido.goles_local ?? 0,
+      goles_visitante: partido.goles_visitante ?? 0,
+    },
+  });
+
+  // Si el partido ya está finalizado, no se guarda directo — se le pide
+  // confirmación al admin antes de sobreescribir (mismo criterio que valida
+  // el backend, ver actualizarResultado en partido.controler.ts; ver acá el
+  // modal "Sobreescribir resultado").
+  const onSubmit = async (data) => {
+    if (partido.estado_partido === "finalizado") {
+      onAbrirReedicion(partido, data);
+      return;
+    }
+    await onGuardar(partido, data.goles_local, data.goles_visitante, false);
+  };
+
+  // Sin Alert propio en esta fila — reusa el mismo cartel de errorPartidos
+  // que ya se muestra arriba de la lista (backend), así un valor negativo no
+  // se queda sin feedback ahora que noValidate apaga el tooltip nativo.
+  const onInvalid = (erroresCampos) => {
+    onErrorValidacion(erroresCampos.goles_local?.message || erroresCampos.goles_visitante?.message || "");
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="ie-partido-resultado" noValidate>
+      <input
+        type="number"
+        min={0}
+        className="ie-partido-goles"
+        {...register("goles_local")}
+        aria-label={`Goles de ${partido.local?.equipo?.nombreEquipo ?? "local"}`}
+      />
+      <span className="ie-partido-guion">–</span>
+      <input
+        type="number"
+        min={0}
+        className="ie-partido-goles"
+        {...register("goles_visitante")}
+        aria-label={`Goles de ${partido.visitante?.equipo?.nombreEquipo ?? "visitante"}`}
+      />
+      <Button type="submit" variant="secondary" disabled={isSubmitting}>
+        {isSubmitting ? "Guardando..." : "Guardar"}
+      </Button>
+    </form>
+  );
+}
 
 export default function CrearTorneo() {
   const navigate = useNavigate();
@@ -127,21 +325,62 @@ export default function CrearTorneo() {
   const [okCanchas, setOkCanchas] = useState("");
 
   const [partidos, setPartidos] = useState([]);
-  const [resultados, setResultados] = useState({}); // { [partidoId]: { goles_local, goles_visitante } }
-  const [guardandoResultadoId, setGuardandoResultadoId] = useState(null);
   const [errorPartidos, setErrorPartidos] = useState("");
   const [jornadaFiltro, setJornadaFiltro] = useState("todas");
+  // Reedición de un resultado ya cargado: además del partido, hace falta
+  // guardar los goles que se tipearon en el momento del click (mismos valores
+  // que se reenvían con confirmarReedicion:true al confirmar "Sobreescribir").
   const [partidoAReeditar, setPartidoAReeditar] = useState(null);
+  const [golesPendientesReedicion, setGolesPendientesReedicion] = useState(null);
   const [editandoProgramacionId, setEditandoProgramacionId] = useState(null); // id del partido con el editor de fecha/hora abierto
-  const [programacion, setProgramacion] = useState({}); // { [partidoId]: { fecha_partido, hora_partido } }
-  const [guardandoProgramacionId, setGuardandoProgramacionId] = useState(null);
   const [errorProgramacion, setErrorProgramacion] = useState("");
   const [toastMsg, setToastMsg] = useState(null); // confirmación de resultado guardado
-  const [fechaBase, setFechaBase] = useState("");
-  const [horaBase, setHoraBase] = useState("15:00");
   const [loadingFixture, setLoadingFixture] = useState(false);
   const [errorFixture, setErrorFixture] = useState("");
   const [okFixture, setOkFixture] = useState("");
+
+  // El resolver se resuelve en cada validación contra el modo/estado ACTUAL
+  // (estadoEnCurso puede cambiar en vivo dentro de la misma carga de página,
+  // si se genera el fixture mientras esta sección sigue montada) — por eso es
+  // una función que arma el schema on-the-fly, no un schema fijo.
+  const {
+    register: registerTorneo,
+    handleSubmit: handleSubmitTorneo,
+    watch: watchTorneo,
+    setValue: setValueTorneo,
+    reset: resetTorneo,
+    formState: { errors: erroresTorneo },
+  } = useForm({
+    resolver: (values, context, options) =>
+      zodResolver(
+        crearTorneoSchema(
+          modoEdicion,
+          modoEdicion && torneoOriginal?.estado === "en_curso",
+          torneoOriginal?.fechaInicio ? torneoOriginal.fechaInicio.slice(0, 10) : undefined
+        )
+      )(values, context, options),
+    defaultValues: FORM_VACIO,
+  });
+
+  const {
+    register: registerFixture,
+    handleSubmit: handleSubmitFixture,
+    reset: resetFixture,
+    formState: { errors: erroresFixture },
+  } = useForm({
+    resolver: zodResolver(fixtureSchema),
+    defaultValues: { fechaBase: "", horaBase: "15:00" },
+  });
+
+  const {
+    register: registerProgramacion,
+    handleSubmit: handleSubmitProgramacion,
+    reset: resetProgramacion,
+    formState: { errors: erroresProgramacion, isSubmitting: guardandoProgramacion },
+  } = useForm({
+    resolver: zodResolver(programacionSchema),
+    defaultValues: { fecha_partido: "", hora_partido: "" },
+  });
 
   useEffect(() => {
     const stored = localStorage.getItem("admin");
@@ -149,8 +388,6 @@ export default function CrearTorneo() {
     try { setAdmin(JSON.parse(stored)); }
     catch { navigate("/admin"); }
   }, [navigate]);
-
-  const [form, setForm] = useState(FORM_VACIO);
 
   // En modo edición, carga el torneo existente + todo lo necesario para
   // gestionar Árbitros/Canchas/Partidos (antes vivía en InscribirEquipos.jsx).
@@ -179,7 +416,7 @@ export default function CrearTorneo() {
         if (!resTorneo.ok) throw new Error(data.message || "Error al cargar el torneo");
         const t = data.data;
         setTorneoOriginal(t);
-        setForm({
+        resetTorneo({
           nombre:         t.nombreTorneo ?? "",
           fechaInicio:    t.fechaInicio ? t.fechaInicio.slice(0, 10) : "",
           fechaFin:       t.fechaFin ? t.fechaFin.slice(0, 10) : "",
@@ -202,7 +439,7 @@ export default function CrearTorneo() {
         setCanchasSelec(new Set(idsCanchasAsignadas));
         setArbitrosSelec(new Set(idsArbitrosAsignados));
 
-        if (t.fechaInicio) setFechaBase(t.fechaInicio.slice(0, 10));
+        if (t.fechaInicio) resetFixture({ fechaBase: t.fechaInicio.slice(0, 10), horaBase: "15:00" });
       } catch (e) {
         setError(e.message);
       } finally {
@@ -211,9 +448,12 @@ export default function CrearTorneo() {
     })();
   }, [admin, modoEdicion, id]);
 
-  const upd = (key, val) => setForm((prev) => ({ ...prev, [key]: val }));
-
-  const partidosEstimados = calcularPartidos(form.cantEquipos, form.formato);
+  // Valores en vivo del form (no solo al submit): hacen falta para el resumen
+  // reactivo, el máx/mín cruzado entre fechas, y el estado "active" de los
+  // pills de formato — cosas de UI, no de validación (eso lo maneja el
+  // resolver de arriba).
+  const valoresTorneo = watchTorneo();
+  const partidosEstimados = calcularPartidos(valoresTorneo.cantEquipos, valoresTorneo.formato);
   const estadoEnCurso = modoEdicion && torneoOriginal?.estado === "en_curso";
 
   const handleLogout = () => {
@@ -225,45 +465,21 @@ export default function CrearTorneo() {
   // estado del torneo al crearlo: 'borrador' (queda sin publicar, se termina
   // después desde "Mis Torneos") o 'inscripcion' (ya acepta equipos — ver
   // src/torneo/torneo.entity.ts en el backend para el resto del ciclo de
-  // vida — así que "Crear Torneo" pasa directo a inscribir equipos).
-  async function submitTorneo(estado) {
+  // vida — así que "Crear Torneo" pasa directo a inscribir equipos). Ya no
+  // valida nada a mano: si llegamos acá es porque crearTorneoSchema ya
+  // corrió (incluida la Regla 3) vía handleSubmitTorneo.
+  async function submitTorneo(estado, values) {
     setError("");
-
-    if (!form.nombre.trim()) { setError("El nombre del torneo es obligatorio."); return; }
-    if (!form.fechaInicio)   { setError("La fecha de inicio es obligatoria."); return; }
-    if (!form.fechaFin)      { setError("La fecha de fin es obligatoria."); return; }
-    if (Number(form.cantEquipos) < 2) { setError("Se necesitan al menos 2 equipos."); return; }
-
-    // Regla 3 (duración mínima = (jornadas - 1) × 4 días), chequeada acá
-    // contra cantEquipos solo para feedback inmediato — el backend vuelve a
-    // validar esto mismo (POST /torneo) y es el que manda, esto no lo saltea.
-    const cantEquiposNum = Number(form.cantEquipos);
-    const formatoBackend = form.formato === "Ida y vuelta" ? "idayvuelta" : "ida";
-    const diasDuracion = Math.round(
-      (new Date(form.fechaFin).getTime() - new Date(form.fechaInicio).getTime()) / (24 * 60 * 60 * 1000)
-    );
-    const jornadas = calcularJornadas(cantEquiposNum, formatoBackend);
-    const minimoRequerido = calcularDuracionMinimaDias(cantEquiposNum, formatoBackend);
-    if (diasDuracion < minimoRequerido) {
-      const formatoLabel = formatoBackend === "idayvuelta" ? "ida y vuelta" : "solo ida";
-      setError(
-        `Este torneo necesita al menos ${jornadas} jornada(s) para ${cantEquiposNum} equipos (formato ${formatoLabel}). `
-        + `Con un mínimo de ${DIAS_MIN_ENTRE_JORNADAS} días entre jornadas, la duración mínima requerida es de ${minimoRequerido} días. `
-        + `La duración actual es de ${diasDuracion} días.`
-      );
-      return;
-    }
-
     setLoading(true);
     try {
       const body = {
-        nombreTorneo:    form.nombre.trim(),
-        fechaInicio:     form.fechaInicio,
-        fechaFin:        form.fechaFin,
+        nombreTorneo:    values.nombre.trim(),
+        fechaInicio:     values.fechaInicio,
+        fechaFin:        values.fechaFin,
         estado,
-        categoria:       form.categoria,
-        cantidadEquipos: Number(form.cantEquipos),
-        formato:         formatoBackend,
+        categoria:       values.categoria,
+        cantidadEquipos: Number(values.cantEquipos),
+        formato:         values.formato === "Ida y vuelta" ? "idayvuelta" : "ida",
         adminTorneo:     admin.id,
       };
 
@@ -292,22 +508,17 @@ export default function CrearTorneo() {
 
   // Guardar cambios — torneo NO en_curso: todos los campos son editables por
   // el PATCH genérico, igual que antes se creaba (sin tocar `estado`).
-  async function guardarCambiosNormal() {
+  async function guardarCambiosNormal(values) {
     setError("");
-    if (!form.nombre.trim()) { setError("El nombre del torneo es obligatorio."); return; }
-    if (!form.fechaInicio)   { setError("La fecha de inicio es obligatoria."); return; }
-    if (!form.fechaFin)      { setError("La fecha de fin es obligatoria."); return; }
-    if (Number(form.cantEquipos) < 2) { setError("Se necesitan al menos 2 equipos."); return; }
-
     setLoading(true);
     try {
       const body = {
-        nombreTorneo:    form.nombre.trim(),
-        fechaInicio:     form.fechaInicio,
-        fechaFin:        form.fechaFin,
-        categoria:       form.categoria,
-        cantidadEquipos: Number(form.cantEquipos),
-        formato:         form.formato === "Ida y vuelta" ? "idayvuelta" : "ida",
+        nombreTorneo:    values.nombre.trim(),
+        fechaInicio:     values.fechaInicio,
+        fechaFin:        values.fechaFin,
+        categoria:       values.categoria,
+        cantidadEquipos: Number(values.cantEquipos),
+        formato:         values.formato === "Ida y vuelta" ? "idayvuelta" : "ida",
       };
       const res = await adminApiFetch(`/torneo/${id}`, { method: "PATCH", body: JSON.stringify(body) });
       const data = await res.json();
@@ -333,41 +544,41 @@ export default function CrearTorneo() {
   // Guardar cambios — torneo en_curso: solo nombre y fechaFin son editables.
   // El nombre se aplica directo (no tiene efectos secundarios); fechaFin pasa
   // primero por el preview de conflictos antes de aplicarse.
-  async function guardarCambiosEnCurso() {
+  async function guardarCambiosEnCurso(values) {
     setError("");
     setLoading(true);
     try {
-      if (form.nombre.trim() !== torneoOriginal.nombreTorneo) {
+      if (values.nombre.trim() !== torneoOriginal.nombreTorneo) {
         const res = await adminApiFetch(`/torneo/${id}`, {
           method: "PATCH",
-          body: JSON.stringify({ nombreTorneo: form.nombre.trim() }),
+          body: JSON.stringify({ nombreTorneo: values.nombre.trim() }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "No se pudo actualizar el nombre.");
       }
 
       const fechaFinOriginal = (torneoOriginal.fechaFin || "").slice(0, 10);
-      if (form.fechaFin === fechaFinOriginal) {
+      if (values.fechaFin === fechaFinOriginal) {
         navigate("/admin/torneos");
         return;
       }
 
       const resPreview = await adminApiFetch(`/torneo/${id}/fecha-fin/preview`, {
         method: "POST",
-        body: JSON.stringify({ fechaFin: form.fechaFin }),
+        body: JSON.stringify({ fechaFin: values.fechaFin }),
       });
       const dataPreview = await resPreview.json();
       if (!resPreview.ok) throw new Error(dataPreview.message || "No se pudo validar la nueva fecha fin.");
 
       const conflictos = dataPreview.data?.conflictos ?? [];
       if (conflictos.length === 0) {
-        await aplicarFechaFin(form.fechaFin, false);
+        await aplicarFechaFin(values.fechaFin, false);
         navigate("/admin/torneos");
         return;
       }
 
       // Hay conflictos: no se aplica nada todavía, se le pide confirmación al admin.
-      setFechaFinPendiente(form.fechaFin);
+      setFechaFinPendiente(values.fechaFin);
       setConflictosFechaFin(conflictos);
     } catch (e) {
       setError(e.message);
@@ -396,8 +607,20 @@ export default function CrearTorneo() {
     setFechaFinPendiente(null);
   }
 
-  function guardarCambios() {
-    return estadoEnCurso ? guardarCambiosEnCurso() : guardarCambiosNormal();
+  function guardarCambios(values) {
+    return estadoEnCurso ? guardarCambiosEnCurso(values) : guardarCambiosNormal(values);
+  }
+
+  // Único onSubmit del <form onSubmit={handleSubmitTorneo(...)}>. En modo
+  // edición hay un solo botón (type="submit" normal). En modo creación hay
+  // DOS botones "submit" con distinto resultado ("Guardar borrador" /
+  // "+ Crear Torneo") — se distinguen por el name/value del <button> que
+  // efectivamente disparó el submit (event.nativeEvent.submitter), en vez de
+  // separar en dos <form> o duplicar la validación.
+  function onSubmitDatosTorneo(values, event) {
+    if (modoEdicion) return guardarCambios(values);
+    const estado = event?.nativeEvent?.submitter?.value ?? "inscripcion";
+    return submitTorneo(estado, values);
   }
 
   // ── Árbitros / Canchas / Partidos (movido tal cual desde InscribirEquipos.jsx) ──
@@ -516,12 +739,10 @@ export default function CrearTorneo() {
     }
   }
 
-  async function handleGenerarFixture() {
+  async function onGenerarFixture({ fechaBase, horaBase }) {
     setErrorFixture("");
     setOkFixture("");
 
-    if (!fechaBase) { setErrorFixture("Ingresá la fecha de inicio del fixture."); return; }
-    if (!horaBase)  { setErrorFixture("Ingresá la hora de inicio."); return; }
     if (arbitrosTorneoIds.size === 0 || canchasTorneoIds.size === 0) {
       setErrorFixture("Asigná al menos un árbitro y una cancha desde las tarjetas correspondientes.");
       return;
@@ -548,28 +769,18 @@ export default function CrearTorneo() {
     }
   }
 
-  function actualizarResultadoLocal(partidoId, campo, valor) {
-    setResultados((prev) => ({
-      ...prev,
-      [partidoId]: { ...(prev[partidoId] ?? {}), [campo]: valor },
-    }));
-  }
-
-  async function guardarResultado(partidoId, confirmarReedicion = false) {
-    const partidoActual = partidos.find((p) => p.id === partidoId);
-    const r = resultados[partidoId] ?? {
-      goles_local: partidoActual?.goles_local ?? 0,
-      goles_visitante: partidoActual?.goles_visitante ?? 0,
-    };
-
+  // Guarda el resultado de un partido — lo llaman tanto PartidoResultadoForm
+  // (envío normal, confirmarReedicion:false) como el botón "Sobreescribir"
+  // del modal de reedición (confirmarReedicion:true, con los goles que ya se
+  // habían tipeado cuando se detectó el conflicto).
+  async function guardarResultado(partido, golesLocal, golesVisitante, confirmarReedicion = false) {
     setErrorPartidos("");
-    setGuardandoResultadoId(partidoId);
     try {
-      const res = await adminApiFetch(`/partidos/${partidoId}/resultado`, {
+      const res = await adminApiFetch(`/partidos/${partido.id}/resultado`, {
         method: "PATCH",
         body: JSON.stringify({
-          goles_local: Number(r.goles_local),
-          goles_visitante: Number(r.goles_visitante),
+          goles_local: golesLocal,
+          goles_visitante: golesVisitante,
           confirmarReedicion,
         }),
       });
@@ -578,51 +789,46 @@ export default function CrearTorneo() {
       // El partido ya tenía un resultado y todavía no se confirmó la
       // sobreescritura (pudo pasar si el estado del frontend quedó
       // desactualizado) — el flujo normal ya abre el modal antes de llegar
-      // acá (ver handleClickGuardar), esto es solo la defensa de respaldo.
+      // acá (ver PartidoResultadoForm), esto es solo la defensa de respaldo.
       if (res.status === 409) {
-        setPartidoAReeditar(partidoActual);
+        setPartidoAReeditar(partido);
+        setGolesPendientesReedicion({ goles_local: golesLocal, goles_visitante: golesVisitante });
         return;
       }
       if (!res.ok) throw new Error(data.message || "No se pudo guardar el resultado.");
 
       setPartidos((prev) =>
         prev.map((p) =>
-          p.id === partidoId
+          p.id === partido.id
             ? { ...p, goles_local: data.data.goles_local, goles_visitante: data.data.goles_visitante, estado_partido: data.data.estado_partido, walkover: false }
             : p
         )
       );
-      const nombreLocal = partidoActual?.local?.equipo?.nombreEquipo ?? "Local";
-      const nombreVisitante = partidoActual?.visitante?.equipo?.nombreEquipo ?? "Visitante";
+      const nombreLocal = partido?.local?.equipo?.nombreEquipo ?? "Local";
+      const nombreVisitante = partido?.visitante?.equipo?.nombreEquipo ?? "Visitante";
       setToastMsg(`Resultado actualizado: ${nombreLocal} ${data.data.goles_local} - ${data.data.goles_visitante} ${nombreVisitante}`);
       setPartidoAReeditar(null);
+      setGolesPendientesReedicion(null);
     } catch (e) {
       setErrorPartidos(e.message);
-    } finally {
-      setGuardandoResultadoId(null);
     }
   }
 
-  // Si el partido ya tiene un resultado cargado, primero pide confirmación
-  // (mismo criterio que el backend, ver actualizarResultado en
-  // partido.controler.ts) — evita sobreescribir sin querer.
-  function handleClickGuardar(partido) {
-    if (partido.estado_partido === "finalizado") {
-      setPartidoAReeditar(partido);
-      return;
-    }
-    guardarResultado(partido.id);
+  // Si el partido ya tiene un resultado cargado, PartidoResultadoForm no
+  // llama a guardarResultado directo: pide confirmación primero (mismo
+  // criterio que el backend, ver actualizarResultado en partido.controler.ts)
+  // — evita sobreescribir sin querer.
+  function abrirReedicionResultado(partido, { goles_local, goles_visitante }) {
+    setPartidoAReeditar(partido);
+    setGolesPendientesReedicion({ goles_local, goles_visitante });
   }
 
   function abrirEdicionProgramacion(partido) {
     setErrorProgramacion("");
-    setProgramacion((prev) => ({
-      ...prev,
-      [partido.id]: {
-        fecha_partido: partido.fecha_partido ? partido.fecha_partido.slice(0, 10) : "",
-        hora_partido: partido.hora_partido ?? "",
-      },
-    }));
+    resetProgramacion({
+      fecha_partido: partido.fecha_partido ? partido.fecha_partido.slice(0, 10) : "",
+      hora_partido: partido.hora_partido ?? "",
+    });
     setEditandoProgramacionId(partido.id);
   }
 
@@ -631,33 +837,19 @@ export default function CrearTorneo() {
     setErrorProgramacion("");
   }
 
-  function actualizarProgramacionLocal(partidoId, campo, valor) {
-    setProgramacion((prev) => ({
-      ...prev,
-      [partidoId]: { ...(prev[partidoId] ?? {}), [campo]: valor },
-    }));
-  }
-
-  async function guardarProgramacion(partidoId) {
-    const p = programacion[partidoId];
-    if (!p?.fecha_partido || !p?.hora_partido) {
-      setErrorProgramacion("Completá fecha y horario.");
-      return;
-    }
-
+  async function onGuardarProgramacion({ fecha_partido, hora_partido }) {
     setErrorProgramacion("");
-    setGuardandoProgramacionId(partidoId);
     try {
-      const res = await adminApiFetch(`/partidos/${partidoId}/programacion`, {
+      const res = await adminApiFetch(`/partidos/${editandoProgramacionId}/programacion`, {
         method: "PATCH",
-        body: JSON.stringify({ fecha_partido: p.fecha_partido, hora_partido: p.hora_partido }),
+        body: JSON.stringify({ fecha_partido, hora_partido }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "No se pudo actualizar la fecha y el horario.");
 
       setPartidos((prev) =>
         prev.map((partido) =>
-          partido.id === partidoId
+          partido.id === editandoProgramacionId
             ? { ...partido, fecha_partido: data.data.fecha_partido, hora_partido: data.data.hora_partido }
             : partido
         )
@@ -665,8 +857,6 @@ export default function CrearTorneo() {
       setEditandoProgramacionId(null);
     } catch (e) {
       setErrorProgramacion(e.message);
-    } finally {
-      setGuardandoProgramacionId(null);
     }
   }
 
@@ -853,19 +1043,19 @@ export default function CrearTorneo() {
                     </div>
 
                     {!fixtureYaGenerado ? (
-                      <>
+                      <form onSubmit={handleSubmitFixture(onGenerarFixture)} noValidate>
                         <TextField
                           label="Fecha de inicio"
                           type="date"
-                          value={fechaBase}
-                          onChange={(e) => setFechaBase(e.target.value)}
+                          {...registerFixture("fechaBase")}
+                          error={erroresFixture.fechaBase?.message}
                           className="ie-fixture-field"
                         />
                         <TextField
                           label="Hora de los partidos"
                           type="time"
-                          value={horaBase}
-                          onChange={(e) => setHoraBase(e.target.value)}
+                          {...registerFixture("horaBase")}
+                          error={erroresFixture.horaBase?.message}
                           className="ie-fixture-field"
                         />
                         <div className="ie-fixture-field">
@@ -891,6 +1081,7 @@ export default function CrearTorneo() {
                         {okFixture && <Alert variant="success" className="ie-alert">{okFixture}</Alert>}
 
                         <Button
+                          type="submit"
                           className="ie-btn-block"
                           icon={<FiZap />}
                           disabled={
@@ -899,7 +1090,6 @@ export default function CrearTorneo() {
                             arbitrosTorneoIds.size === 0 ||
                             canchasTorneoIds.size === 0
                           }
-                          onClick={handleGenerarFixture}
                         >
                           {loadingFixture
                             ? "Generando..."
@@ -907,7 +1097,7 @@ export default function CrearTorneo() {
                             ? "Inscribí al menos 2 equipos"
                             : "Generar fixture"}
                         </Button>
-                      </>
+                      </form>
                     ) : (
                       <>
                         {errorPartidos && <Alert variant="error" className="ie-alert">{errorPartidos}</Alert>}
@@ -936,15 +1126,11 @@ export default function CrearTorneo() {
                             {jornadaFiltro === "todas" && <h4 className="ie-jornada-titulo">Jornada {jornada}</h4>}
                             <div className="ie-partidos-list">
                               {partidosDeJornada.map((p) => {
-                                const r = resultados[p.id] ?? {
-                                  goles_local: p.goles_local ?? 0,
-                                  goles_visitante: p.goles_visitante ?? 0,
-                                };
                                 // La programación (fecha/hora/árbitro/cancha) se bloquea si el partido ya
                                 // está finalizado O si su fecha+hora ya pasó — cualquiera de las dos, no
                                 // una en reemplazo de la otra (un finalizado con fecha futura por algún
                                 // motivo igual queda bloqueado: ya se jugó en los hechos). El resultado,
-                                // en cambio, siempre es editable (ver guardarResultado/handleClickGuardar).
+                                // en cambio, siempre es editable (ver PartidoResultadoForm/guardarResultado).
                                 const yaPaso = combinarFechaHora(p.fecha_partido, p.hora_partido) < new Date();
                                 const puedeReprogramar = estadoEnCurso && p.estado_partido !== "finalizado" && !yaPaso;
                                 return (
@@ -983,63 +1169,45 @@ export default function CrearTorneo() {
                                     </div>
 
                                     {editandoProgramacionId === p.id && (
-                                      <div className="ie-programacion-editor">
+                                      <form
+                                        onSubmit={handleSubmitProgramacion(onGuardarProgramacion)}
+                                        className="ie-programacion-editor"
+                                        noValidate
+                                      >
                                         <input
                                           type="date"
                                           className="ie-programacion-input"
-                                          value={programacion[p.id]?.fecha_partido ?? ""}
-                                          onChange={(e) => actualizarProgramacionLocal(p.id, "fecha_partido", e.target.value)}
+                                          {...registerProgramacion("fecha_partido")}
                                           aria-label="Nueva fecha del partido"
                                         />
                                         <input
                                           type="time"
                                           className="ie-programacion-input"
-                                          value={programacion[p.id]?.hora_partido ?? ""}
-                                          onChange={(e) => actualizarProgramacionLocal(p.id, "hora_partido", e.target.value)}
+                                          {...registerProgramacion("hora_partido")}
                                           aria-label="Nuevo horario del partido"
                                         />
-                                        <Button
-                                          variant="secondary"
-                                          disabled={guardandoProgramacionId === p.id}
-                                          onClick={() => guardarProgramacion(p.id)}
-                                        >
-                                          {guardandoProgramacionId === p.id ? "Guardando..." : "Guardar"}
+                                        <Button type="submit" variant="secondary" disabled={guardandoProgramacion}>
+                                          {guardandoProgramacion ? "Guardando..." : "Guardar"}
                                         </Button>
-                                        <Button variant="ghost" onClick={cancelarEdicionProgramacion}>
+                                        <Button type="button" variant="ghost" onClick={cancelarEdicionProgramacion}>
                                           Cancelar
                                         </Button>
-                                        {errorProgramacion && (
-                                          <Alert variant="error" className="ie-alert ie-programacion-error">{errorProgramacion}</Alert>
+                                        {(errorProgramacion || erroresProgramacion.fecha_partido || erroresProgramacion.hora_partido) && (
+                                          <Alert variant="error" className="ie-alert ie-programacion-error">
+                                            {errorProgramacion
+                                              || erroresProgramacion.fecha_partido?.message
+                                              || erroresProgramacion.hora_partido?.message}
+                                          </Alert>
                                         )}
-                                      </div>
+                                      </form>
                                     )}
 
-                                    <div className="ie-partido-resultado">
-                                      <input
-                                        type="number"
-                                        min={0}
-                                        className="ie-partido-goles"
-                                        value={r.goles_local}
-                                        onChange={(e) => actualizarResultadoLocal(p.id, "goles_local", e.target.value)}
-                                        aria-label={`Goles de ${p.local?.equipo?.nombreEquipo ?? "local"}`}
-                                      />
-                                      <span className="ie-partido-guion">–</span>
-                                      <input
-                                        type="number"
-                                        min={0}
-                                        className="ie-partido-goles"
-                                        value={r.goles_visitante}
-                                        onChange={(e) => actualizarResultadoLocal(p.id, "goles_visitante", e.target.value)}
-                                        aria-label={`Goles de ${p.visitante?.equipo?.nombreEquipo ?? "visitante"}`}
-                                      />
-                                      <Button
-                                        variant="secondary"
-                                        disabled={guardandoResultadoId === p.id}
-                                        onClick={() => handleClickGuardar(p)}
-                                      >
-                                        {guardandoResultadoId === p.id ? "Guardando..." : "Guardar"}
-                                      </Button>
-                                    </div>
+                                    <PartidoResultadoForm
+                                      partido={p}
+                                      onGuardar={guardarResultado}
+                                      onAbrirReedicion={abrirReedicionResultado}
+                                      onErrorValidacion={setErrorPartidos}
+                                    />
                                   </div>
                                 );
                               })}
@@ -1068,7 +1236,20 @@ export default function CrearTorneo() {
               </span>
             </div>
 
-            <div className="ct-form-body">
+            <form
+              className="ct-form-body"
+              noValidate
+              onSubmit={(e) => {
+                // Limpia cualquier error de backend de un intento anterior
+                // ANTES de re-validar — si no, un intento inválido posterior
+                // mostraría ese error viejo en vez del mensaje de validación
+                // nuevo (mismo `setError("")` que antes corría primero en
+                // cada handler, ahora movido acá porque submitTorneo/
+                // guardarCambios* ya no se llaman si la validación falla).
+                setError("");
+                return handleSubmitTorneo(onSubmitDatosTorneo)(e);
+              }}
+            >
 
               {estadoEnCurso && (
                 <Alert variant="info">
@@ -1078,9 +1259,8 @@ export default function CrearTorneo() {
 
               <TextField
                 label="Nombre del Torneo"
-                value={form.nombre}
-                onChange={(e) => upd("nombre", e.target.value)}
                 placeholder="Ej: Apertura 2025"
+                {...registerTorneo("nombre")}
               />
 
               {/* Fechas */}
@@ -1088,16 +1268,14 @@ export default function CrearTorneo() {
                 <TextField
                   label="Fecha de inicio"
                   type="date"
-                  value={form.fechaInicio}
-                  onChange={(e) => upd("fechaInicio", e.target.value)}
                   disabled={estadoEnCurso}
+                  {...registerTorneo("fechaInicio")}
                 />
                 <TextField
                   label="Fecha de fin"
                   type="date"
-                  value={form.fechaFin}
-                  min={form.fechaInicio || undefined}
-                  onChange={(e) => upd("fechaFin", e.target.value)}
+                  min={valoresTorneo.fechaInicio || undefined}
+                  {...registerTorneo("fechaFin")}
                 />
               </div>
 
@@ -1110,9 +1288,8 @@ export default function CrearTorneo() {
                     <select
                       id="ct-categoria"
                       className="ui-field-input"
-                      value={form.categoria}
-                      onChange={(e) => upd("categoria", e.target.value)}
                       disabled={estadoEnCurso}
+                      {...registerTorneo("categoria")}
                     >
                       {CATEGORIAS.map((c) => (
                         <option key={c.value} value={c.value}>{c.label}</option>
@@ -1127,10 +1304,13 @@ export default function CrearTorneo() {
                     type="number"
                     min={2}
                     max={30}
-                    value={form.cantEquipos}
-                    onChange={(e) => upd("cantEquipos", e.target.value)}
-                    error={Number(form.cantEquipos) > 30 ? "El máximo permitido es 30 equipos." : ""}
                     disabled={estadoEnCurso}
+                    error={
+                      erroresTorneo.cantEquipos?.message === "El máximo permitido es 30 equipos."
+                        ? erroresTorneo.cantEquipos.message
+                        : ""
+                    }
+                    {...registerTorneo("cantEquipos")}
                   />
                 </div>
               </div>
@@ -1143,8 +1323,8 @@ export default function CrearTorneo() {
                     <button
                       key={f}
                       type="button"
-                      className={`ct-pill${form.formato === f ? " active" : ""}`}
-                      onClick={() => !estadoEnCurso && upd("formato", f)}
+                      className={`ct-pill${valoresTorneo.formato === f ? " active" : ""}`}
+                      onClick={() => !estadoEnCurso && setValueTorneo("formato", f, { shouldDirty: true })}
                       disabled={estadoEnCurso}
                     >
                       {f}
@@ -1157,22 +1337,40 @@ export default function CrearTorneo() {
               <div className="ct-field-row">
                 <TextField
                   label="Puntos por victoria"
-                  type="number" min={0} max={10} value={form.puntosVictoria}
-                  onChange={(e) => upd("puntosVictoria", Number(e.target.value))}
+                  type="number" min={0} max={10}
+                  {...registerTorneo("puntosVictoria")}
                 />
                 <TextField
                   label="Puntos por empate"
-                  type="number" min={0} max={10} value={form.puntosEmpate}
-                  onChange={(e) => upd("puntosEmpate", Number(e.target.value))}
+                  type="number" min={0} max={10}
+                  {...registerTorneo("puntosEmpate")}
                 />
                 <TextField
                   label="Puntos por derrota"
-                  type="number" min={0} max={10} value={form.puntosDerrota}
-                  onChange={(e) => upd("puntosDerrota", Number(e.target.value))}
+                  type="number" min={0} max={10}
+                  {...registerTorneo("puntosDerrota")}
                 />
               </div>
 
-              {error && <Alert variant="error">{error}</Alert>}
+              {(error
+                || erroresTorneo.nombre?.message
+                || erroresTorneo.fechaInicio?.message
+                || erroresTorneo.fechaFin?.message
+                || erroresTorneo.cantEquipos?.message
+                || erroresTorneo.puntosVictoria?.message
+                || erroresTorneo.puntosEmpate?.message
+                || erroresTorneo.puntosDerrota?.message) && (
+                <Alert variant="error">
+                  {error
+                    || erroresTorneo.nombre?.message
+                    || erroresTorneo.fechaInicio?.message
+                    || erroresTorneo.fechaFin?.message
+                    || erroresTorneo.cantEquipos?.message
+                    || erroresTorneo.puntosVictoria?.message
+                    || erroresTorneo.puntosEmpate?.message
+                    || erroresTorneo.puntosDerrota?.message}
+                </Alert>
+              )}
 
               {/* Botones */}
               <div className="ct-actions">
@@ -1181,24 +1379,26 @@ export default function CrearTorneo() {
                     <Button type="button" variant="secondary" disabled={loading} onClick={() => navigate("/admin/torneos")}>
                       Cancelar
                     </Button>
-                    <Button type="button" disabled={loading} onClick={guardarCambios} className="ct-btn-crear">
+                    <Button type="submit" disabled={loading} className="ct-btn-crear">
                       {loading ? "Guardando..." : "Guardar cambios"}
                     </Button>
                   </>
                 ) : (
                   <>
                     <Button
-                      type="button"
+                      type="submit"
+                      name="estado"
+                      value="borrador"
                       variant="secondary"
                       disabled={loading}
-                      onClick={() => submitTorneo("borrador")}
                     >
                       {loading ? "Guardando..." : "Guardar borrador"}
                     </Button>
                     <Button
-                      type="button"
+                      type="submit"
+                      name="estado"
+                      value="inscripcion"
                       disabled={loading}
-                      onClick={() => submitTorneo("inscripcion")}
                       className="ct-btn-crear"
                     >
                       {loading ? "Creando..." : "+ Crear Torneo"}
@@ -1207,7 +1407,7 @@ export default function CrearTorneo() {
                 )}
               </div>
 
-            </div>
+            </form>
           </Card>
 
           {/* ── Resumen ─────────────────────────────────────────────────── */}
@@ -1215,14 +1415,14 @@ export default function CrearTorneo() {
             <h3 className="ct-summary-title">Resumen</h3>
             <div className="ct-summary-rows">
               {[
-                { label: "Nombre",            value: form.nombre || "—" },
-                { label: "Categoría",         value: CATEGORIAS.find(c => c.value === form.categoria)?.label ?? form.categoria },
-                { label: "Equipos",           value: form.cantEquipos },
-                { label: "Formato",           value: form.formato },
-                { label: "Inicio",            value: form.fechaInicio || "—" },
-                { label: "Fin",               value: form.fechaFin || "—" },
+                { label: "Nombre",            value: valoresTorneo.nombre || "—" },
+                { label: "Categoría",         value: CATEGORIAS.find(c => c.value === valoresTorneo.categoria)?.label ?? valoresTorneo.categoria },
+                { label: "Equipos",           value: valoresTorneo.cantEquipos },
+                { label: "Formato",           value: valoresTorneo.formato },
+                { label: "Inicio",            value: valoresTorneo.fechaInicio || "—" },
+                { label: "Fin",               value: valoresTorneo.fechaFin || "—" },
                 { label: "Partidos estimados", value: partidosEstimados },
-                { label: "Puntos (V/E/D)",    value: `${form.puntosVictoria} / ${form.puntosEmpate} / ${form.puntosDerrota}` },
+                { label: "Puntos (V/E/D)",    value: `${valoresTorneo.puntosVictoria} / ${valoresTorneo.puntosEmpate} / ${valoresTorneo.puntosDerrota}` },
               ].map(({ label, value }) => (
                 <div key={label} className="ct-summary-row">
                   <span className="ct-summary-label">{label}</span>
@@ -1234,7 +1434,7 @@ export default function CrearTorneo() {
             {!modoEdicion && (
               <Alert variant="warning" className="ct-warning">
                 Vas a generar <strong>{partidosEstimados} partidos</strong> en formato{" "}
-                <strong>{form.formato.toLowerCase()}</strong>. Después de crear el torneo
+                <strong>{(valoresTorneo.formato || "").toLowerCase()}</strong>. Después de crear el torneo
                 podrás inscribir equipos y generar el fixture.
               </Alert>
             )}
@@ -1281,8 +1481,22 @@ export default function CrearTorneo() {
           ({partidoAReeditar?.goles_local}-{partidoAReeditar?.goles_visitante}). ¿Confirmás que querés sobreescribirlo?
         </p>
         <div className="ie-modal-reeditar-actions">
-          <Button variant="secondary" onClick={() => setPartidoAReeditar(null)}>Cancelar</Button>
-          <Button onClick={() => guardarResultado(partidoAReeditar.id, true)}>Sobreescribir</Button>
+          <Button
+            variant="secondary"
+            onClick={() => { setPartidoAReeditar(null); setGolesPendientesReedicion(null); }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={() => guardarResultado(
+              partidoAReeditar,
+              golesPendientesReedicion.goles_local,
+              golesPendientesReedicion.goles_visitante,
+              true
+            )}
+          >
+            Sobreescribir
+          </Button>
         </div>
       </Modal>
 

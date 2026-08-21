@@ -1,10 +1,28 @@
 import "../styles/InicioSesion.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { FiMail, FiLock, FiCreditCard, FiCalendar, FiFlag } from "react-icons/fi";
 import { GoogleLogin } from "@react-oauth/google";
 import { apiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert, Modal } from "../components/ui";
+
+const datosFaltantesSchema = z.object({
+  dni: z.string().regex(/^\d{7,9}$/, "El DNI debe tener entre 7 y 9 dígitos."),
+  fechaNacimiento: z.string().min(1, "Ingresá tu fecha de nacimiento."),
+  posicion: z.string().min(1, "Elegí tu posición."),
+  genero: z.string().min(1, "Elegí tu género."),
+});
+
+// Email: mismo regex/mensaje que Registro.jsx (reusado). Contraseña: es un
+// LOGIN, no una alta — solo "no vacía", nunca un largo mínimo (ver la misma
+// nota en InicioSesionAdmin.jsx).
+const loginSchema = z.object({
+  usuario: z.string().regex(/\S+@\S+\.\S+/, "El email no es válido"),
+  contraseña: z.string().min(1, "La contraseña es obligatoria."),
+});
 
 // Lee el payload de un JWT sin verificar su firma (eso lo hace el backend).
 // Alcanza con base64url→JSON nativo del browser — no hace falta ninguna
@@ -23,8 +41,6 @@ function decodificarPayloadJWT(token) {
 function InicioSesion() {
   const navigate = useNavigate();
 
-  const [usuario, setUsuario] = useState("");
-  const [contraseña, setContraseña] = useState("");
   const [recordar, setRecordar] = useState(false);
   const [error, setError] = useState("");
   const [bienvenida, setBienvenida] = useState("");
@@ -35,11 +51,35 @@ function InicioSesion() {
   const [enviandoGoogle, setEnviandoGoogle] = useState(false);
   const [credentialPendiente, setCredentialPendiente] = useState(null);
   const [datosGooglePendiente, setDatosGooglePendiente] = useState(null);
-  const [datosFaltantes, setDatosFaltantes] = useState({ dni: "", fechaNacimiento: "", posicion: "", genero: "" });
-  const [datosFaltantesError, setDatosFaltantesError] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const {
+    register: registerLogin,
+    handleSubmit: handleSubmitLogin,
+    setValue: setValueLogin,
+    formState: { errors: erroresLogin },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { usuario: "", contraseña: "" },
+  });
+
+  const {
+    register: registerDatosFaltantes,
+    handleSubmit: handleSubmitDatosFaltantes,
+    reset: resetDatosFaltantes,
+    formState: { errors: erroresDatosFaltantes },
+  } = useForm({
+    resolver: zodResolver(datosFaltantesSchema),
+    defaultValues: { dni: "", fechaNacimiento: "", posicion: "", genero: "" },
+  });
+
+  // Un solo Alert genérico (no por campo), como antes.
+  const mensajeDatosFaltantes =
+    erroresDatosFaltantes.dni?.message
+    || erroresDatosFaltantes.fechaNacimiento?.message
+    || erroresDatosFaltantes.posicion?.message
+    || erroresDatosFaltantes.genero?.message;
+
+  const onSubmitLogin = async ({ usuario, contraseña }) => {
     setError("");
     setIsLoading(true);
 
@@ -159,37 +199,17 @@ function InicioSesion() {
     setGoogleError("No pudimos conectar con Google. Probá de nuevo.");
   };
 
-  const handleCompletarRegistroGoogle = (e) => {
-    e.preventDefault();
-    setDatosFaltantesError("");
-
-    if (!/^\d{7,9}$/.test(datosFaltantes.dni)) {
-      setDatosFaltantesError("El DNI debe tener entre 7 y 9 dígitos.");
-      return;
-    }
-    if (!datosFaltantes.fechaNacimiento) {
-      setDatosFaltantesError("Ingresá tu fecha de nacimiento.");
-      return;
-    }
-    if (!datosFaltantes.posicion) {
-      setDatosFaltantesError("Elegí tu posición.");
-      return;
-    }
-    if (!datosFaltantes.genero) {
-      setDatosFaltantesError("Elegí tu género.");
-      return;
-    }
-
-    enviarGoogleLogin(credentialPendiente, datosFaltantes);
+  const onCompletarRegistroGoogle = (data) => {
+    enviarGoogleLogin(credentialPendiente, data);
   };
 
   useEffect(() => {
     const remembered = localStorage.getItem("rememberEmail");
     if (remembered) {
-      setUsuario(remembered);
+      setValueLogin("usuario", remembered);
       setRecordar(true);
     }
-  }, []);
+  }, [setValueLogin]);
 
   return (
     <div className="auth-page">
@@ -204,15 +224,14 @@ function InicioSesion() {
           </p>
         </div>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form className="auth-form" onSubmit={handleSubmitLogin(onSubmitLogin)} noValidate>
           <TextField
             label="Email"
             type="email"
             icon={<FiMail />}
             placeholder="juanperez@email.com"
-            value={usuario}
-            onChange={(e) => setUsuario(e.target.value)}
-            required
+            error={erroresLogin.usuario?.message}
+            {...registerLogin("usuario")}
           />
 
           <TextField
@@ -220,9 +239,8 @@ function InicioSesion() {
             type="password"
             icon={<FiLock />}
             placeholder="••••••••"
-            value={contraseña}
-            onChange={(e) => setContraseña(e.target.value)}
-            required
+            error={erroresLogin.contraseña?.message}
+            {...registerLogin("contraseña")}
           />
 
           <div className="auth-row-between">
@@ -301,7 +319,7 @@ function InicioSesion() {
         onClose={() => {
           setCredentialPendiente(null);
           setDatosGooglePendiente(null);
-          setDatosFaltantesError("");
+          resetDatosFaltantes();
         }}
         title="Completá tu registro"
       >
@@ -312,23 +330,19 @@ function InicioSesion() {
           Necesitamos estos datos para terminar de crear tu cuenta.
         </p>
 
-        <form className="auth-form" onSubmit={handleCompletarRegistroGoogle}>
+        <form className="auth-form" onSubmit={handleSubmitDatosFaltantes(onCompletarRegistroGoogle)} noValidate>
           <TextField
             label="DNI"
             icon={<FiCreditCard />}
-            value={datosFaltantes.dni}
-            onChange={(e) => setDatosFaltantes({ ...datosFaltantes, dni: e.target.value })}
             placeholder="40111222"
-            required
+            {...registerDatosFaltantes("dni")}
           />
 
           <TextField
             label="Fecha de nacimiento"
             type="date"
             icon={<FiCalendar />}
-            value={datosFaltantes.fechaNacimiento}
-            onChange={(e) => setDatosFaltantes({ ...datosFaltantes, fechaNacimiento: e.target.value })}
-            required
+            {...registerDatosFaltantes("fechaNacimiento")}
           />
 
           <div className="ui-field">
@@ -340,9 +354,7 @@ function InicioSesion() {
               <select
                 id="posicion-google"
                 className="ui-field-input"
-                value={datosFaltantes.posicion}
-                onChange={(e) => setDatosFaltantes({ ...datosFaltantes, posicion: e.target.value })}
-                required
+                {...registerDatosFaltantes("posicion")}
               >
                 <option value="" disabled>
                   — Seleccionar posición —
@@ -364,9 +376,7 @@ function InicioSesion() {
               <select
                 id="genero-google"
                 className="ui-field-input"
-                value={datosFaltantes.genero}
-                onChange={(e) => setDatosFaltantes({ ...datosFaltantes, genero: e.target.value })}
-                required
+                {...registerDatosFaltantes("genero")}
               >
                 <option value="" disabled>
                   — Seleccionar género —
@@ -377,7 +387,7 @@ function InicioSesion() {
             </div>
           </div>
 
-          {datosFaltantesError && <Alert variant="error">{datosFaltantesError}</Alert>}
+          {mensajeDatosFaltantes && <Alert variant="error">{mensajeDatosFaltantes}</Alert>}
           {googleError && <Alert variant="error">{googleError}</Alert>}
 
           <Button type="submit" disabled={enviandoGoogle}>

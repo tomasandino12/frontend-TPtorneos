@@ -1,9 +1,19 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { FiArrowLeft, FiEdit2, FiBarChart2, FiSearch, FiSend, FiLogOut, FiX, FiRepeat, FiCheckCircle, FiUserX, FiPlus, FiInfo } from "react-icons/fi";
 import { apiFetch } from "../utils/api.js";
 import { Button, TextField, Alert, PageHero, Tabs, Modal, ScrollableTable } from "./ui";
 import Convocatoria from "./Convocatoria.jsx";
+
+// El botón "Confirmar" de expulsar hoy no muestra ningún mensaje de error de
+// validación (solo se deshabilita) — el mensaje acá es solo para el schema,
+// nunca se renderiza, para no agregar un texto que antes no existía.
+const expulsionSchema = z.object({
+  motivo: z.string().trim().min(5, "El motivo debe tener al menos 5 caracteres."),
+});
 
 /**
  * Contenido de "detalle de un equipo" (header con nombre, descripción,
@@ -38,6 +48,14 @@ const MAX_JUGADORES_PLANTEL = 26;
 const MIN_JUGADORES_PLANTEL_TORNEO = 15;
 const DESCRIPCION_MAX_LENGTH = 300;
 
+// El maxLength nativo del <textarea> ya impide escribir/pegar más de
+// DESCRIPCION_MAX_LENGTH caracteres, así que esto es defensa en profundidad,
+// no un caso realmente alcanzable a mano — sin mínimo: la descripción es
+// opcional (nunca hubo `required` acá, se puede guardar vacía).
+const descripcionEquipoSchema = z.object({
+  descripcion: z.string().max(DESCRIPCION_MAX_LENGTH, `La descripción no puede superar los ${DESCRIPCION_MAX_LENGTH} caracteres.`),
+});
+
 // Mismo criterio en todo el archivo (plantel y detalle de jugador al agregar):
 // el backend no siempre manda la fecha de nacimiento con la misma key.
 function calcularEdad(jugador) {
@@ -56,9 +74,20 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editandoDescripcion, setEditandoDescripcion] = useState(false);
-  const [descripcionForm, setDescripcionForm] = useState("");
   const [guardandoDescripcion, setGuardandoDescripcion] = useState(false);
   const [descripcionFeedback, setDescripcionFeedback] = useState(null);
+
+  const {
+    register: registerDescripcion,
+    handleSubmit: handleSubmitDescripcion,
+    watch: watchDescripcion,
+    reset: resetDescripcionForm,
+    formState: { errors: erroresDescripcion },
+  } = useForm({
+    resolver: zodResolver(descripcionEquipoSchema),
+    defaultValues: { descripcion: "" },
+  });
+  const descripcionActual = watchDescripcion("descripcion");
 
   // Reclutamiento (solo capitán)
   const [jugadoresSinEquipo, setJugadoresSinEquipo] = useState([]);
@@ -97,10 +126,20 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
 
   // Echar jugador del plantel
   const [jugadorAExpulsar, setJugadorAExpulsar] = useState(null);
-  const [motivoExpulsion, setMotivoExpulsion] = useState("");
   const [expulsando, setExpulsando] = useState(false);
   const [expulsarError, setExpulsarError] = useState(null);
   const [expulsionFeedback, setExpulsionFeedback] = useState(null);
+
+  const {
+    register: registerExpulsion,
+    handleSubmit: handleSubmitExpulsion,
+    reset: resetExpulsion,
+    formState: { isValid: expulsionValida },
+  } = useForm({
+    resolver: zodResolver(expulsionSchema),
+    defaultValues: { motivo: "" },
+    mode: "onChange",
+  });
 
   // Convocatoria — la formación guardada vive acá (no adentro de
   // Convocatoria.jsx) porque Tabs desmonta el contenido de la pestaña
@@ -251,22 +290,21 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
   };
 
   const handleEmpezarEdicionDescripcion = () => {
-    setDescripcionForm(equipo.descripcion || "");
+    resetDescripcionForm({ descripcion: equipo.descripcion || "" });
     setDescripcionFeedback(null);
     setEditandoDescripcion(true);
   };
 
-  const handleGuardarDescripcion = async (e) => {
-    e.preventDefault();
+  const onGuardarDescripcion = async ({ descripcion }) => {
     setGuardandoDescripcion(true);
     try {
       const response = await apiFetch(`/equipos/${equipoId}`, {
         method: "PUT",
-        body: JSON.stringify({ descripcion: descripcionForm }),
+        body: JSON.stringify({ descripcion }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Error al guardar la descripción");
-      setEquipo({ ...equipo, descripcion: descripcionForm });
+      setEquipo({ ...equipo, descripcion });
       setEditandoDescripcion(false);
     } catch (err) {
       setDescripcionFeedback({ variant: "error", text: err.message });
@@ -393,28 +431,24 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
   };
 
   const handleAbrirExpulsar = (jugador) => {
-    setMotivoExpulsion("");
+    resetExpulsion({ motivo: "" });
     setExpulsarError(null);
     setJugadorAExpulsar(jugador);
   };
 
   const handleCerrarExpulsar = () => {
     setJugadorAExpulsar(null);
-    setMotivoExpulsion("");
+    resetExpulsion({ motivo: "" });
     setExpulsarError(null);
   };
 
-  const motivoExpulsionValido = motivoExpulsion.trim().length >= 5;
-
-  const handleConfirmarExpulsion = async () => {
-    if (!motivoExpulsionValido) return;
-
+  const onConfirmarExpulsion = async ({ motivo }) => {
     setExpulsando(true);
     setExpulsarError(null);
     try {
       const response = await apiFetch(`/jugadores/${jugadorAExpulsar.id}/expulsar`, {
         method: "PATCH",
-        body: JSON.stringify({ motivo: motivoExpulsion.trim() }),
+        body: JSON.stringify({ motivo }),
       });
 
       const data = await response.json();
@@ -834,16 +868,18 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
               )}
             </>
           ) : (
-            <form onSubmit={handleGuardarDescripcion}>
+            <form onSubmit={handleSubmitDescripcion(onGuardarDescripcion)} noValidate>
               <textarea
-                value={descripcionForm}
-                onChange={(e) => setDescripcionForm(e.target.value)}
                 placeholder="Ej: Equipo de amigos, buena onda, nos gusta el juego asociado..."
                 maxLength={DESCRIPCION_MAX_LENGTH}
+                {...registerDescripcion("descripcion")}
               />
               <span className="descripcion-contador">
-                {descripcionForm.length}/{DESCRIPCION_MAX_LENGTH}
+                {(descripcionActual ?? "").length}/{DESCRIPCION_MAX_LENGTH}
               </span>
+              {erroresDescripcion.descripcion && (
+                <Alert variant="error">{erroresDescripcion.descripcion.message}</Alert>
+              )}
               {descripcionFeedback && (
                 <Alert variant={descripcionFeedback.variant}>{descripcionFeedback.text}</Alert>
               )}
@@ -957,37 +993,40 @@ export default function EquipoInfo({ equipoId, showVolver = true, onEquipoLeft }
         onClose={handleCerrarExpulsar}
         title={jugadorAExpulsar ? `Echar a ${jugadorAExpulsar.nombre} ${jugadorAExpulsar.apellido}` : ""}
       >
-        <p className="expulsar-aviso">
-          Esta acción saca al jugador del equipo. Contanos el motivo antes de confirmar.
-        </p>
-        <div className="ui-field">
-          <label className="ui-field-label" htmlFor="motivo-expulsion">
-            Motivo
-          </label>
-          <textarea
-            id="motivo-expulsion"
-            className="expulsar-motivo"
-            value={motivoExpulsion}
-            onChange={(e) => setMotivoExpulsion(e.target.value)}
-            placeholder="Ej: inasistencias reiteradas, conducta antideportiva..."
-          />
-        </div>
+        {/* display:contents: .ui-modal-body es flex con gap entre sus hijos
+            directos — este <form> solo le da a react-hook-form un submit real,
+            no debe sumarse como un único hijo y romper ese espaciado. */}
+        <form onSubmit={handleSubmitExpulsion(onConfirmarExpulsion)} style={{ display: "contents" }} noValidate>
+          <p className="expulsar-aviso">
+            Esta acción saca al jugador del equipo. Contanos el motivo antes de confirmar.
+          </p>
+          <div className="ui-field">
+            <label className="ui-field-label" htmlFor="motivo-expulsion">
+              Motivo
+            </label>
+            <textarea
+              id="motivo-expulsion"
+              className="expulsar-motivo"
+              {...registerExpulsion("motivo")}
+              placeholder="Ej: inasistencias reiteradas, conducta antideportiva..."
+            />
+          </div>
 
-        {expulsarError && <Alert variant="error">{expulsarError}</Alert>}
+          {expulsarError && <Alert variant="error">{expulsarError}</Alert>}
 
-        <div className="descripcion-botones">
-          <Button type="button" variant="secondary" onClick={handleCerrarExpulsar}>
-            Cancelar
-          </Button>
-          <Button
-            type="button"
-            variant="danger"
-            onClick={handleConfirmarExpulsion}
-            disabled={!motivoExpulsionValido || expulsando}
-          >
-            {expulsando ? "Expulsando..." : "Confirmar"}
-          </Button>
-        </div>
+          <div className="descripcion-botones">
+            <Button type="button" variant="secondary" onClick={handleCerrarExpulsar}>
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="danger"
+              disabled={!expulsionValida || expulsando}
+            >
+              {expulsando ? "Expulsando..." : "Confirmar"}
+            </Button>
+          </div>
+        </form>
       </Modal>
     </>
   );

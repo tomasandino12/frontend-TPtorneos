@@ -3,10 +3,13 @@ import "../styles/MenuAdmin.css";
 import "../styles/CrearCancha.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { FiMapPin } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
+import { canchaSchema } from "../schemas/cancha.js";
 
 const ESTADOS = [
   { value: "activa", label: "Activa" },
@@ -27,17 +30,31 @@ export default function CrearCancha() {
     catch { navigate("/admin"); }
   }, [navigate]);
 
-  const [form, setForm] = useState({
-    nombre: "",
-    direccion: "",
-    tipoSuperficie: "",
-    capacidad: "",
-    estado: "activa",
-    precioPorHora: "",
-    iluminacion: false,
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(canchaSchema),
+    defaultValues: {
+      nombre: "",
+      direccion: "",
+      tipoSuperficie: "",
+      capacidad: "",
+      estado: "activa",
+      precioPorHora: "",
+      iluminacion: false,
+    },
   });
 
-  const upd = (key, val) => setForm((prev) => ({ ...prev, [key]: val }));
+  // Un solo Alert genérico (no por campo), como antes: muestra el primer
+  // error en el mismo orden en que se chequeaban los ifs originales.
+  const mensajeValidacion =
+    errors.nombre?.message
+    || errors.direccion?.message
+    || errors.tipoSuperficie?.message
+    || errors.capacidad?.message
+    || errors.precioPorHora?.message;
 
   const handleLogout = () => {
     localStorage.removeItem("admin");
@@ -45,28 +62,20 @@ export default function CrearCancha() {
     navigate("/admin");
   };
 
-  const handleGuardar = async (e) => {
-    e.preventDefault();
+  const onGuardar = async (values) => {
     setError("");
-
-    if (!form.nombre.trim())         { setError("El nombre de la cancha es obligatorio."); return; }
-    if (!form.direccion.trim())      { setError("La dirección es obligatoria."); return; }
-    if (!form.tipoSuperficie.trim()) { setError("El tipo de superficie es obligatorio."); return; }
-    if (!form.capacidad || Number(form.capacidad) <= 0) { setError("La capacidad debe ser mayor a 0."); return; }
-    if (!form.precioPorHora || Number(form.precioPorHora) < 0) { setError("El precio por hora es obligatorio."); return; }
-
     setLoading(true);
     try {
       const res = await adminApiFetch("/canchas", {
         method: "POST",
         body: JSON.stringify({
-          nombre: form.nombre.trim(),
-          direccion: form.direccion.trim(),
-          tipoSuperficie: form.tipoSuperficie.trim(),
-          capacidad: Number(form.capacidad),
-          estado: form.estado,
-          precioPorHora: Number(form.precioPorHora),
-          iluminacion: form.iluminacion,
+          nombre: values.nombre,
+          direccion: values.direccion,
+          tipoSuperficie: values.tipoSuperficie,
+          capacidad: Number(values.capacidad),
+          estado: values.estado,
+          precioPorHora: Number(values.precioPorHora),
+          iluminacion: values.iluminacion,
         }),
       });
 
@@ -102,35 +111,31 @@ export default function CrearCancha() {
               <p>Información básica del predio</p>
             </div>
 
-            <form className="cc-form-body" onSubmit={handleGuardar}>
+            <form className="cc-form-body" onSubmit={handleSubmit(onGuardar)} noValidate>
               <TextField
                 label="Nombre"
-                value={form.nombre}
-                onChange={(e) => upd("nombre", e.target.value)}
                 placeholder="Ej: Cancha Municipal 1"
+                {...register("nombre")}
               />
 
               <TextField
                 label="Dirección"
-                value={form.direccion}
-                onChange={(e) => upd("direccion", e.target.value)}
                 placeholder="Ej: Av. Siempre Viva 123"
+                {...register("direccion")}
               />
 
               <div className="cc-field-row">
                 <TextField
                   label="Tipo de superficie"
-                  value={form.tipoSuperficie}
-                  onChange={(e) => upd("tipoSuperficie", e.target.value)}
                   placeholder="Ej: Césped sintético"
+                  {...register("tipoSuperficie")}
                 />
                 <TextField
                   label="Capacidad"
                   type="number"
                   min={0}
-                  value={form.capacidad}
-                  onChange={(e) => upd("capacidad", e.target.value)}
                   placeholder="Ej: 200"
+                  {...register("capacidad")}
                 />
               </div>
 
@@ -141,8 +146,7 @@ export default function CrearCancha() {
                     <select
                       id="cc-estado"
                       className="ui-field-input"
-                      value={form.estado}
-                      onChange={(e) => upd("estado", e.target.value)}
+                      {...register("estado")}
                     >
                       {ESTADOS.map((e) => (
                         <option key={e.value} value={e.value}>{e.label}</option>
@@ -154,22 +158,17 @@ export default function CrearCancha() {
                   label="Precio por hora"
                   type="number"
                   min={0}
-                  value={form.precioPorHora}
-                  onChange={(e) => upd("precioPorHora", e.target.value)}
                   placeholder="Ej: 15000"
+                  {...register("precioPorHora")}
                 />
               </div>
 
               <label className="cc-checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={form.iluminacion}
-                  onChange={(e) => upd("iluminacion", e.target.checked)}
-                />
+                <input type="checkbox" {...register("iluminacion")} />
                 Tiene iluminación
               </label>
 
-              {error && <Alert variant="error">{error}</Alert>}
+              {(error || mensajeValidacion) && <Alert variant="error">{error || mensajeValidacion}</Alert>}
 
               <div className="cc-actions">
                 <Button
