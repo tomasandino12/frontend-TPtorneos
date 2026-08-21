@@ -8,6 +8,7 @@ import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, PageShell, PageHero, Modal, Alert, ScrollableTable } from "../components/ui";
 import { Jugador } from "../models";
+import { useAdmin } from "../context/AdminContext.jsx";
 
 const ESTADO_CONFIG = {
   Activa: { badgeBg: "var(--color-success-bg)", badgeColor: "var(--color-pitch)" },
@@ -18,7 +19,7 @@ const TABS = ["Activas", "Levantadas", "Todas"];
 
 export default function RegistroSanciones() {
   const navigate = useNavigate();
-  const [admin, setAdmin] = useState(null);
+  const { admin, logout } = useAdmin();
   const [suspensiones, setSuspensiones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -30,18 +31,8 @@ export default function RegistroSanciones() {
   const [errorEliminar, setErrorEliminar] = useState("");
 
   useEffect(() => {
-    const stored = localStorage.getItem("admin");
-    if (!stored) {
-      navigate("/admin");
-      return;
-    }
-    try {
-      setAdmin(JSON.parse(stored));
-      fetchSuspensiones();
-    } catch {
-      navigate("/admin");
-    }
-  }, [navigate]);
+    fetchSuspensiones();
+  }, []);
 
   async function fetchSuspensiones() {
     try {
@@ -78,8 +69,7 @@ export default function RegistroSanciones() {
   });
 
   const handleLogout = () => {
-    localStorage.removeItem("admin");
-    localStorage.removeItem("adminToken");
+    logout();
     navigate("/admin");
   };
 
@@ -122,8 +112,6 @@ export default function RegistroSanciones() {
       setEliminando(false);
     }
   }
-
-  if (!admin) return null;
 
   return (
     <div className="layout">

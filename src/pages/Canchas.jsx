@@ -19,6 +19,7 @@ import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
 import { canchaSchema } from "../schemas/cancha.js";
+import { useAdmin } from "../context/AdminContext.jsx";
 
 const ESTADOS = [
   { value: "activa", label: "Activa" },
@@ -65,7 +66,7 @@ function CanchaIlustracion() {
 
 export default function Canchas() {
   const navigate = useNavigate();
-  const [admin, setAdmin] = useState(null);
+  const { admin, logout } = useAdmin();
   const [canchas, setCanchas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -86,18 +87,8 @@ export default function Canchas() {
   });
 
   useEffect(() => {
-    const stored = localStorage.getItem("admin");
-    if (!stored) {
-      navigate("/admin");
-      return;
-    }
-    try {
-      setAdmin(JSON.parse(stored));
-      fetchCanchas();
-    } catch {
-      navigate("/admin");
-    }
-  }, [navigate]);
+    fetchCanchas();
+  }, []);
 
   async function fetchCanchas() {
     try {
@@ -114,8 +105,7 @@ export default function Canchas() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("admin");
-    localStorage.removeItem("adminToken");
+    logout();
     navigate("/admin");
   };
 
@@ -179,8 +169,6 @@ export default function Canchas() {
       alert(e.message);
     }
   };
-
-  if (!admin) return null;
 
   const filtradas = canchas.filter((c) => {
     const texto = `${c.nombre} ${c.direccion} ${c.tipoSuperficie}`.toLowerCase();

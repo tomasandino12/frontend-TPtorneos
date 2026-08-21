@@ -7,6 +7,7 @@ import { FiAward, FiEdit2, FiCheckCircle, FiUsers, FiSearch, FiPlus, FiTrash2 } 
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, PageShell, PageHero, Modal, Alert } from "../components/ui";
+import { useAdmin } from "../context/AdminContext.jsx";
 
 // estado backend → etiqueta UI
 const ESTADO_LABEL = {
@@ -55,7 +56,7 @@ function mapTorneo(t) {
 
 export default function MisTorneos() {
   const navigate = useNavigate();
-  const [admin, setAdmin] = useState(null);
+  const { admin, logout } = useAdmin();
   const [torneos, setTorneos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -66,16 +67,8 @@ export default function MisTorneos() {
   const [errorEliminar, setErrorEliminar] = useState("");
 
   useEffect(() => {
-    const stored = localStorage.getItem("admin");
-    if (!stored) { navigate("/admin"); return; }
-    try {
-      const adminData = JSON.parse(stored);
-      setAdmin(adminData);
-      fetchTorneos(adminData.id);
-    } catch {
-      navigate("/admin");
-    }
-  }, [navigate]);
+    fetchTorneos(admin.id);
+  }, [admin.id]);
 
   async function fetchTorneos(adminId) {
     try {
@@ -119,12 +112,9 @@ export default function MisTorneos() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("admin");
-    localStorage.removeItem("adminToken");
+    logout();
     navigate("/admin");
   };
-
-  if (!admin) return null;
 
   const filtered = torneos.filter((t) => {
     const matchTab =

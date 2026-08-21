@@ -8,6 +8,7 @@ import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch, ASSETS_URL } from "../utils/api.js";
 import { Button, TextField, Alert, PageShell, PageHero } from "../components/ui";
 import { Equipo } from "../models";
+import { useAdmin } from "../context/AdminContext.jsx";
 
 const LABEL_CATEGORIA = {
   sub15:     "Sub-15",
@@ -25,7 +26,7 @@ export default function InscribirEquipos() {
   const { id: torneoId } = useParams();
   const navigate = useNavigate();
 
-  const [admin, setAdmin] = useState(null);
+  const { admin, logout } = useAdmin();
   const [torneo, setTorneo] = useState(null);
   const [equipos, setEquipos] = useState([]);       // todos los equipos de la categoría
   const [inscriptos, setInscriptos] = useState([]); // IDs ya inscriptos
@@ -39,12 +40,10 @@ export default function InscribirEquipos() {
   const [pageLoading, setPageLoading] = useState(true);
   const [pageError, setPageError] = useState("");
 
-  useEffect(() => {
-    const stored = localStorage.getItem("admin");
-    if (!stored) { navigate("/admin"); return; }
-    try { setAdmin(JSON.parse(stored)); }
-    catch { navigate("/admin"); return; }
-  }, [navigate]);
+  const handleLogout = () => {
+    logout();
+    navigate("/admin");
+  };
 
   useEffect(() => {
     if (!torneoId) return;
@@ -158,18 +157,16 @@ export default function InscribirEquipos() {
     }
   }
 
-  if (!admin) return null;
-
   if (pageLoading) return (
     <div className="layout">
-      <AdminHeader admin={admin} onLogout={() => { localStorage.removeItem("admin"); navigate("/admin"); }} />
+      <AdminHeader admin={admin} onLogout={handleLogout} />
       <main className="ie-page-status">Cargando...</main>
     </div>
   );
 
   if (pageError) return (
     <div className="layout">
-      <AdminHeader admin={admin} onLogout={() => { localStorage.removeItem("admin"); navigate("/admin"); }} />
+      <AdminHeader admin={admin} onLogout={handleLogout} />
       <main className="ie-page-status ie-page-status-error">{pageError}</main>
     </div>
   );
@@ -178,10 +175,7 @@ export default function InscribirEquipos() {
 
   return (
     <div className="layout">
-      <AdminHeader
-        admin={admin}
-        onLogout={() => { localStorage.removeItem("admin"); localStorage.removeItem("adminToken"); navigate("/admin"); }}
-      />
+      <AdminHeader admin={admin} onLogout={handleLogout} />
 
       <PageShell bare>
         {/* Hero */}

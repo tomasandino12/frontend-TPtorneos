@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import './App.css'
+import { AdminProvider, useAdmin } from "./context/AdminContext.jsx"
 
 import InicioSesion from "./pages/InicioSesion.jsx"
 import Registro from "./pages/Registro.jsx"
@@ -32,14 +33,16 @@ function PrivateRoute({ children }) {
 }
 
 function AdminRoute({ children }) {
-  const adminToken = localStorage.getItem("adminToken");
-  if (!adminToken) return <Navigate to="/admin" replace />;
+  const { loading, admin, isAdmin } = useAdmin();
+  if (loading) return null;
+  if (!admin || !isAdmin) return <Navigate to="/admin" replace />;
   return children;
 }
 
 function App() {
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+    <AdminProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<InicioSesion />} />
@@ -72,6 +75,7 @@ function App() {
         <Route path="/equipo/:id" element={<PrivateRoute><EquipoDetalle /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
+    </AdminProvider>
     </GoogleOAuthProvider>
   )
 }

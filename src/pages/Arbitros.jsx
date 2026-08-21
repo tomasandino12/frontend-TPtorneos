@@ -10,6 +10,7 @@ import { FiFlag, FiSearch, FiEdit2, FiTrash2 } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert, PageShell, PageHero, ScrollableTable } from "../components/ui";
+import { useAdmin } from "../context/AdminContext.jsx";
 
 const FORM_VACIO = { nombre: "", apellido: "", nro_matricula: "", email: "" };
 
@@ -28,7 +29,7 @@ const arbitroSchema = z.object({
 
 export default function Arbitros() {
   const navigate = useNavigate();
-  const [admin, setAdmin] = useState(null);
+  const { admin, logout } = useAdmin();
   const [arbitros, setArbitros] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -49,18 +50,8 @@ export default function Arbitros() {
   });
 
   useEffect(() => {
-    const stored = localStorage.getItem("admin");
-    if (!stored) {
-      navigate("/admin");
-      return;
-    }
-    try {
-      setAdmin(JSON.parse(stored));
-      fetchArbitros();
-    } catch {
-      navigate("/admin");
-    }
-  }, [navigate]);
+    fetchArbitros();
+  }, []);
 
   async function fetchArbitros() {
     try {
@@ -77,8 +68,7 @@ export default function Arbitros() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("admin");
-    localStorage.removeItem("adminToken");
+    logout();
     navigate("/admin");
   };
 
@@ -148,8 +138,6 @@ export default function Arbitros() {
       alert(e.message);
     }
   };
-
-  if (!admin) return null;
 
   const filtrados = arbitros.filter((a) => {
     const texto = `${a.nombre} ${a.apellido} ${a.nro_matricula}`.toLowerCase();

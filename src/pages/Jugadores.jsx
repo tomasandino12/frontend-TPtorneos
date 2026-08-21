@@ -10,6 +10,7 @@ import { FiUsers, FiSearch, FiX } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Card, TextField, Button, Alert, PageShell, PageHero, ScrollableTable } from "../components/ui";
+import { useAdmin } from "../context/AdminContext.jsx";
 
 const MIN_CARACTERES_BUSQUEDA = 3;
 const MAX_BUSQUEDAS_RECIENTES = 6;
@@ -24,7 +25,7 @@ function recientesKey(adminId) {
 
 export default function Jugadores() {
   const navigate = useNavigate();
-  const [admin, setAdmin] = useState(null);
+  const { admin, logout } = useAdmin();
   const [busqueda, setBusqueda] = useState("");
   const [recientes, setRecientes] = useState([]);
 
@@ -38,20 +39,13 @@ export default function Jugadores() {
   const fetchedRef = useRef(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("admin");
-    if (!stored) {
-      navigate("/admin");
-      return;
-    }
     try {
-      const adminData = JSON.parse(stored);
-      setAdmin(adminData);
-      const guardadas = localStorage.getItem(recientesKey(adminData.id));
+      const guardadas = localStorage.getItem(recientesKey(admin.id));
       if (guardadas) setRecientes(JSON.parse(guardadas));
     } catch {
-      navigate("/admin");
+      // Un historial de búsquedas corrupto no debe bloquear la pantalla.
     }
-  }, [navigate]);
+  }, [admin.id]);
 
   const terminoValido = busqueda.trim().length >= MIN_CARACTERES_BUSQUEDA;
 
@@ -95,8 +89,7 @@ export default function Jugadores() {
   }, [busqueda, admin, terminoValido]);
 
   const handleLogout = () => {
-    localStorage.removeItem("admin");
-    localStorage.removeItem("adminToken");
+    logout();
     navigate("/admin");
   };
 
@@ -180,8 +173,6 @@ export default function Jugadores() {
       setGuardandoAccion(false);
     }
   };
-
-  if (!admin) return null;
 
   const filtrados =
     terminoValido && todosLosJugadores

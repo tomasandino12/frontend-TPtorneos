@@ -11,6 +11,7 @@ import { FiAward, FiTag, FiUser, FiMapPin, FiCalendar, FiClock, FiZap, FiEdit2 }
 import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert, PageShell, PageHero, Modal, Toast } from "../components/ui";
+import { useAdmin } from "../context/AdminContext.jsx";
 
 const FORMATOS = ["Solo ida", "Ida y vuelta"];
 
@@ -290,7 +291,7 @@ export default function CrearTorneo() {
   const { id } = useParams();
   const modoEdicion = Boolean(id);
 
-  const [admin, setAdmin] = useState(null);
+  const { admin, logout } = useAdmin();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -382,13 +383,6 @@ export default function CrearTorneo() {
     defaultValues: { fecha_partido: "", hora_partido: "" },
   });
 
-  useEffect(() => {
-    const stored = localStorage.getItem("admin");
-    if (!stored) { navigate("/admin"); return; }
-    try { setAdmin(JSON.parse(stored)); }
-    catch { navigate("/admin"); }
-  }, [navigate]);
-
   // En modo edición, carga el torneo existente + todo lo necesario para
   // gestionar Árbitros/Canchas/Partidos (antes vivía en InscribirEquipos.jsx).
   useEffect(() => {
@@ -457,8 +451,7 @@ export default function CrearTorneo() {
   const estadoEnCurso = modoEdicion && torneoOriginal?.estado === "en_curso";
 
   const handleLogout = () => {
-    localStorage.removeItem("admin");
-    localStorage.removeItem("adminToken");
+    logout();
     navigate("/admin");
   };
 
@@ -859,8 +852,6 @@ export default function CrearTorneo() {
       setErrorProgramacion(e.message);
     }
   }
-
-  if (!admin) return null;
 
   if (modoEdicion && loadingInicial) {
     return (

@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FiMail, FiLock } from "react-icons/fi";
 import { Button, TextField, Card, Alert } from "../components/ui";
+import { useAdmin } from "../context/AdminContext.jsx";
 
 // Email: mismo regex/mensaje que Registro.jsx (reusado).
 // Contraseña: es un LOGIN, no una alta — acá solo se valida "no vacía",
@@ -20,6 +21,7 @@ const loginAdminSchema = z.object({
 
 function InicioSesionAdmin() {
   const navigate = useNavigate();
+  const { login } = useAdmin();
 
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -55,8 +57,7 @@ function InicioSesionAdmin() {
         throw new Error(data.message || "Error al iniciar sesión");
       }
 
-      localStorage.setItem("admin", JSON.stringify(data.admin));
-      localStorage.setItem("adminToken", data.token);
+      login(data.admin, data.token);
 
       navigate("/menu-admin");
     } catch (err) {

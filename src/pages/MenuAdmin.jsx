@@ -1,10 +1,10 @@
 import "../styles/IndexStyle.css";
 import "../styles/MenuAdmin.css";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiAward, FiFlag, FiMapPin, FiAlertTriangle } from "react-icons/fi";
 import AdminHeader from "../components/AdminHeader.jsx";
 import { Card, PageShell } from "../components/ui";
+import { useAdmin } from "../context/AdminContext.jsx";
 
 const ADMIN_CARDS = [
   { label: "Mis Torneos", icon: FiAward, path: "/admin/torneos" },
@@ -15,27 +15,12 @@ const ADMIN_CARDS = [
 
 function MenuAdmin() {
   const navigate = useNavigate();
-  const [admin, setAdmin] = useState(null);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("admin");
-    if (!stored) {
-      navigate("/admin");
-      return;
-    }
-    try {
-      setAdmin(JSON.parse(stored));
-    } catch {
-      navigate("/admin");
-    }
-  }, [navigate]);
+  const { admin, logout } = useAdmin();
 
   const handleLogout = () => {
-    localStorage.removeItem("admin");
+    logout();
     navigate("/admin");
   };
-
-  if (!admin) return null;
 
   return (
     <div className="layout">

@@ -1,7 +1,7 @@
 import "../styles/IndexStyle.css";
 import "../styles/MenuAdmin.css";
 import "../styles/CrearCancha.css";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +10,7 @@ import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
 import { canchaSchema } from "../schemas/cancha.js";
+import { useAdmin } from "../context/AdminContext.jsx";
 
 const ESTADOS = [
   { value: "activa", label: "Activa" },
@@ -19,16 +20,9 @@ const ESTADOS = [
 
 export default function CrearCancha() {
   const navigate = useNavigate();
-  const [admin, setAdmin] = useState(null);
+  const { admin, logout } = useAdmin();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    const stored = localStorage.getItem("admin");
-    if (!stored) { navigate("/admin"); return; }
-    try { setAdmin(JSON.parse(stored)); }
-    catch { navigate("/admin"); }
-  }, [navigate]);
 
   const {
     register,
@@ -57,8 +51,7 @@ export default function CrearCancha() {
     || errors.precioPorHora?.message;
 
   const handleLogout = () => {
-    localStorage.removeItem("admin");
-    localStorage.removeItem("adminToken");
+    logout();
     navigate("/admin");
   };
 
@@ -89,8 +82,6 @@ export default function CrearCancha() {
       setLoading(false);
     }
   };
-
-  if (!admin) return null;
 
   return (
     <div className="layout">
