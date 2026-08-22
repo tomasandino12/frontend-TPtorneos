@@ -4,7 +4,6 @@ import "../styles/MisTorneos.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiAward, FiEdit2, FiCheckCircle, FiUsers, FiSearch, FiPlus, FiTrash2 } from "react-icons/fi";
-import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, PageShell, PageHero, Modal, Alert } from "../components/ui";
 import { useAdmin } from "../context/AdminContext.jsx";
@@ -56,7 +55,7 @@ function mapTorneo(t) {
 
 export default function MisTorneos() {
   const navigate = useNavigate();
-  const { admin, logout } = useAdmin();
+  const { admin } = useAdmin();
   const [torneos, setTorneos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -111,11 +110,6 @@ export default function MisTorneos() {
     }
   }
 
-  const handleLogout = () => {
-    logout();
-    navigate("/admin");
-  };
-
   const filtered = torneos.filter((t) => {
     const matchTab =
       activeTab === "Todos" ||
@@ -136,9 +130,7 @@ export default function MisTorneos() {
   };
 
   return (
-    <div className="layout">
-      <AdminHeader admin={admin} onLogout={handleLogout} />
-
+    <>
       <PageShell bare>
         {/* ── Hero ────────────────────────────────────────────────────────── */}
         <PageHero
@@ -360,14 +352,6 @@ export default function MisTorneos() {
           </div>
         )}
       </Modal>
-
-      <footer className="footer">
-        <h5>
-          © 2025 - Gestor de Torneos · Panel del Administrador · Para mas información o
-          problemas con la página contactate a: 341 6173297 o a nuestra cuenta de
-          instagram @todotorneos
-        </h5>
-      </footer>
-    </div>
+    </>
   );
 }

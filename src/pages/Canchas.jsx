@@ -15,11 +15,9 @@ import {
   FiDollarSign,
   FiTool,
 } from "react-icons/fi";
-import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
 import { canchaSchema } from "../schemas/cancha.js";
-import { useAdmin } from "../context/AdminContext.jsx";
 
 const ESTADOS = [
   { value: "activa", label: "Activa" },
@@ -66,7 +64,6 @@ function CanchaIlustracion() {
 
 export default function Canchas() {
   const navigate = useNavigate();
-  const { admin, logout } = useAdmin();
   const [canchas, setCanchas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -103,11 +100,6 @@ export default function Canchas() {
       setLoading(false);
     }
   }
-
-  const handleLogout = () => {
-    logout();
-    navigate("/admin");
-  };
 
   const handleAbrirEditar = (cancha) => {
     setCanchaEditando(cancha);
@@ -181,9 +173,7 @@ export default function Canchas() {
     canchas.length > 0 ? canchas.reduce((acc, c) => acc + (c.precioPorHora || 0), 0) / canchas.length : 0;
 
   return (
-    <div className="layout">
-      <AdminHeader admin={admin} onLogout={handleLogout} />
-
+    <>
       <PageShell bare>
         <PageHero
           layout="left"
@@ -386,14 +376,6 @@ export default function Canchas() {
           </form>
         </div>
       )}
-
-      <footer className="footer">
-        <h5>
-          © 2025 - Gestor de Torneos · Panel del Administrador · Para mas información o
-          problemas con la página contactate a: 341 6173297 o a nuestra cuenta de
-          instagram @todotorneos
-        </h5>
-      </footer>
-    </div>
+    </>
   );
 }

@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FiAward, FiTag, FiUser, FiMapPin, FiCalendar, FiClock, FiZap, FiEdit2 } from "react-icons/fi";
-import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert, PageShell, PageHero, Modal, Toast } from "../components/ui";
 import { useAdmin } from "../context/AdminContext.jsx";
@@ -291,7 +290,7 @@ export default function CrearTorneo() {
   const { id } = useParams();
   const modoEdicion = Boolean(id);
 
-  const { admin, logout } = useAdmin();
+  const { admin } = useAdmin();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -449,11 +448,6 @@ export default function CrearTorneo() {
   const valoresTorneo = watchTorneo();
   const partidosEstimados = calcularPartidos(valoresTorneo.cantEquipos, valoresTorneo.formato);
   const estadoEnCurso = modoEdicion && torneoOriginal?.estado === "en_curso";
-
-  const handleLogout = () => {
-    logout();
-    navigate("/admin");
-  };
 
   // estado del torneo al crearlo: 'borrador' (queda sin publicar, se termina
   // después desde "Mis Torneos") o 'inscripcion' (ya acepta equipos — ver
@@ -855,19 +849,14 @@ export default function CrearTorneo() {
 
   if (modoEdicion && loadingInicial) {
     return (
-      <div className="layout">
-        <AdminHeader admin={admin} onLogout={handleLogout} />
-        <PageShell bare>
-          <Card className="ct-form-card">Cargando torneo...</Card>
-        </PageShell>
-      </div>
+      <PageShell bare>
+        <Card className="ct-form-card">Cargando torneo...</Card>
+      </PageShell>
     );
   }
 
   return (
-    <div className="layout">
-      <AdminHeader admin={admin} onLogout={handleLogout} />
-
+    <>
       <PageShell bare>
         {/* Hero */}
         <PageHero
@@ -1492,14 +1481,6 @@ export default function CrearTorneo() {
       </Modal>
 
       <Toast message={toastMsg} onClose={() => setToastMsg(null)} />
-
-      <footer className="footer">
-        <h5>
-          © 2025 - Gestor de Torneos · Panel del Administrador · Para mas información o
-          problemas con la página contactate a: 341 6173297 o a nuestra cuenta de
-          instagram @todotorneos
-        </h5>
-      </footer>
-    </div>
+    </>
   );
 }

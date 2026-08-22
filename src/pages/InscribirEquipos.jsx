@@ -4,11 +4,9 @@ import "../styles/InscribirEquipos.css";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FiUsers, FiSearch, FiArrowLeft, FiCheck } from "react-icons/fi";
-import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch, ASSETS_URL } from "../utils/api.js";
 import { Button, TextField, Alert, PageShell, PageHero } from "../components/ui";
 import { Equipo } from "../models";
-import { useAdmin } from "../context/AdminContext.jsx";
 
 const LABEL_CATEGORIA = {
   sub15:     "Sub-15",
@@ -26,7 +24,6 @@ export default function InscribirEquipos() {
   const { id: torneoId } = useParams();
   const navigate = useNavigate();
 
-  const { admin, logout } = useAdmin();
   const [torneo, setTorneo] = useState(null);
   const [equipos, setEquipos] = useState([]);       // todos los equipos de la categoría
   const [inscriptos, setInscriptos] = useState([]); // IDs ya inscriptos
@@ -39,11 +36,6 @@ export default function InscribirEquipos() {
   const [okInscripcion, setOkInscripcion] = useState("");
   const [pageLoading, setPageLoading] = useState(true);
   const [pageError, setPageError] = useState("");
-
-  const handleLogout = () => {
-    logout();
-    navigate("/admin");
-  };
 
   useEffect(() => {
     if (!torneoId) return;
@@ -157,26 +149,14 @@ export default function InscribirEquipos() {
     }
   }
 
-  if (pageLoading) return (
-    <div className="layout">
-      <AdminHeader admin={admin} onLogout={handleLogout} />
-      <main className="ie-page-status">Cargando...</main>
-    </div>
-  );
+  if (pageLoading) return <main className="ie-page-status">Cargando...</main>;
 
-  if (pageError) return (
-    <div className="layout">
-      <AdminHeader admin={admin} onLogout={handleLogout} />
-      <main className="ie-page-status ie-page-status-error">{pageError}</main>
-    </div>
-  );
+  if (pageError) return <main className="ie-page-status ie-page-status-error">{pageError}</main>;
 
   const categoriaLabel = LABEL_CATEGORIA[torneo?.categoria] ?? torneo?.categoria ?? "—";
 
   return (
-    <div className="layout">
-      <AdminHeader admin={admin} onLogout={handleLogout} />
-
+    <>
       <PageShell bare>
         {/* Hero */}
         <PageHero
@@ -330,14 +310,6 @@ export default function InscribirEquipos() {
         </section>
         </PageHero>
       </PageShell>
-
-      <footer className="footer">
-        <h5>
-          © 2025 - Gestor de Torneos · Panel del Administrador · Para mas información o
-          problemas con la página contactate a: 341 6173297 o a nuestra cuenta de
-          instagram @todotorneos
-        </h5>
-      </footer>
-    </div>
+    </>
   );
 }

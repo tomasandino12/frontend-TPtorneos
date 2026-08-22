@@ -6,11 +6,9 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FiMapPin } from "react-icons/fi";
-import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, Alert, PageShell, PageHero } from "../components/ui";
 import { canchaSchema } from "../schemas/cancha.js";
-import { useAdmin } from "../context/AdminContext.jsx";
 
 const ESTADOS = [
   { value: "activa", label: "Activa" },
@@ -20,7 +18,6 @@ const ESTADOS = [
 
 export default function CrearCancha() {
   const navigate = useNavigate();
-  const { admin, logout } = useAdmin();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -49,11 +46,6 @@ export default function CrearCancha() {
     || errors.tipoSuperficie?.message
     || errors.capacidad?.message
     || errors.precioPorHora?.message;
-
-  const handleLogout = () => {
-    logout();
-    navigate("/admin");
-  };
 
   const onGuardar = async (values) => {
     setError("");
@@ -84,9 +76,7 @@ export default function CrearCancha() {
   };
 
   return (
-    <div className="layout">
-      <AdminHeader admin={admin} onLogout={handleLogout} />
-
+    <>
       <PageShell bare>
         <PageHero
           layout="left"
@@ -178,14 +168,6 @@ export default function CrearCancha() {
           </Card>
         </section>
       </PageShell>
-
-      <footer className="footer">
-        <h5>
-          © 2025 - Gestor de Torneos · Panel del Administrador · Para mas información o
-          problemas con la página contactate a: 341 6173297 o a nuestra cuenta de
-          instagram @todotorneos
-        </h5>
-      </footer>
-    </div>
+    </>
   );
 }

@@ -2,7 +2,6 @@ import "../styles/IndexStyle.css";
 import "../styles/MenuAdmin.css";
 import { useNavigate } from "react-router-dom";
 import { FiAward, FiFlag, FiMapPin, FiAlertTriangle } from "react-icons/fi";
-import AdminHeader from "../components/AdminHeader.jsx";
 import { Card, PageShell } from "../components/ui";
 import { useAdmin } from "../context/AdminContext.jsx";
 
@@ -15,18 +14,10 @@ const ADMIN_CARDS = [
 
 function MenuAdmin() {
   const navigate = useNavigate();
-  const { admin, logout } = useAdmin();
-
-  const handleLogout = () => {
-    logout();
-    navigate("/admin");
-  };
+  const { admin } = useAdmin();
 
   return (
-    <div className="layout">
-
-      <AdminHeader admin={admin} onLogout={handleLogout} />
-
+    <>
       {/* ── Contenido ───────────────────────────────────────────────────── */}
       <PageShell bare>
 
@@ -60,7 +51,7 @@ function MenuAdmin() {
         </div>
 
       </PageShell>
-    </div>
+    </>
   );
 }
 

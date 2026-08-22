@@ -13,6 +13,7 @@ import Equipos from "./pages/Equipos.jsx"
 import MiPerfil from "./pages/MiPerfil.jsx"
 import EquipoDetalle from "./pages/EquipoDetalle.jsx"
 import InicioSesionAdmin from "./pages/InicioSesionAdmin.jsx"
+import AdminLayout from "./pages/AdminLayout.jsx"
 import MenuAdmin from "./pages/MenuAdmin.jsx"
 import Inicio from "./pages/Inicio.jsx"
 import MisTorneos from "./pages/MisTorneos.jsx"
@@ -50,16 +51,22 @@ function App() {
         <Route path="/olvide-password" element={<OlvidePassword />} />
         <Route path="/restablecer-password" element={<RestablecerPassword />} />
         <Route path="/admin" element={<InicioSesionAdmin />} />
-        <Route path="/menu-admin" element={<AdminRoute><MenuAdmin /></AdminRoute>} />
-        <Route path="/admin/torneos" element={<AdminRoute><MisTorneos /></AdminRoute>} />
-        <Route path="/admin/torneos/nuevo" element={<AdminRoute><CrearTorneo /></AdminRoute>} />
-        <Route path="/admin/torneos/:id/editar" element={<AdminRoute><CrearTorneo /></AdminRoute>} />
-        <Route path="/admin/torneos/:id/equipos" element={<AdminRoute><InscribirEquipos /></AdminRoute>} />
-        <Route path="/admin/arbitros" element={<AdminRoute><Arbitros /></AdminRoute>} />
-        <Route path="/admin/canchas" element={<AdminRoute><Canchas /></AdminRoute>} />
-        <Route path="/admin/canchas/nueva" element={<AdminRoute><CrearCancha /></AdminRoute>} />
-        <Route path="/admin/jugadores" element={<AdminRoute><Jugadores /></AdminRoute>} />
-        <Route path="/admin/sanciones" element={<AdminRoute><RegistroSanciones /></AdminRoute>} />
+
+        {/* 📂 Sección con layout: panel de Administrador — AdminHeader y footer
+            se dibujan una sola vez en AdminLayout, cada ruta hija solo pone su
+            contenido (mismo patrón que /gestorTorneos más abajo). */}
+        <Route element={<AdminRoute><AdminLayout /></AdminRoute>}>
+          <Route path="/menu-admin" element={<MenuAdmin />} />
+          <Route path="/admin/torneos" element={<MisTorneos />} />
+          <Route path="/admin/torneos/nuevo" element={<CrearTorneo />} />
+          <Route path="/admin/torneos/:id/editar" element={<CrearTorneo />} />
+          <Route path="/admin/torneos/:id/equipos" element={<InscribirEquipos />} />
+          <Route path="/admin/arbitros" element={<Arbitros />} />
+          <Route path="/admin/canchas" element={<Canchas />} />
+          <Route path="/admin/canchas/nueva" element={<CrearCancha />} />
+          <Route path="/admin/jugadores" element={<Jugadores />} />
+          <Route path="/admin/sanciones" element={<RegistroSanciones />} />
+        </Route>
 
         {/* 📂 Sección con layout: Gestor de Torneos */}
         <Route path="/gestorTorneos" element={<PrivateRoute><GestorTorneos /></PrivateRoute>}>

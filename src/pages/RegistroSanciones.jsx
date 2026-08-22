@@ -2,13 +2,10 @@ import "../styles/IndexStyle.css";
 import "../styles/MenuAdmin.css";
 import "../styles/RegistroSanciones.css";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { FiAlertTriangle, FiSearch, FiTrash2 } from "react-icons/fi";
-import AdminHeader from "../components/AdminHeader.jsx";
 import { adminApiFetch } from "../utils/api.js";
 import { Button, TextField, Card, PageShell, PageHero, Modal, Alert, ScrollableTable } from "../components/ui";
 import { Jugador } from "../models";
-import { useAdmin } from "../context/AdminContext.jsx";
 
 const ESTADO_CONFIG = {
   Activa: { badgeBg: "var(--color-success-bg)", badgeColor: "var(--color-pitch)" },
@@ -18,8 +15,6 @@ const ESTADO_CONFIG = {
 const TABS = ["Activas", "Levantadas", "Todas"];
 
 export default function RegistroSanciones() {
-  const navigate = useNavigate();
-  const { admin, logout } = useAdmin();
   const [suspensiones, setSuspensiones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -68,11 +63,6 @@ export default function RegistroSanciones() {
     return matchTab && matchSearch;
   });
 
-  const handleLogout = () => {
-    logout();
-    navigate("/admin");
-  };
-
   async function handleLevantar(suspension) {
     setAccionandoId(suspension.id);
     setError("");
@@ -114,9 +104,7 @@ export default function RegistroSanciones() {
   }
 
   return (
-    <div className="layout">
-      <AdminHeader admin={admin} onLogout={handleLogout} />
-
+    <>
       <PageShell bare>
         <PageHero
           layout="left"
@@ -236,14 +224,6 @@ export default function RegistroSanciones() {
           </div>
         )}
       </Modal>
-
-      <footer className="footer">
-        <h5>
-          © 2025 - Gestor de Torneos · Panel del Administrador · Para mas información o
-          problemas con la página contactate a: 341 6173297 o a nuestra cuenta de
-          instagram @todotorneos
-        </h5>
-      </footer>
-    </div>
+    </>
   );
 }
